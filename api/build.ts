@@ -7,7 +7,7 @@
  */
 
 import io from 'io'
-import type { BUILD_OPTIONS } from 'types'
+import type { BUILD_OPTIONS } from 'options'
 
 const build = {
     /**

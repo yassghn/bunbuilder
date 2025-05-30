@@ -1,5 +1,5 @@
 {
-    "include": ["index.ts", "build/**/*", "api/**/*"],
+    "include": ["build.ts", "build/**/*", "api/**/*"],
 
     "compilerOptions": {
         // environment setup & latest features
