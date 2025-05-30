@@ -44,7 +44,7 @@
         "watchFile": "useFsEvents",
         "watchDirectory": "useFsEvents",
         "fallbackPolling": "dynamicPriority",
-        "excludeDirectories": ["**/node_modules"],
+        "excludeDirectories": ["**/node_modules", "bin/"],
         "synchronousWatchDirectory": true
     },
 
