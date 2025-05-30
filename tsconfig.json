@@ -1,0 +1,52 @@
+{
+    "include": ["index.ts", "build/**/*", "api/**/*"],
+
+    "compilerOptions": {
+        // environment setup & latest features
+        "lib": ["ESNext", "DOM"],
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleDetection": "force",
+        "allowJs": true,
+
+        // bundler mode
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "noEmit": true,
+
+        // best practices
+        "strict": true,
+        "skipLibCheck": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedIndexedAccess": true,
+
+        // some stricter flags (disabled by default)
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noPropertyAccessFromIndexSignature": true,
+
+        // custom
+        "outDir": "./dist",
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "baseUrl": "./",
+        // nice project import syntax
+        "paths": {
+            "*": ["api/*", "build/*"]
+        },
+        // node_modules/@types/...
+        "types": ["bun"]
+    },
+
+    "watchOptions": {
+        "watchFile": "useFsEvents",
+        "watchDirectory": "useFsEvents",
+        "fallbackPolling": "dynamicPriority",
+        "excludeDirectories": ["**/node_modules"],
+        "synchronousWatchDirectory": true
+    },
+
+    "typeAcquisition": {}
+}

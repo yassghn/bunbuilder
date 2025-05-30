@@ -1,0 +1,20 @@
+{
+  "name": "bunbuilder",
+  "version": "0.0.1",
+  "description": "build bun apps",
+  "author": "yassghn@protonmail.com",
+  "license": "SEE LICENSE IN license",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {},
+  "bin": "bin/bunbuilder.js",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@typescript-eslint/parser": "^8.33.0",
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3",
+    "prettier-eslint": "^16.4.2",
+    "tar": "^7.4.3",
+    "typescript": "^5.8.3"
+  }
+}
