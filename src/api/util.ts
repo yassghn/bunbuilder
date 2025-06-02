@@ -31,7 +31,15 @@ function _greet() {
     io.echo(info, { newLine: true, color: 'green' })
 }
 
-function _appendHelpStr(str: string, add: string, newLineWrap: boolean = false) {
+/**
+ * append help strings with optional newline wraps for labels
+ *
+ * @param {string} str help string
+ * @param {string} add string to append
+ * @param {boolean} newLineWrap flag to wrap labels in new lines
+ * @returns {string} appended string
+ */
+function _appendHelpStr(str: string, add: string, newLineWrap: boolean = false): string {
     const retVal = { str: str.valueOf() }
     if (newLineWrap)
         retVal.str += '\n'
@@ -42,6 +50,11 @@ function _appendHelpStr(str: string, add: string, newLineWrap: boolean = false) 
     return retVal.str
 }
 
+/**
+ * get help description from json data and apply format
+ *
+ * @returns {HELP_STRING} description help string
+ */
 function _hewHelpDescription(): HELP_STRING {
     const description = { label: '', str: '' }
     description.str += '\n'
@@ -50,6 +63,11 @@ function _hewHelpDescription(): HELP_STRING {
     return description
 }
 
+/**
+ * get help usage from json data and apply format
+ *
+ * @returns {HELP_STRING} usage help string
+ */
 function _hewHelpUsage(): HELP_STRING {
     const usage = { label: '', str: '' }
     const label = Object.keys(data.help)[1] ?? ''
@@ -58,6 +76,11 @@ function _hewHelpUsage(): HELP_STRING {
     return usage
 }
 
+/**
+ * get options help string from json data and apply format
+ *
+ * @returns {HELP_STRING} options help string
+ */
 function _hewHelpOptions(): HELP_STRING {
     const options = { label: '', str: '' }
     const label = Object.keys(data.help)[2] ?? ''
@@ -70,6 +93,11 @@ function _hewHelpOptions(): HELP_STRING {
     return options
 }
 
+/**
+ * get examples help string from json data and apply format
+ *
+ * @returns {HELP_STRING} examples help string
+ */
 function _hewHelpExamples(): HELP_STRING {
     const examples = { label: '', str: '' }
     const label = Object.keys(data.help)[3] ?? ''
@@ -82,6 +110,9 @@ function _hewHelpExamples(): HELP_STRING {
     return examples
 }
 
+/**
+ * echo formatted help to stdout
+ */
 async function _printHelp() {
     const description: HELP_STRING = _hewHelpDescription()
     const usage: HELP_STRING = _hewHelpUsage()
