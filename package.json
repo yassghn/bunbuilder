@@ -7,7 +7,7 @@
   "module": "build.ts",
   "type": "module",
   "scripts": {
-    "ship": "bun run build && npm pack"
+    "ship": "bun run make && npm pack"
   },
   "bin": "bin/bunbuilder.js",
   "devDependencies": {
