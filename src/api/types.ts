@@ -34,7 +34,7 @@ type ACTIONS = {
  * @typedef {object} ACTION_PLAN
  * @type {ACTION_PLAN} bunbuilder action plan
  * @property {object} actions bunbuilder actions
- * @property {string[]} files individual files for actions
+ * @property {string[]} [files] individual files for actions
  */
 interface ACTION_PLAN {
     actions: ACTIONS
