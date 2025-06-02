@@ -21,8 +21,8 @@ import type { BUNBUILDER_CONFIG } from 'api/types'
 
     try {
         _bunbuilder()
-    } catch (e) {
-        console.error(e)
+    } catch (e: any) {
+        console.error(e.message)
     }
     
 })()
