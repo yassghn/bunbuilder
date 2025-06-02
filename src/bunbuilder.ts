@@ -6,16 +6,14 @@ import util from 'api/util'
 import config from 'api/config'
 import cli from 'api/cli'
 import action from 'api/action'
-import type { BUNBUILDER_CONFIG } from 'api/types'
+import type { ACTION_PLAN, BUNBUILDER_CONFIG } from 'api/types'
 
 (async function () {
 
     function _bunbuilder() {
-        util.greet()
         const conf: BUNBUILDER_CONFIG = config.parse()
-        console.log(typeof conf)
-        console.dir(conf)
-        const actionPlan = cli.argsParse()
+        const actionPlan: ACTION_PLAN = cli.argsParse()
+        util.greet()
         action.start(actionPlan, conf)
     }
 
