@@ -7,6 +7,7 @@
  */
 
 import data from '../../data/data.json' assert { type: 'json' }
+import type { BUNBUILDER_CONFIG } from 'api/types'
 import { readFileSync } from 'node:fs'
 import { cwd } from 'node:process'
 import { sep } from 'node:path'
@@ -28,9 +29,9 @@ function _hewConfigPath(): string {
 /**
  * import config
  *
- * @returns {object|null} config object
+ * @returns {BUNBUILDER_CONFIG} config object
  */
-function _importConfig(): object | null {
+function _importConfig(): BUNBUILDER_CONFIG {
     const configPath = _hewConfigPath()
     const data = readFileSync(configPath, 'utf-8')
     const config = JSON.parse(data)
@@ -40,15 +41,15 @@ function _importConfig(): object | null {
 /**
  * parse configuration file
  *
- * @returns {object|null} config object
+ * @returns {BUNBUILDER_CONFIG} config object
  */
-function _parse(): object | null {
+function _parse(): BUNBUILDER_CONFIG {
     const config = _importConfig()
     return config
 }
 
 const config = {
-    parse: (): object | null => {
+    parse: (): BUNBUILDER_CONFIG => {
         return _parse()
     }
 }
