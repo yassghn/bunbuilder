@@ -35,6 +35,10 @@ function _hewParseArgsOptions(): object {
         help: {
             type: 'boolean',
             short: 'h'
+        },
+        '?': {
+            type: 'boolean',
+            short: '?'
         }
     }
     return options

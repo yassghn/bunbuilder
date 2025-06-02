@@ -39,6 +39,9 @@ async function _processAction(action: string) {
         case ACTION.help:
             await _takeActionHelp()
             break
+        default:
+            await _takeActionHelp()
+            break
     }
 }
 

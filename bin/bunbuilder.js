@@ -208,6 +208,10 @@ function _hewParseArgsOptions() {
     help: {
       type: "boolean",
       short: "h"
+    },
+    "?": {
+      type: "boolean",
+      short: "?"
     }
   };
   return options;
@@ -255,7 +259,8 @@ var ACTION = {
   watch: "watch",
   serve: "serve",
   clean: "clean",
-  help: "help"
+  help: "help",
+  "?": "?"
 };
 
 // src/api/action.ts
@@ -277,6 +282,9 @@ async function _processAction(action) {
       console.log(action);
       break;
     case ACTION.help:
+      await _takeActionHelp();
+      break;
+    default:
       await _takeActionHelp();
       break;
   }
