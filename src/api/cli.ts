@@ -6,12 +6,8 @@
  * @property {bunbuilder.module:bunbuilder/api/cli}
  */
 
+import type { PARSED_ARGS, ACTION_PLAN } from './types'
 import { parseArgs } from 'node:util'
-
-interface parsedArgs {
-    values: object,
-    positionals: string[]
-}
 
 /**
  * hew options for parsing cli arguments
@@ -55,7 +51,7 @@ function _hewParseArgsConfig(): object {
     return config
 }
 
-function _processParsed(parsed: parsedArgs): object {
+function _processParsed(parsed: PARSED_ARGS): ACTION_PLAN {
     // spread parsed values
     const actions = { ...parsed.values }
     const files = []
@@ -66,14 +62,14 @@ function _processParsed(parsed: parsedArgs): object {
         files.push(arr)
     }
     // action plan
-    const actionPlan = {
+    const actionPlan: ACTION_PLAN = {
         actions: { ...actions },
         files: files[0]
     }
     return actionPlan
 }
 
-function _argsParse(): object {
+function _argsParse(): ACTION_PLAN {
     const config = _hewParseArgsConfig()
     const parsed = parseArgs(config)
     const actionPlan = _processParsed(parsed)
@@ -81,7 +77,7 @@ function _argsParse(): object {
 }
 
 const cli = {
-    argsParse: (): object => {
+    argsParse: (): ACTION_PLAN => {
         return _argsParse()
     }
 }
