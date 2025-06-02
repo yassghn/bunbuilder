@@ -24,4 +24,41 @@ interface ACTION_PLAN {
     files: string[] | undefined
 }
 
-export type { PARSED_ARGS, ACTION_PLAN }
+/**
+ * @typedef {string} BUILD_TARGET
+ * @type {BUILD_TARGET} bunbuilder build target
+ */
+type BUILD_TARGET = 'browser' | 'OTHER_UNCONFIGURED_TARGETS'
+
+/**
+ * @typedef {object} TARGET_OPTIONS
+ * @type {TARGET_OPTIONS} generic bunbuilder target options
+ * @property {string[]} input input files/folders for build
+ * @property {string} output output directory
+ */
+interface TARGET_OPTIONS {
+    input: string[]
+    output: string
+}
+
+/**
+ * @typedef {object} BROWSER_TARGET_OPTIONS
+ * @type {BROWSER_TARGET_OPTIONS} browser specific build options
+ * @property {boolean} singlePage single page web application flag
+ */
+interface BROWSER_TARGET_OPTIONS extends TARGET_OPTIONS {
+    singlePage: boolean
+}
+
+/**
+ * @typedef {object} BUNBUILDER_CONFIG
+ * @type {BUNBUILDER_CONFIG} bunbuilder configuration
+ * @property {BUILD_TARGET} target build target
+ * @property {BROWSER_TARGET_OPTIONS | 'OTHER_UNCONFIGURED_TARGETS'} options build target options
+ */
+interface BUNBUILDER_CONFIG {
+    target: BUILD_TARGET
+    options: BROWSER_TARGET_OPTIONS | 'OTHER_UNCONFIGURED_TARGETS'
+}
+
+export type { PARSED_ARGS, ACTION_PLAN, BUILD_TARGET, BROWSER_TARGET_OPTIONS, BUNBUILDER_CONFIG }
