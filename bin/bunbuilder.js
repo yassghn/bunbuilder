@@ -48,6 +48,28 @@ var package_default = {
     typescript: "^5.8.3"
   }
 };
+// data/data.json
+var data_default = {
+  configFileName: "bunbuilder.config.json",
+  help: {
+    description: "bunbuilder help",
+    usage: "$ bunx bunbuilder [OPTIONS] [[FILES][DIRECTORIES]]",
+    options: {
+      build: "-b, --build   build bun app",
+      watch: "-w, --watch   watch source directory for changes",
+      serve: "-s, --serve   start http server on localhost:3000",
+      clean: "-c, --clean   clean dist directory",
+      help: "-h, --help    print this help"
+    },
+    examples: {
+      build: "$ bunx bunbuilder -b .\\src\\ts\\index.ts",
+      watch: "$ bunx bunbuilder -w",
+      serve: "$ bunx bunbuilder -s",
+      clean: "$ bunx bunbuilder -c",
+      combo: "$ bunx bunbuilder -cbsw"
+    }
+  }
+};
 
 // src/api/util.ts
 function _hewPackageInfoString() {
@@ -60,16 +82,80 @@ function _greet() {
   const info = _hewPackageInfoString();
   io_default.echo(info, { newLine: true, color: "green" });
 }
+function _appendHelpStr(str, add, newLineWrap = false) {
+  const retVal = { str: str.valueOf() };
+  if (newLineWrap)
+    retVal.str += `
+`;
+  retVal.str += add.valueOf();
+  retVal.str += `
+`;
+  if (newLineWrap)
+    retVal.str += `
+`;
+  return retVal.str;
+}
+function _hewHelpDescription() {
+  const description = { label: "", str: "" };
+  description.str += `
+`;
+  description.str += data_default.help.description;
+  description.str += `
+`;
+  return description;
+}
+function _hewHelpUsage() {
+  const usage = { label: "", str: "" };
+  const label = Object.keys(data_default.help)[1] ?? "";
+  usage.label = _appendHelpStr(usage.label, label.toUpperCase(), true);
+  usage.str = _appendHelpStr(usage.str, data_default.help.usage);
+  return usage;
+}
+function _hewHelpOptions() {
+  const options = { label: "", str: "" };
+  const label = Object.keys(data_default.help)[2] ?? "";
+  options.label = _appendHelpStr(options.label, label.toLocaleUpperCase(), true);
+  options.str = _appendHelpStr(options.str, data_default.help.options.build);
+  options.str = _appendHelpStr(options.str, data_default.help.options.watch);
+  options.str = _appendHelpStr(options.str, data_default.help.options.serve);
+  options.str = _appendHelpStr(options.str, data_default.help.options.clean);
+  options.str = _appendHelpStr(options.str, data_default.help.options.help);
+  return options;
+}
+function _hewHelpExamples() {
+  const examples = { label: "", str: "" };
+  const label = Object.keys(data_default.help)[3] ?? "";
+  examples.label = _appendHelpStr(examples.label, label.toLocaleUpperCase(), true);
+  examples.str = _appendHelpStr(examples.str, data_default.help.examples.build);
+  examples.str = _appendHelpStr(examples.str, data_default.help.examples.watch);
+  examples.str = _appendHelpStr(examples.str, data_default.help.examples.serve);
+  examples.str = _appendHelpStr(examples.str, data_default.help.examples.clean);
+  examples.str = _appendHelpStr(examples.str, data_default.help.examples.combo);
+  return examples;
+}
+async function _printHelp() {
+  const description = _hewHelpDescription();
+  const usage = _hewHelpUsage();
+  const options = _hewHelpOptions();
+  const examples = _hewHelpExamples();
+  const labelColor = { color: "yellow" };
+  await io_default.echo(description.str);
+  await io_default.echo(usage.label, labelColor);
+  await io_default.echo(usage.str);
+  await io_default.echo(options.label, labelColor);
+  await io_default.echo(options.str);
+  await io_default.echo(examples.label, labelColor);
+  await io_default.echo(examples.str);
+}
 var util = {
   greet: () => {
     _greet();
+  },
+  printHelp: async () => {
+    await _printHelp();
   }
 };
 var util_default = util;
-// data/data.json
-var data_default = {
-  configFileName: "bunbuilder.config.json"
-};
 
 // src/api/config.ts
 import { readFileSync } from "fs";
@@ -163,28 +249,64 @@ var cli = {
 };
 var cli_default = cli;
 
-// src/api/actions.ts
-function _start(actionPlan, config2) {}
+// src/api/types.ts
+var ACTION = {
+  build: "build",
+  watch: "watch",
+  serve: "serve",
+  clean: "clean",
+  help: "help"
+};
+
+// src/api/action.ts
+async function _takeActionHelp() {
+  await util_default.printHelp();
+}
+async function _processAction(action) {
+  switch (action) {
+    case ACTION.build:
+      console.log(action);
+      break;
+    case ACTION.clean:
+      console.log(action);
+      break;
+    case ACTION.serve:
+      console.log(action);
+      break;
+    case ACTION.watch:
+      console.log(action);
+      break;
+    case ACTION.help:
+      await _takeActionHelp();
+      break;
+  }
+}
+async function _processActions(actionPlan) {
+  for (const action in actionPlan.actions) {
+    await _processAction(action);
+  }
+}
+async function _start(actionPlan, config2) {
+  await _processActions(actionPlan);
+}
 var action = {
-  start: (actionPlan, config2) => {
-    _start(actionPlan, config2);
+  start: async (actionPlan, config2) => {
+    await _start(actionPlan, config2);
   }
 };
-var actions_default = action;
+var action_default = action;
 
 // src/bunbuilder.ts
 (async function() {
-  function _bunbuilder() {
-    util_default.greet();
+  async function _bunbuilder() {
     const conf = config_default.parse();
-    console.log(typeof conf);
-    console.dir(conf);
     const actionPlan = cli_default.argsParse();
-    actions_default.start(actionPlan, conf);
+    util_default.greet();
+    await action_default.start(actionPlan, conf);
   }
   try {
-    _bunbuilder();
+    await _bunbuilder();
   } catch (e) {
-    console.error(e);
+    console.error(e.message);
   }
 })();
