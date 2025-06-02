@@ -6,6 +6,7 @@
  * @property {bunbuilder.module:bunbuilder/api/util} util utlities
  */
 
+import io from './io'
 import packageData from '../../package.json' assert { type: 'json' }
 
 /**
@@ -20,9 +21,17 @@ function _hewPackageInfoString(): string {
     return info.join('')
 }
 
+/**
+ * echo styled string with a newline
+ */
+function _greet() {
+    const info = _hewPackageInfoString()
+    io.echo(info, {newLine: true, color: 'green' })
+}
+
 const util = {
-    hewPackageInfoString: (): string => {
-        return _hewPackageInfoString()
+    greet: () => {
+        _greet()
     }
 }
 

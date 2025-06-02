@@ -2,13 +2,13 @@
  * bunbuilder.ts
  */
 
-import build from 'api/build'
+import util from 'api/util'
 import config from 'api/config'
 
 (async function () {
 
     function _bunbuilder() {
-        build.greet()
+        util.greet()
         const conf = config.parse()
         console.dir(conf)
     }
