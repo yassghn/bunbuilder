@@ -13,6 +13,14 @@ interface PARSED_ARGS {
     positionals: string[]
 }
 
+type ACTIONS = {
+    build?: boolean
+    watch?: boolean
+    serve?: boolean
+    clean?: boolean
+    help?: boolean
+}
+
 /**
  * @typedef {object} ACTION_PLAN
  * @type {ACTION_PLAN} bunbuilder action plan
@@ -20,7 +28,7 @@ interface PARSED_ARGS {
  * @property {string[]} files individual files for actions
  */
 interface ACTION_PLAN {
-    actions: object
+    actions: ACTIONS
     files: string[] | undefined
 }
 
@@ -69,5 +77,5 @@ interface BUNBUILDER_CONFIG {
     options: BROWSER_TARGET_OPTIONS | 'OTHER_UNCONFIGURED_TARGETS'
 }
 
-export type { PARSED_ARGS, ACTION_PLAN, BUILD_TARGET, BROWSER_TARGET_OPTIONS, BUNBUILDER_CONFIG }
+export type { PARSED_ARGS, ACTIONS, ACTION_PLAN, BUILD_TARGET, BROWSER_TARGET_OPTIONS, BUNBUILDER_CONFIG }
 export { ACTION }
