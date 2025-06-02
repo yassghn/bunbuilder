@@ -99,12 +99,88 @@ var config = {
 };
 var config_default = config;
 
+// src/api/cli.ts
+import { parseArgs } from "util";
+function _hewParseArgsOptions() {
+  const options = {
+    build: {
+      type: "boolean",
+      short: "b"
+    },
+    watch: {
+      type: "boolean",
+      short: "w"
+    },
+    serve: {
+      type: "boolean",
+      short: "s"
+    },
+    clean: {
+      type: "boolean",
+      short: "c"
+    },
+    help: {
+      type: "boolean",
+      short: "h"
+    }
+  };
+  return options;
+}
+function _hewParseArgsConfig() {
+  const options = _hewParseArgsOptions();
+  const config2 = {
+    args: Bun.argv,
+    strict: true,
+    allowPositionals: true,
+    options: { ...options }
+  };
+  return config2;
+}
+function _processParsed(parsed) {
+  const actions = { ...parsed.values };
+  const files = [];
+  if (parsed.positionals.length > 2) {
+    const length = parsed.positionals.length;
+    const arr = parsed.positionals.slice(2, length);
+    files.push(arr);
+  }
+  const actionPlan = {
+    actions: { ...actions },
+    files: files[0]
+  };
+  return actionPlan;
+}
+function _argsParse() {
+  const config2 = _hewParseArgsConfig();
+  const parsed = parseArgs(config2);
+  const actionPlan = _processParsed(parsed);
+  return actionPlan;
+}
+var cli = {
+  argsParse: () => {
+    return _argsParse();
+  }
+};
+var cli_default = cli;
+
+// src/api/actions.ts
+function _start(actionPlan, config2) {}
+var action = {
+  start: (actionPlan, config2) => {
+    _start(actionPlan, config2);
+  }
+};
+var actions_default = action;
+
 // src/bunbuilder.ts
 (async function() {
   function _bunbuilder() {
     util_default.greet();
     const conf = config_default.parse();
+    console.log(typeof conf);
     console.dir(conf);
+    const actionPlan = cli_default.argsParse();
+    actions_default.start(actionPlan, conf);
   }
   try {
     _bunbuilder();
