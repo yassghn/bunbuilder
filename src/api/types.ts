@@ -24,6 +24,14 @@ interface ACTION_PLAN {
     files: string[] | undefined
 }
 
+const ACTION = {
+    build: 'build',
+    watch: 'watch',
+    serve: 'serve',
+    clean: 'clean',
+    help: 'help'
+}
+
 /**
  * @typedef {string} BUILD_TARGET
  * @type {BUILD_TARGET} bunbuilder build target
@@ -62,3 +70,4 @@ interface BUNBUILDER_CONFIG {
 }
 
 export type { PARSED_ARGS, ACTION_PLAN, BUILD_TARGET, BROWSER_TARGET_OPTIONS, BUNBUILDER_CONFIG }
+export { ACTION }
