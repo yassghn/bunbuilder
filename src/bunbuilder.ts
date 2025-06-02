@@ -10,17 +10,17 @@ import type { ACTION_PLAN, BUNBUILDER_CONFIG } from 'api/types'
 
 (async function () {
 
-    function _bunbuilder() {
+    async function _bunbuilder() {
         const conf: BUNBUILDER_CONFIG = config.parse()
         const actionPlan: ACTION_PLAN = cli.argsParse()
         util.greet()
-        action.start(actionPlan, conf)
+        await action.start(actionPlan, conf)
     }
 
     try {
-        _bunbuilder()
+        await _bunbuilder()
     } catch (e: any) {
         console.error(e.message)
     }
-    
+
 })()
