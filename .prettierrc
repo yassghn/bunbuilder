@@ -4,6 +4,6 @@
   "singleQuote": true,
   "semi": false,
   "trailingComma": "none",
-  "printWidth": 500,
+  "printWidth": 100,
   "proseWrap": "preserve"
 }
