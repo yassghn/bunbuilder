@@ -22,19 +22,23 @@ async function _takeActionHelp() {
  *
  * @param {string} action action to invoke
  */
-async function _processAction(action: string) {
+async function _processAction(action: string, config: BUNBUILDER_CONFIG) {
     switch (action) {
         case ACTION.build:
             console.log(action)
+            console.dir(config)
             break
         case ACTION.clean:
             console.log(action)
+            console.dir(config)
             break
         case ACTION.serve:
             console.log(action)
+            console.dir(config)
             break
         case ACTION.watch:
             console.log(action)
+            console.dir(config)
             break
         case ACTION.help:
             await _takeActionHelp()
@@ -50,9 +54,9 @@ async function _processAction(action: string) {
  *
  * @param {ACTION_PLAN} actionPlan bunbuilder actions to process
  */
-async function _processActions(actionPlan: ACTION_PLAN) {
+async function _processActions(actionPlan: ACTION_PLAN, config: BUNBUILDER_CONFIG) {
     for (const action in actionPlan.actions) {
-        await _processAction(action)
+        await _processAction(action, config)
     }
 }
 
@@ -63,9 +67,7 @@ async function _processActions(actionPlan: ACTION_PLAN) {
  * @param {BUNBUILDER_CONFIG} config bunbuilder configuration
  */
 async function _start(actionPlan: ACTION_PLAN, config: BUNBUILDER_CONFIG) {
-    await _processActions(actionPlan)
-    //console.dir(actionPlan)
-    //console.dir(config)
+    await _processActions(actionPlan, config)
 }
 
 const action = {
