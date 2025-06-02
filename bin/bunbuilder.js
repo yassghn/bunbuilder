@@ -36,7 +36,7 @@ var package_default = {
   module: "build.ts",
   type: "module",
   scripts: {
-    ship: "bun run build && npm pack"
+    ship: "bun run make && npm pack"
   },
   bin: "bin/bunbuilder.js",
   devDependencies: {
@@ -56,28 +56,16 @@ function _hewPackageInfoString() {
   const info = [name, " ", "v", version];
   return info.join("");
 }
+function _greet() {
+  const info = _hewPackageInfoString();
+  io_default.echo(info, { newLine: true, color: "green" });
+}
 var util = {
-  hewPackageInfoString: () => {
-    return _hewPackageInfoString();
+  greet: () => {
+    _greet();
   }
 };
 var util_default = util;
-
-// src/api/build.ts
-function _buildGreet() {
-  const info = util_default.hewPackageInfoString();
-  io_default.echo(info, { newLine: true, color: "green" });
-}
-function _buildAll() {}
-var build = {
-  greet: () => {
-    _buildGreet();
-  },
-  all: () => {
-    _buildAll();
-  }
-};
-var build_default = build;
 // data/data.json
 var data_default = {
   configFileName: "bunbuilder.config.json"
@@ -114,7 +102,7 @@ var config_default = config;
 // src/bunbuilder.ts
 (async function() {
   function _bunbuilder() {
-    build_default.greet();
+    util_default.greet();
     const conf = config_default.parse();
     console.dir(conf);
   }
