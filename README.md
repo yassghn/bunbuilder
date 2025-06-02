@@ -16,6 +16,12 @@ install dependencies
 bun i
 ```
 
+build & pack
+
+```boo
+bun ship
+```
+
 ## package
 
 create executable
@@ -38,6 +44,12 @@ run bunbuilder
 
 ```boo
 bunx bunbuilder
+```
+
+update bunbuilder (pulls from original tar path)
+
+```boo
+bun update bunbuilder
 ```
 
 ## license
