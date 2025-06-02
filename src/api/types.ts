@@ -13,6 +13,15 @@ interface PARSED_ARGS {
     positionals: string[]
 }
 
+/**
+ * @typedef {object} ACTIONS
+ * @type {ACTIONS} action plan actions
+ * @property {boolean} [build] build flag
+ * @property {boolean} [watch] watch flag
+ * @property {boolean} [serve] serve flag
+ * @property {boolean} [clean] clean flag
+ * @property {boolean} [help] help flag
+ */
 type ACTIONS = {
     build?: boolean
     watch?: boolean
