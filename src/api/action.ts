@@ -6,6 +6,7 @@
  * @property {bunbuilder.module:bunbuilder/api/action}
  */
 
+import build from './build'
 import { ACTION } from './types'
 import type { ACTION_PLAN, BUNBUILDER_CONFIG } from './types'
 import util from './util'
@@ -18,15 +19,26 @@ async function _takeActionHelp() {
 }
 
 /**
+ * invoke build action
+ *
+ * @param {BUNBUILDER_CONFIG} config bunbuilder configuration
+ * @param {string[]} [files] individual files to build
+ */
+async function _takeActionBuild(config: BUNBUILDER_CONFIG, files: string[] | undefined) {
+    if (!files) {
+        build.all(config)
+    }
+}
+
+/**
  * process action type
  *
  * @param {string} action action to invoke
  */
-async function _processAction(action: string, config: BUNBUILDER_CONFIG) {
+async function _processAction(action: string, config: BUNBUILDER_CONFIG, files: string[] | undefined) {
     switch (action) {
         case ACTION.build:
-            console.log(action)
-            console.dir(config)
+            _takeActionBuild(config, files)
             break
         case ACTION.clean:
             console.log(action)
@@ -56,7 +68,7 @@ async function _processAction(action: string, config: BUNBUILDER_CONFIG) {
  */
 async function _processActions(actionPlan: ACTION_PLAN, config: BUNBUILDER_CONFIG) {
     for (const action in actionPlan.actions) {
-        await _processAction(action, config)
+        await _processAction(action, config, actionPlan.files)
     }
 }
 
