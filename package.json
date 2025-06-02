@@ -6,12 +6,14 @@
   "license": "SEE LICENSE IN license",
   "module": "build.ts",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "ship": "bun run build && npm pack"
+  },
   "bin": "bin/bunbuilder.js",
   "devDependencies": {
     "@types/bun": "latest",
     "@typescript-eslint/parser": "^8.33.0",
-    "eslint": "^9.27.0",
+    "eslint": "^9.28.0",
     "prettier": "^3.5.3",
     "prettier-eslint": "^16.4.2",
     "typescript": "^5.8.3"

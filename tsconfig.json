@@ -1,5 +1,6 @@
 {
-    "include": ["build.ts", "build/**/*", "api/**/*"],
+    // includes for linting and imports
+    "include": ["build.ts", "src/**/*"],
 
     "compilerOptions": {
         // environment setup & latest features
@@ -34,10 +35,10 @@
         "baseUrl": "./",
         // nice project import syntax
         "paths": {
-            "*": ["api/*", "build/*"]
+            "*": ["src/*"]
         },
         // node_modules/@types/...
-        "types": ["bun"]
+        "types": ["bun", "node"]
     },
 
     "watchOptions": {
