@@ -64,10 +64,10 @@ interface BUILD_OPTIONS {
         const success = output.success
         switch (success) {
             case true:
-                io.echo('build success')
+                io.echo('build success', {color: 'green'})
                 break
             case false:
-                io.echo('build failed')
+                io.echo('build failed', {color: 'red'})
                 break
         }
     }
