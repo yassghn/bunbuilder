@@ -86,5 +86,16 @@ interface BUNBUILDER_CONFIG {
     options: BROWSER_TARGET_OPTIONS | 'OTHER_UNCONFIGURED_TARGETS'
 }
 
-export type { PARSED_ARGS, ACTIONS, ACTION_PLAN, BUILD_TARGET, BROWSER_TARGET_OPTIONS, BUNBUILDER_CONFIG }
+/**
+ * @typedef {object} HELP_STRING
+ * @type {HELP_STRING} help output string
+ * @property {string} label help output section label
+ * @property {string} str help output section
+ */
+interface HELP_STRING {
+    label: string
+    str: string
+}
+
+export type { PARSED_ARGS, ACTIONS, ACTION_PLAN, BUILD_TARGET, BROWSER_TARGET_OPTIONS, BUNBUILDER_CONFIG, HELP_STRING }
 export { ACTION }
