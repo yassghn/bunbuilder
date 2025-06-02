@@ -5,7 +5,7 @@
 import util from 'api/util'
 import config from 'api/config'
 import cli from 'api/cli'
-import action from 'api/actions'
+import action from 'api/action'
 import type { BUNBUILDER_CONFIG } from 'api/types'
 
 (async function () {
