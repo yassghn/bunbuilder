@@ -29,6 +29,10 @@ function _getFiles(dir: string): string[] {
     return retVal.files
 }
 
+function _opMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
+    
+}
+
 /**
  * process source files
  *
