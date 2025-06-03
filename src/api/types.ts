@@ -56,6 +56,25 @@ const ACTION = {
 type BUILD_TARGET = 'browser' | 'OTHER_UNCONFIGURED_TARGETS'
 
 /**
+ * @typedef {string} BROWSER_BUILD_OPS
+ * @type {BROWSER_BUILD_OPS} browser target build operations
+ */
+type BROWSER_BUILD_OPS = 'copy' | 'compile'
+
+type BUILD_OPS = BROWSER_BUILD_OPS | 'OTHER_UNCONFIGURED_BUILD_OPS'
+
+/**
+ * @typedef {object} BROWSER_BUILD_OP_MAP
+ * @type {BROWSER_BUILD_OP_MAP} browser target build operation per extension
+ */
+interface BROWSER_BUILD_OP_MAP {
+    ext: string
+    op: BROWSER_BUILD_OPS
+}
+
+type BUILD_OP_MAP = BROWSER_BUILD_OP_MAP | 'OTHER_UNCONFIGURED_BUILD_EXT_OP'
+
+/**
  * @typedef {object} TARGET_OPTIONS
  * @type {TARGET_OPTIONS} generic bunbuilder target options
  * @property {string[]} input input files/folders for build
@@ -114,6 +133,10 @@ export type {
     ACTIONS,
     ACTION_PLAN,
     BUILD_TARGET,
+    BROWSER_BUILD_OPS,
+    BUILD_OPS,
+    BROWSER_BUILD_OP_MAP,
+    BUILD_OP_MAP,
     BROWSER_TARGET_OPTIONS,
     BUNBUILDER_CONFIG,
     HELP_STRING
