@@ -41,23 +41,33 @@ function _digestFiles(dir: string, files: string[]) {
 }
 
 /**
+ * process source input
+ *
+ * @param {string} input bunbuilder configuration input source
+ */
+function _digestInput(input: string[]) {
+    // iterate all input array
+    for (const src of input) {
+        // lstat input
+        const stat = lstatSync(src)
+        // check for directory
+        if (stat.isDirectory()) {
+            // recursively get all files
+            const files = _getFiles(src)
+            _digestFiles(src, files)
+        } else {
+        }
+    }
+}
+
+/**
  * build whole bun app
  */
 function _buildAll() {
     // get config
     const config = buildConfig.state
-    // iterate all inputs
-    for (const input of config.options.input) {
-        // lstat input
-        const stat = lstatSync(input)
-        // check for directory
-        if (stat.isDirectory()) {
-            // recursively get all files
-            const files = _getFiles(input)
-            _digestFiles(input, files)
-        } else {
-        }
-    }
+    // digest all input sources
+    _digestInput(config.options.input)
 }
 
 const build = {
