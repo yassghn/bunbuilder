@@ -46,8 +46,7 @@ const ACTION = {
     watch: 'watch',
     serve: 'serve',
     clean: 'clean',
-    help: 'help',
-    '?': '?'
+    help: 'help'
 }
 
 /**
