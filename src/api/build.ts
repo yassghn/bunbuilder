@@ -36,8 +36,8 @@ function _getFiles(dir: string): string[] {
  * @param {string[]} files source files
  */
 function _digestFiles(dir: string, files: string[]) {
-        const buildOpMap: BUILD_OP_MAP[] = buildOp.inferOps(files)
-        console.dir(buildOpMap)
+        const buildOpMaps: BUILD_OP_MAP[] = buildOp.inferOps(files)
+        _opMapBuild(dir, files, buildOpMaps)
 }
 
 /**
