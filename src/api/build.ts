@@ -30,7 +30,7 @@ function _getFiles(dir: string): string[] {
 
 /**
  * process source files
- * 
+ *
  * @param {string} dir root source input directory
  * @param {string[]} files source files
  */
