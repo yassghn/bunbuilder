@@ -1,5 +1,5 @@
 /**
- * build.ts
+ * make.ts
  */
 
 import io from 'api/io'
