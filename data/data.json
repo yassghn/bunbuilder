@@ -21,7 +21,11 @@
     "buildTargets": {
         "browser": {
             "name": "browser",
-            "compileExts": [".ts", ".mts"]
+            "compileExts": [".ts", ".mts"],
+            "buildOps": {
+                "copy": "copy",
+                "compile": "compile"
+            }
         }
     }
 }
