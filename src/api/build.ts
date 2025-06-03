@@ -6,6 +6,7 @@
  * @property {bunbuilder.module:bunbuilder/api/build} build build application
  */
 
+import buildOp from './buildOp'
 import type { BUNBUILDER_CONFIG } from './types'
 import { readdirSync, lstatSync } from 'node:fs'
 import { sep } from 'node:path'
@@ -28,6 +29,18 @@ function _getFiles(dir: string): string[] {
 }
 
 /**
+ * process source files
+ * 
+ * @param {string} dir root source input directory
+ * @param {string[]} files source files
+ */
+function _digestFiles(dir: string, files: string[]) {
+    files.forEach((file: string) => {
+        buildOp.inferOperation(dir, file)
+    })
+}
+
+/**
  * build whole bun app
  *
  * @param {BUNBUILDER_CONFIG} config bunbuilder configuration
@@ -41,9 +54,7 @@ function _buildAll(config: BUNBUILDER_CONFIG) {
         if (stat.isDirectory()) {
             // recursively get all files
             const files = _getFiles(input)
-            for (const file of files) {
-                console.log(file)
-            }
+            _digestFiles(input, files)
         } else {
         }
     }
