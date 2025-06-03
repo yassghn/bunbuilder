@@ -8,7 +8,7 @@
 
 import build from './build'
 import { ACTION } from './types'
-import type { ACTION_PLAN, BUNBUILDER_CONFIG } from './types'
+import type { ACTION_PLAN } from './types'
 import util from './util'
 
 /**
@@ -21,12 +21,11 @@ async function _takeActionHelp() {
 /**
  * invoke build action
  *
- * @param {BUNBUILDER_CONFIG} config bunbuilder configuration
  * @param {string[]} [files] individual files to build
  */
-async function _takeActionBuild(config: BUNBUILDER_CONFIG, files: string[] | undefined) {
+async function _takeActionBuild(files: string[] | undefined) {
     if (!files) {
-        build.all(config)
+        build.all()
     }
 }
 
@@ -34,23 +33,21 @@ async function _takeActionBuild(config: BUNBUILDER_CONFIG, files: string[] | und
  * process action type
  *
  * @param {string} action action to invoke
+ * @param {string[]} [files] individual files to build
  */
-async function _processAction(action: string, config: BUNBUILDER_CONFIG, files: string[] | undefined) {
+async function _processAction(action: string, files: string[] | undefined) {
     switch (action) {
         case ACTION.build:
-            _takeActionBuild(config, files)
+            _takeActionBuild(files)
             break
         case ACTION.clean:
             console.log(action)
-            console.dir(config)
             break
         case ACTION.serve:
             console.log(action)
-            console.dir(config)
             break
         case ACTION.watch:
             console.log(action)
-            console.dir(config)
             break
         case ACTION.help:
             await _takeActionHelp()
@@ -66,9 +63,9 @@ async function _processAction(action: string, config: BUNBUILDER_CONFIG, files: 
  *
  * @param {ACTION_PLAN} actionPlan bunbuilder actions to process
  */
-async function _processActions(actionPlan: ACTION_PLAN, config: BUNBUILDER_CONFIG) {
+async function _processActions(actionPlan: ACTION_PLAN) {
     for (const action in actionPlan.actions) {
-        await _processAction(action, config, actionPlan.files)
+        await _processAction(action, actionPlan.files)
     }
 }
 
@@ -76,15 +73,14 @@ async function _processActions(actionPlan: ACTION_PLAN, config: BUNBUILDER_CONFI
  * begin processing bunbuilder action plan with given configuration
  *
  * @param {ACTION_PLAN} actionPlan bunbuilder action plan
- * @param {BUNBUILDER_CONFIG} config bunbuilder configuration
  */
-async function _start(actionPlan: ACTION_PLAN, config: BUNBUILDER_CONFIG) {
-    await _processActions(actionPlan, config)
+async function _start(actionPlan: ACTION_PLAN) {
+    await _processActions(actionPlan)
 }
 
 const action = {
-    start: async (actionPlan: ACTION_PLAN, config: BUNBUILDER_CONFIG) => {
-        await _start(actionPlan, config)
+    start: async (actionPlan: ACTION_PLAN) => {
+        await _start(actionPlan)
     }
 }
 

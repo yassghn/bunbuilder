@@ -7,7 +7,7 @@
  */
 
 import buildOp from './buildOp'
-import type { BUNBUILDER_CONFIG } from './types'
+import buildConfig from './buildConfig'
 import { readdirSync, lstatSync } from 'node:fs'
 import { sep } from 'node:path'
 
@@ -42,10 +42,10 @@ function _digestFiles(dir: string, files: string[]) {
 
 /**
  * build whole bun app
- *
- * @param {BUNBUILDER_CONFIG} config bunbuilder configuration
  */
-function _buildAll(config: BUNBUILDER_CONFIG) {
+function _buildAll() {
+    // get config
+    const config = buildConfig.state
     // iterate all inputs
     for (const input of config.options.input) {
         // lstat input
@@ -61,8 +61,8 @@ function _buildAll(config: BUNBUILDER_CONFIG) {
 }
 
 const build = {
-    all: (config: BUNBUILDER_CONFIG) => {
-        _buildAll(config)
+    all: () => {
+        _buildAll()
     }
 }
 

@@ -6,6 +6,7 @@ import util from 'api/util'
 import config from 'api/config'
 import cli from 'api/cli'
 import action from 'api/action'
+import buildConfig from 'api/buildConfig'
 import type { ACTION_PLAN, BUNBUILDER_CONFIG } from 'api/types'
 
 (async function () {
@@ -14,7 +15,8 @@ import type { ACTION_PLAN, BUNBUILDER_CONFIG } from 'api/types'
         const conf: BUNBUILDER_CONFIG = config.parse()
         const actionPlan: ACTION_PLAN = cli.argsParse()
         util.greet()
-        await action.start(actionPlan, conf)
+        buildConfig.state = conf
+        await action.start(actionPlan)
     }
 
     try {
