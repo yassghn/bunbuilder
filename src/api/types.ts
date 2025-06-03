@@ -76,14 +76,26 @@ interface BROWSER_TARGET_OPTIONS extends TARGET_OPTIONS {
 }
 
 /**
+ * @typedef {object} OTHER_UNCONFIGURED_TARGET_OPTIONS
+ * @type {OTHER_UNCONFIGURED_TARGET_OPTIONS} temp
+ */
+interface OTHER_UNCONFIGURED_TARGET_OPTIONS extends TARGET_OPTIONS {}
+
+/**
+ * @typedef {object} BUILD_TARGET_OPTIONS
+ * @type {BUILD_TARGET_OPTIONS} build target specific options
+ */
+type BUILD_TARGET_OPTIONS = BROWSER_TARGET_OPTIONS | OTHER_UNCONFIGURED_TARGET_OPTIONS
+
+/**
  * @typedef {object} BUNBUILDER_CONFIG
  * @type {BUNBUILDER_CONFIG} bunbuilder configuration
  * @property {BUILD_TARGET} target build target
- * @property {BROWSER_TARGET_OPTIONS | 'OTHER_UNCONFIGURED_TARGET_OPTIONS'} options build target options
+ * @property {BUILD_TARGET_OPTIONS} options build target options
  */
 interface BUNBUILDER_CONFIG {
     target: BUILD_TARGET
-    options: BROWSER_TARGET_OPTIONS | 'OTHER_UNCONFIGURED_TARGET_OPTIONS'
+    options: BUILD_TARGET_OPTIONS
 }
 
 /**
