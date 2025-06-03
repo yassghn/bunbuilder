@@ -17,5 +17,11 @@
             "clean": "$ bunx bunbuilder -c",
             "combo": "$ bunx bunbuilder -cbsw"
         }
+    },
+    "buildTargets": {
+        "browser": {
+            "name": "browser",
+            "compileExts": [".ts", ".mts"]
+        }
     }
 }
