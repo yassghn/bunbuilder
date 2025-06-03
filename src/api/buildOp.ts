@@ -1,6 +1,11 @@
 /**
  * buildOp.ts
+ *
+ * @memberof bunbuilder/api
+ * @module bunbuilder/api/buildOp
+ * @property {bunbuilder.module:bunbuilder/api/buildOp} buildOp build operations
  */
+
 import { sep, extname } from 'node:path'
 
 function _inferOperation(dir: string, file: string) {
