@@ -7,7 +7,7 @@
  */
 
 import buildConfig from './buildConfig'
-import type { BROWSER_BUILD_OP_MAP, BUILD_OP_MAP } from './types'
+import type { BROWSER_BUILD_OP_MAP, BROWSER_BUILD_OPS, BUILD_OP_MAP } from './types'
 import data from '../../data/data.json' assert { type: 'json' }
 import { extname } from 'node:path'
 
@@ -30,11 +30,12 @@ function _hewBrowserCompileExts(): string[] {
  */
 function _hewBrowserOpMap(ext: string): BROWSER_BUILD_OP_MAP {
     const compileExts = _hewBrowserCompileExts()
+    const buildOps = data.buildTargets.browser.buildOps
     const opMap: BROWSER_BUILD_OP_MAP = {
         ext: ext.valueOf(),
-        op: 'copy'
+        op: buildOps.copy as BROWSER_BUILD_OPS
     }
-    if (compileExts.includes(ext)) opMap.op = 'compile'
+    if (compileExts.includes(ext)) opMap.op = buildOps.compile as BROWSER_BUILD_OPS
     return opMap
 }
 
