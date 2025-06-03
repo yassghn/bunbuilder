@@ -10,6 +10,7 @@ import buildOp from './buildOp'
 import buildConfig from './buildConfig'
 import { readdirSync, lstatSync } from 'node:fs'
 import { sep } from 'node:path'
+import type { BUILD_OP_MAP } from './types'
 
 /**
  * recursively traverse input directory and aggregate files
@@ -35,9 +36,8 @@ function _getFiles(dir: string): string[] {
  * @param {string[]} files source files
  */
 function _digestFiles(dir: string, files: string[]) {
-    files.forEach((file: string) => {
-        buildOp.inferOperation(dir, file)
-    })
+        const buildOpMap: BUILD_OP_MAP[] = buildOp.inferOps(files)
+        console.dir(buildOpMap)
 }
 
 /**
