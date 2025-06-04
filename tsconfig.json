@@ -37,8 +37,8 @@
         "paths": {
             "*": ["src/*"]
         },
-        // node_modules/@types/...
-        "types": ["bun", "node"]
+        // node_modules/@types/... (omit for all)
+        //"types": ["bun", "node"]
     },
 
     "watchOptions": {
