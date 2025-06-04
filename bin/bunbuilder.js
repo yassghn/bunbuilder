@@ -1,4 +1,32 @@
 // @bun
+var __defProp = Object.defineProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, {
+      get: all[name],
+      enumerable: true,
+      configurable: true,
+      set: (newValue) => all[name] = () => newValue
+    });
+};
+
+// node_modules/serve-static-bun/dist/utils/collapse-slashes.js
+var exports_collapse_slashes = {};
+__export(exports_collapse_slashes, {
+  collapseSlashes: () => collapseSlashes
+});
+function collapseSlashes(str, options = {}) {
+  const { keepLeading = true, keepTrailing = true } = options;
+  str = `/${str}/`.replaceAll(/[/]+/g, "/");
+  if (!keepLeading) {
+    str = str.substring(1);
+  }
+  if (!keepTrailing) {
+    str = str.substring(0, str.length - 1);
+  }
+  return str;
+}
+
 // src/api/io.ts
 import { styleText } from "util";
 import { stdout } from "process";
@@ -49,6 +77,7 @@ var package_default = {
     jsdoc: "^4.0.4",
     prettier: "^3.5.3",
     "prettier-eslint": "^16.4.2",
+    "serve-static-bun": "^0.5.3",
     typescript: "^5.8.3"
   }
 };
@@ -538,6 +567,180 @@ var build = {
 };
 var build_default = build;
 
+// src/api/clean.ts
+import { rmSync, readdirSync as readdirSync2 } from "fs";
+import path from "path";
+function _cleanOutdir() {
+  const config2 = buildConfig_default.state;
+  const outdir = config2.options.output;
+  const options = { force: true, recursive: true };
+  readdirSync2(outdir).forEach((item) => {
+    rmSync(path.join(outdir, item), options);
+  });
+}
+var clean = {
+  outdir: () => {
+    _cleanOutdir();
+  }
+};
+var clean_default = clean;
+
+// node_modules/serve-static-bun/dist/middleware/bao.js
+function getBaoMiddleware(getResponse, handleErrors) {
+  return async (ctx) => {
+    const res = await getResponse(ctx.req);
+    switch (res.status) {
+      case 403:
+      case 404:
+        return handleErrors ? ctx.sendRaw(res).forceSend() : ctx;
+      default:
+        return ctx.sendRaw(res).forceSend();
+    }
+  };
+}
+
+// node_modules/serve-static-bun/dist/types.js
+function isErrorlike(error) {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+  return Object.hasOwn(error, "code");
+}
+
+// node_modules/serve-static-bun/dist/utils/get-file-info.js
+function getMimeType({ type }) {
+  const charsetIndex = type.indexOf(";charset");
+  return charsetIndex !== -1 ? type.substring(0, charsetIndex) : type;
+}
+async function getFileInfo(path2) {
+  const info = {
+    blob: Bun.file(path2),
+    exists: false,
+    isFile: false
+  };
+  try {
+    await info.blob.arrayBuffer();
+    info.exists = true;
+    info.isFile = true;
+    const mimeType = getMimeType(info.blob);
+    info.mimeType = mimeType === "application/octet-stream" ? undefined : mimeType;
+  } catch (error) {
+    if (isErrorlike(error)) {
+      switch (error.code) {
+        case "EISDIR":
+          info.exists = true;
+          break;
+      }
+    }
+  }
+  return info;
+}
+
+// node_modules/serve-static-bun/dist/serve-static.js
+function isMiddleware(options) {
+  return Object.hasOwn(options, "middlewareMode");
+}
+function getPathname({ pathname }, stripFromPathname) {
+  return stripFromPathname ? pathname.replace(stripFromPathname, "") : pathname;
+}
+async function getRedirectPath(pathname, { isFile }, { collapseSlashes: collapseSlashes2, dirTrailingSlash }) {
+  let redirectPath = pathname;
+  if (collapseSlashes2) {
+    const pkg = await Promise.resolve().then(() => exports_collapse_slashes);
+    redirectPath = pkg.collapseSlashes(redirectPath, {
+      keepTrailing: redirectPath.endsWith("/")
+    });
+  }
+  if (dirTrailingSlash && !isFile && !redirectPath.endsWith("/")) {
+    redirectPath = `${redirectPath}/`;
+  }
+  return redirectPath;
+}
+async function getFileToServe(pathname, requestedFile, root, { index, dotfiles }) {
+  const isDotfile = pathname.split("/").pop()?.startsWith(".");
+  if (requestedFile.isFile && (!isDotfile || dotfiles === "allow")) {
+    return requestedFile;
+  }
+  const indexFile = index === null ? null : await getFileInfo(`${root}/${pathname}/${index}`);
+  if (indexFile?.exists && indexFile.isFile) {
+    return indexFile;
+  }
+  return null;
+}
+function serveStatic(root, options = {}) {
+  root = `${process.cwd()}/${root}`;
+  const { index = "index.html", dirTrailingSlash = true, collapseSlashes: collapseSlashes2 = true, stripFromPathname, headers, dotfiles = "deny", defaultMimeType = "text/plain", charset = "utf-8" } = options;
+  const wantsMiddleware = isMiddleware(options);
+  const getResponse = async (req) => {
+    const pathname = getPathname(new URL(req.url), stripFromPathname);
+    const requestedFile = await getFileInfo(`${root}/${pathname}`);
+    if (!requestedFile.exists) {
+      return new Response("404 Not Found", {
+        status: 404,
+        headers: {
+          ...headers,
+          "Content-Type": `text/plain; charset=${charset}`
+        }
+      });
+    }
+    const redirectPath = await getRedirectPath(pathname, requestedFile, {
+      collapseSlashes: collapseSlashes2,
+      dirTrailingSlash
+    });
+    if (redirectPath !== pathname) {
+      return new Response(undefined, {
+        status: 308,
+        headers: {
+          ...headers,
+          Location: redirectPath
+        }
+      });
+    }
+    const fileToServe = await getFileToServe(pathname, requestedFile, root, { index, dotfiles });
+    if (fileToServe) {
+      return new Response(fileToServe.blob, {
+        headers: {
+          ...headers,
+          "Content-Type": `${fileToServe.mimeType ?? defaultMimeType}; charset=${charset}`
+        }
+      });
+    }
+    return new Response("403 Forbidden", {
+      status: 403,
+      headers: {
+        ...headers,
+        "Content-Type": `text/plain; charset=${charset}`
+      }
+    });
+  };
+  if (wantsMiddleware) {
+    const { middlewareMode, handleErrors = false } = options;
+    switch (middlewareMode) {
+      case "bao":
+        return getBaoMiddleware(getResponse, handleErrors);
+    }
+  }
+  return getResponse;
+}
+
+// node_modules/serve-static-bun/dist/index.js
+var dist_default = serveStatic;
+
+// src/api/serve.ts
+function _startServe() {
+  const config2 = buildConfig_default.state;
+  Bun.serve({
+    port: 3000,
+    fetch: dist_default(config2.options.output)
+  });
+}
+var serve = {
+  start: () => {
+    _startServe();
+  }
+};
+var serve_default = serve;
+
 // src/api/types.ts
 var ACTION = {
   build: "build",
@@ -556,6 +759,12 @@ async function _takeActionBuild(files) {
     await build_default.all();
   }
 }
+function _takeActionClean() {
+  clean_default.outdir();
+}
+function _takeActionServe() {
+  serve_default.start();
+}
 async function _processAction(action, files) {
   switch (action) {
     case ACTION.build:
@@ -563,10 +772,10 @@ async function _processAction(action, files) {
       await _takeActionBuild(files);
       break;
     case ACTION.clean:
-      console.log(action);
+      _takeActionClean();
       break;
     case ACTION.serve:
-      console.log(action);
+      _takeActionServe();
       break;
     case ACTION.watch:
       console.log(action);
