@@ -20,6 +20,8 @@ interface ECHO_OPTIONS {
     color?: any | undefined
 }
 
+const newLine = { newLine: true }
+
 /**
  * add echo options to string
  *
@@ -66,3 +68,4 @@ const io = {
 }
 
 export default io
+export { newLine }
