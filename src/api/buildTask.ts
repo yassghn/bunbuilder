@@ -6,6 +6,8 @@
  * @property {bunbuilder.module:bunbuilder/api/buildTask} buildTask build tasks
  */
 
+import buildConfig from './buildConfig'
+import data from '../../data/data.json' assert { type: 'json' }
 import { cp, existsSync, mkdirSync } from 'node:fs'
 import { sep } from 'node:path'
 
@@ -30,8 +32,8 @@ function _makeDestDir(dest: string) {
     }
 }
 
-function _compile(dir: string, files: string[], dest: string) {
-    const src = { files: [] as string[]}
+function _compileTargetBrowser(dir: string, files: string[], dest: string) {
+    const src = { files: [] as string[] }
     files.forEach((file: string) => {
         src.files.push(dir + sep + file)
     })
@@ -39,6 +41,16 @@ function _compile(dir: string, files: string[], dest: string) {
         entrypoints: src.files,
         outdir: dest + sep + 'js'
     })
+}
+
+function _compile(dir: string, files: string[], dest: string) {
+    const config = buildConfig.state
+    const targets = data.buildTargets
+    switch (config.target) {
+        case targets.browser.name:
+            _compileTargetBrowser(dir, files, dest)
+            break
+    }
 }
 
 const buildTask = {
