@@ -4,7 +4,7 @@
   "description": "build bun apps",
   "author": "yassghn@protonmail.com",
   "license": "SEE LICENSE IN license",
-  "module": "build.ts",
+  "module": "make.ts",
   "type": "module",
   "scripts": {
     "ship": "bun run make && npm pack",
