@@ -14,6 +14,7 @@ import { ACTION } from './types'
 import type { ACTION_PLAN } from './types'
 import util from './util'
 import verbose from './verbose'
+import watch from './watch'
 
 /**
  * invoke help action
@@ -41,6 +42,10 @@ function _takeActionServe() {
     serve.start()
 }
 
+function _takeActionWatch() {
+    watch.start()
+}
+
 /**
  * process action type
  *
@@ -60,7 +65,7 @@ async function _processAction(action: string, files: string[] | undefined) {
             _takeActionServe()
             break
         case ACTION.watch:
-            console.log(action)
+            _takeActionWatch()
             break
         case ACTION.help:
             await _takeActionHelp()
