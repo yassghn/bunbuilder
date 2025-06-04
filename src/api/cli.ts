@@ -65,26 +65,48 @@ function _hewParseArgsConfig(): object {
 }
 
 /**
+ * hew files array by checking parsed positional arguments for individual files
+ *
+ * @param {PARSED_ARGS} parsed parsed cli arguments
+ * @returns {string[]|null} array of individual files
+ */
+function _hewParsedFiles(parsed: PARSED_ARGS): string[] | null {
+    // check for individual files
+    if (parsed.positionals.length > 2) {
+        const length = parsed.positionals.length
+        const files = parsed.positionals.slice(2, length)
+        return files
+    }
+    return null
+}
+
+/**
+ * hew bunbuilder action plan given parsed cli arguments and positionals
+ *
+ * @param {PARSED_ARGS} parsed parsed cli arguments
+ * @param {string[]|null} files array of individual files
+ * @returns {ACTION_PLAN} bunbuilder action plan
+ */
+function _hewActionPlan(parsed: PARSED_ARGS, files: string[]|null): ACTION_PLAN {
+    const actions = { ...parsed.values }
+    const actionPlan: ACTION_PLAN = {
+        actions: { ...actions },
+        files: files == null ? undefined : [...files]
+    }
+    return actionPlan
+}
+
+/**
  * process parsed args
  *
  * @param {PARSED_ARGS} parsed parsed cli arguments
  * @returns {ACTION_PLAN} bunbuilder action plan
  */
 function _processParsed(parsed: PARSED_ARGS): ACTION_PLAN {
-    // spread parsed values
-    const actions = { ...parsed.values }
-    const files = []
-    // check for individual files
-    if (parsed.positionals.length > 2) {
-        const length = parsed.positionals.length
-        const arr = parsed.positionals.slice(2, length)
-        files.push(arr)
-    }
+    // get files
+    const files = _hewParsedFiles(parsed)
     // action plan
-    const actionPlan: ACTION_PLAN = {
-        actions: { ...actions },
-        files: files[0]
-    }
+    const actionPlan = _hewActionPlan(parsed, files)
     return actionPlan
 }
 
