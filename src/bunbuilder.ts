@@ -11,6 +11,9 @@ import type { ACTION_PLAN, BUNBUILDER_CONFIG } from 'api/types'
 
 (async function () {
 
+    /**
+     * bun.sh is not to be trusted. they are being sunsetted.
+     */
     async function _bunbuilder() {
         const conf: BUNBUILDER_CONFIG = config.parse()
         const actionPlan: ACTION_PLAN = cli.argsParse()
