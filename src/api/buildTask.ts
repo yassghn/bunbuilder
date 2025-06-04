@@ -30,12 +30,26 @@ function _makeDestDir(dest: string) {
     }
 }
 
+function _compile(dir: string, files: string[], dest: string) {
+    const src = { files: [] as string[]}
+    files.forEach((file: string) => {
+        src.files.push(dir + sep + file)
+    })
+    Bun.build({
+        entrypoints: src.files,
+        outdir: dest + sep + 'js'
+    })
+}
+
 const buildTask = {
     copyFile: (dir: string, file: string, dest: string) => {
         _copyFile(dir, file, dest)
     },
     makeDestDir: (dest: string) => {
         _makeDestDir(dest)
+    },
+    compile: (dir: string, files: string[], dest: string) => {
+        _compile(dir, files, dest)
     }
 }
 

@@ -33,28 +33,51 @@ function _getFiles(dir: string): string[] {
         .forEach((file: string) => retVal.files.push(file))
     return retVal.files
 }
+async function _applyBrowserBuildOp(dir: string, file: string, buildOp: string): Promise<void>
+async function _applyBrowserBuildOp(dir: string, files: string[], buildOp: string): Promise<void>
 
-async function _applyBrowserBuildOp(dir: string, file: string, buildOp: string) {
+async function _applyBrowserBuildOp(dir: string, file: string | string[], buildOp: string) {
     const config = buildConfig.state
     const buildOps = data.buildTargets.browser.buildOps
-    switch (buildOp) {
-        case buildOps.copy:
-            await verbose.copy(file)
-            buildTask.copyFile(dir, file, config.options.output)
-            break
-        case buildOps.compile:
-            break
+    if (typeof file === 'string') {
+        switch (buildOp) {
+            case buildOps.copy:
+                await verbose.copy(file)
+                buildTask.copyFile(dir, file, config.options.output)
+                break
+        }
+    } else {
+        switch (buildOp) {
+            case buildOps.compile:
+                buildTask.compile(dir, file, config.options.output)
+                break
+        }
     }
 }
 
+/* async function _applyBrowserBuildOp(dir: string, files: string[], buildOp: string) {
+    const config = buildConfig.state
+    const buildOps = data.buildTargets.browser.buildOps
+    switch (buildOp) {
+        case buildOps.compile:
+            buildTask.compile(dir, files, config.options.output)
+            break
+    }
+} */
+
 async function _browserOpMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
+    const buildOps = data.buildTargets.browser.buildOps
     await buildOpMaps.forEach(async (opMap: any) => {
         // filter files current operation map target
         const targets = files.filter((file: string) => extname(file) == opMap.ext)
-        // iterate targets and apply build operation
-        await targets.forEach(async (target: string) => {
-            await _applyBrowserBuildOp(dir, target, opMap.op)
-        })
+        if (opMap.op == buildOps.compile) {
+            await _applyBrowserBuildOp(dir, targets, opMap.op)
+        } else {
+            // iterate targets and apply build operation
+            await targets.forEach(async (target: string) => {
+                await _applyBrowserBuildOp(dir, target, opMap.op)
+            })
+        }
     })
 }
 
@@ -117,3 +140,4 @@ const build = {
 }
 
 export default build
+export {}
