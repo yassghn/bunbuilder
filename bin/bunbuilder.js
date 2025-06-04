@@ -246,18 +246,25 @@ function _hewParseArgsConfig() {
   };
   return config2;
 }
-function _processParsed(parsed) {
-  const actions = { ...parsed.values };
-  const files = [];
+function _hewParsedFiles(parsed) {
   if (parsed.positionals.length > 2) {
     const length = parsed.positionals.length;
-    const arr = parsed.positionals.slice(2, length);
-    files.push(arr);
+    const files = parsed.positionals.slice(2, length);
+    return files;
   }
+  return null;
+}
+function _hewActionPlan(parsed, files) {
+  const actions = { ...parsed.values };
   const actionPlan = {
     actions: { ...actions },
-    files: files[0]
+    files: files == null ? undefined : [...files]
   };
+  return actionPlan;
+}
+function _processParsed(parsed) {
+  const files = _hewParsedFiles(parsed);
+  const actionPlan = _hewActionPlan(parsed, files);
   return actionPlan;
 }
 function _argsParse() {
