@@ -11,7 +11,7 @@ import buildConfig from './buildConfig'
 import data from '../../data/data.json' assert { type: 'json' }
 import { readdirSync, lstatSync } from 'node:fs'
 import { extname, sep } from 'node:path'
-import type { BROWSER_BUILD_OP_MAP, BUILD_OP_MAP } from './types'
+import type { BUILD_OP_MAP } from './types'
 import buildTask from './buildTask'
 
 /**
