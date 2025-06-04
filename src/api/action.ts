@@ -3,7 +3,7 @@
  *
  * @memberof bunbuilder/api
  * @module bunbuilder/api/action
- * @property {bunbuilder.module:bunbuilder/api/action}
+ * @property {bunbuilder.module:bunbuilder/api/action} action invoke bunbuilder actions
  */
 
 import build from './build'
