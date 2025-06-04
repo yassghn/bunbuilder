@@ -12,6 +12,7 @@ import data from '../../data/data.json' assert { type: 'json' }
 import { readdirSync, lstatSync } from 'node:fs'
 import { extname, sep } from 'node:path'
 import type { BROWSER_BUILD_OP_MAP, BUILD_OP_MAP } from './types'
+import buildTask from './buildTask'
 
 /**
  * recursively traverse input directory and aggregate files
@@ -32,16 +33,14 @@ function _getFiles(dir: string): string[] {
     return retVal.files
 }
 
-function _applyBrowserBuildOp(file: string, buildOp: string) {
+function _applyBrowserBuildOp(dir: string, file: string, buildOp: string) {
+    const config = buildConfig.state
     const buildOps = data.buildTargets.browser.buildOps
     switch (buildOp) {
         case buildOps.copy:
-            console.log(buildOp)
-            console.log(file)
+            buildTask.copyFile(dir, file, config.options.output)
             break
         case buildOps.compile:
-            console.log(buildOp)
-            console.log(file)
             break
     }
 }
@@ -52,8 +51,7 @@ function _browserOpMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_
         const targets = files.filter((file: string) => extname(file) == opMap.ext)
         // iterate targets and apply build operation
         targets.forEach((target: string) => {
-            const relativePath = dir + sep + target
-            _applyBrowserBuildOp(relativePath, opMap.op)
+            _applyBrowserBuildOp(dir, target, opMap.op)
         })
     })
 }
@@ -63,6 +61,7 @@ function _opMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) 
     const targets = data.buildTargets
     switch (config.target) {
         case targets.browser.name: {
+            buildTask.makeDestDir(config.options.output)
             _browserOpMapBuild(dir, files, buildOpMaps)
         }
     }
