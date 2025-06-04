@@ -9,6 +9,7 @@
 import build from './build'
 import buildConfig from './buildConfig'
 import clean from './clean'
+import serve from './serve'
 import { ACTION } from './types'
 import type { ACTION_PLAN } from './types'
 import util from './util'
@@ -36,6 +37,10 @@ function _takeActionClean() {
     clean.outdir()
 }
 
+function _takeActionServe() {
+    serve.start()
+}
+
 /**
  * process action type
  *
@@ -52,7 +57,7 @@ async function _processAction(action: string, files: string[] | undefined) {
             _takeActionClean()
             break
         case ACTION.serve:
-            console.log(action)
+            _takeActionServe()
             break
         case ACTION.watch:
             console.log(action)
