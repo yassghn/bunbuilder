@@ -63,6 +63,10 @@ type BUILD_TARGET = 'browser' | 'OTHER_UNCONFIGURED_TARGETS'
  */
 type BROWSER_BUILD_OPS = 'copy' | 'compile'
 
+/**
+ * @typedef {string} BUILD_OPS
+ * @type {BUILD_OPS} build operations aggregate
+ */
 type BUILD_OPS = BROWSER_BUILD_OPS | 'OTHER_UNCONFIGURED_BUILD_OPS'
 
 /**
@@ -74,6 +78,10 @@ interface BROWSER_BUILD_OP_MAP {
     op: BROWSER_BUILD_OPS
 }
 
+/**
+ * @typedef {object} BUILD_OP_MAP
+ * @type {BUILD_OP_MAP} build operations map aggregate
+ */
 type BUILD_OP_MAP = BROWSER_BUILD_OP_MAP | 'OTHER_UNCONFIGURED_BUILD_OP_MAP'
 
 /**

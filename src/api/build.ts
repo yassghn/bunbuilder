@@ -33,9 +33,32 @@ function _getFiles(dir: string): string[] {
         .forEach((file: string) => retVal.files.push(file))
     return retVal.files
 }
+
+/**
+ * apply browser build operation for a given file
+ *
+ * @param {string} dir root source file directory
+ * @param {string} file source file
+ * @param {string} buildOp build operation
+ */
 async function _applyBrowserBuildOp(dir: string, file: string, buildOp: string): Promise<void>
+
+/**
+ * apply browser build operation for an array of files
+ *
+ * @param {string} dir root source file directory
+ * @param {string[]} files source file
+ * @param {string} buildOp build operation
+ */
 async function _applyBrowserBuildOp(dir: string, files: string[], buildOp: string): Promise<void>
 
+/**
+ * overloaded function to process build operations
+ *
+ * @param {string} dir root source file directory
+ * @param {string|string[]} file source file
+ * @param {string} buildOp build operation
+ */
 async function _applyBrowserBuildOp(dir: string, file: string | string[], buildOp: string) {
     const config = buildConfig.state
     const buildOps = data.buildTargets.browser.buildOps
@@ -55,16 +78,13 @@ async function _applyBrowserBuildOp(dir: string, file: string | string[], buildO
     }
 }
 
-/* async function _applyBrowserBuildOp(dir: string, files: string[], buildOp: string) {
-    const config = buildConfig.state
-    const buildOps = data.buildTargets.browser.buildOps
-    switch (buildOp) {
-        case buildOps.compile:
-            buildTask.compile(dir, files, config.options.output)
-            break
-    }
-} */
-
+/**
+ * apply browser build op map to source files
+ *
+ * @param {string} dir root source file directory
+ * @param {string[]} files source files
+ * @param {BUILD_OP_MAP} buildOpMaps build operations map
+ */
 async function _browserOpMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
     const buildOps = data.buildTargets.browser.buildOps
     await buildOpMaps.forEach(async (opMap: any) => {
@@ -81,6 +101,13 @@ async function _browserOpMapBuild(dir: string, files: string[], buildOpMaps: BUI
     })
 }
 
+/**
+ * infer build operation based on bunbuilder config target
+ *
+ * @param {string} dir root source file directory
+ * @param {string[]} files source files
+ * @param {BUILD_OP_MAP} buildOpMaps build operations map
+ */
 async function _opMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
     const config = buildConfig.state
     const targets = data.buildTargets

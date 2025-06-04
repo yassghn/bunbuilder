@@ -26,12 +26,24 @@ function _copyFile(dir: string, file: string, dest: string) {
     })
 }
 
+/**
+ * create build destination directory if it does not exist
+ *
+ * @param {string} dest build destination directory
+ */
 function _makeDestDir(dest: string) {
     if (!existsSync(dest)) {
         mkdirSync(dest)
     }
 }
 
+/**
+ * browser compile target
+ *
+ * @param {string} dir root source file directory
+ * @param {string[]} files source files
+ * @param {string} dest build destination directory
+ */
 function _compileTargetBrowser(dir: string, files: string[], dest: string) {
     const src = { files: [] as string[] }
     files.forEach((file: string) => {
@@ -43,6 +55,13 @@ function _compileTargetBrowser(dir: string, files: string[], dest: string) {
     })
 }
 
+/**
+ * infer compilation method based on bunbuilder configuration target
+ *
+ * @param {string} dir root source file directory
+ * @param {string[]} files source files
+ * @param {string} dest build destination directory
+ */
 function _compile(dir: string, files: string[], dest: string) {
     const config = buildConfig.state
     const targets = data.buildTargets
@@ -57,9 +76,11 @@ const buildTask = {
     copyFile: (dir: string, file: string, dest: string) => {
         _copyFile(dir, file, dest)
     },
+
     makeDestDir: (dest: string) => {
         _makeDestDir(dest)
     },
+
     compile: (dir: string, files: string[], dest: string) => {
         _compile(dir, files, dest)
     }

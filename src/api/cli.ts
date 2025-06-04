@@ -48,6 +48,11 @@ function _hewParseArgsOptions(): object {
     return options
 }
 
+/**
+ * hew parse args config
+ *
+ * @returns {object} prase args configuration object
+ */
 function _hewParseArgsConfig(): object {
     const options = _hewParseArgsOptions()
     const config = {
@@ -59,6 +64,12 @@ function _hewParseArgsConfig(): object {
     return config
 }
 
+/**
+ * process parsed args
+ *
+ * @param {PARSED_ARGS} parsed parsed cli arguments
+ * @returns {ACTION_PLAN} bunbuilder action plan
+ */
 function _processParsed(parsed: PARSED_ARGS): ACTION_PLAN {
     // spread parsed values
     const actions = { ...parsed.values }
@@ -77,6 +88,11 @@ function _processParsed(parsed: PARSED_ARGS): ACTION_PLAN {
     return actionPlan
 }
 
+/**
+ * parse cli arguments
+ *
+ * @returns {ACTION_PLAN} bunbuilder action plan
+ */
 function _argsParse(): ACTION_PLAN {
     const config = _hewParseArgsConfig()
     const parsed = parseArgs(config)
