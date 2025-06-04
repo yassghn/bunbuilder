@@ -32,6 +32,10 @@ function _hewParseArgsOptions(): object {
             type: 'boolean',
             short: 'c'
         },
+        verbose: {
+            type: 'boolean',
+            short: 'v'
+        },
         help: {
             type: 'boolean',
             short: 'h'

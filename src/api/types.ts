@@ -20,6 +20,7 @@ interface PARSED_ARGS {
  * @property {boolean} [watch] watch flag
  * @property {boolean} [serve] serve flag
  * @property {boolean} [clean] clean flag
+ * @property {boolean} [verbose] verbose flag
  * @property {boolean} [help] help flag
  */
 type ACTIONS = {
@@ -27,6 +28,7 @@ type ACTIONS = {
     watch?: boolean
     serve?: boolean
     clean?: boolean
+    verbose?: boolean
     help?: boolean
 }
 

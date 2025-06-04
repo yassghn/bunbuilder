@@ -15,10 +15,12 @@ import type { BUNBUILDER_CONFIG } from './types'
  */
 interface BUNBUILDER_CONFIG_STATE {
     config: BUNBUILDER_CONFIG | null
+    verbose: boolean
 }
 
 const _state: BUNBUILDER_CONFIG_STATE = {
-    config: null
+    config: null,
+    verbose: false
 }
 
 /**
@@ -43,6 +45,24 @@ function _getState(): BUNBUILDER_CONFIG {
     }
 }
 
+/**
+ * set verbose flag for build configuration
+ *
+ * @param {boolean} value verbose flag
+ */
+function _setVerbose(value: boolean) {
+    _state.verbose = value
+}
+
+/**
+ * get verbose flag for build configuration
+ *
+ * @returns {boolean} verbose flag
+ */
+function _getVerbose(): boolean {
+    return _state.verbose
+}
+
 const buildConfig = {
     set state(config: BUNBUILDER_CONFIG) {
         _setState(config)
@@ -50,6 +70,14 @@ const buildConfig = {
 
     get state(): BUNBUILDER_CONFIG {
         return _getState()
+    },
+
+    set verbose(value: boolean) {
+        _setVerbose(value)
+    },
+
+    get verbose(): boolean {
+        return _getVerbose()
     }
 }
 

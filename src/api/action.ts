@@ -7,6 +7,7 @@
  */
 
 import build from './build'
+import buildConfig from './buildConfig'
 import { ACTION } from './types'
 import type { ACTION_PLAN } from './types'
 import util from './util'
@@ -69,12 +70,20 @@ async function _processActions(actionPlan: ACTION_PLAN) {
     }
 }
 
+function _filterVerbose(actionPlan: ACTION_PLAN) {
+    if (actionPlan.actions.verbose) {
+        buildConfig.verbose = true
+        delete actionPlan.actions.verbose
+    }
+}
+
 /**
  * begin processing bunbuilder action plan with given configuration
  *
  * @param {ACTION_PLAN} actionPlan bunbuilder action plan
  */
 async function _start(actionPlan: ACTION_PLAN) {
+    _filterVerbose(actionPlan)
     await _processActions(actionPlan)
 }
 

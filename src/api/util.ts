@@ -89,6 +89,7 @@ function _hewHelpOptions(): HELP_STRING {
     options.str = _appendHelpStr(options.str, data.help.options.watch)
     options.str = _appendHelpStr(options.str, data.help.options.serve)
     options.str = _appendHelpStr(options.str, data.help.options.clean)
+    options.str = _appendHelpStr(options.str, data.help.options.verbose)
     options.str = _appendHelpStr(options.str, data.help.options.help)
     return options
 }

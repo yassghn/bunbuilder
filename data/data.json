@@ -4,18 +4,19 @@
         "description": "bunbuilder help",
         "usage": "$ bunx bunbuilder [OPTIONS] [[FILES][DIRECTORIES]]",
         "options": {
-            "build": "-b, --build   build bun app",
-            "watch": "-w, --watch   watch source directory for changes",
-            "serve": "-s, --serve   start http server on localhost:3000",
-            "clean": "-c, --clean   clean dist directory",
-            "help" : "-h, --help    print this help"
+            "build":   "-b, --build     build bun app",
+            "watch":   "-w, --watch     watch source directory for changes",
+            "serve":   "-s, --serve     start http server on localhost:3000",
+            "clean":   "-c, --clean     clean dist directory",
+            "verbose": "-v, --verbose   verbose output",
+            "help" :   "-h, --help      print this help"
         },
         "examples": {
             "build": "$ bunx bunbuilder -b .\\src\\ts\\index.ts",
             "watch": "$ bunx bunbuilder -w",
             "serve": "$ bunx bunbuilder -s",
             "clean": "$ bunx bunbuilder -c",
-            "combo": "$ bunx bunbuilder -cbsw"
+            "combo": "$ bunx bunbuilder -cbswv"
         }
     },
     "buildTargets": {
