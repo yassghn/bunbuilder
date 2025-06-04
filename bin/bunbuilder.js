@@ -2,6 +2,7 @@
 // src/api/io.ts
 import { styleText } from "util";
 import { stdout } from "process";
+var newLine = { newLine: true };
 function _addEchoOptions(str, options) {
   const output = { str: str.valueOf() };
   if (options.color) {
@@ -33,16 +34,19 @@ var package_default = {
   description: "build bun apps",
   author: "yassghn@protonmail.com",
   license: "SEE LICENSE IN license",
-  module: "build.ts",
+  module: "make.ts",
   type: "module",
   scripts: {
-    ship: "bun run make && npm pack"
+    ship: "bun run make && npm pack",
+    doc: "rm -rf docs/ && jsdoc -c jsdoc.json"
   },
   bin: "bin/bunbuilder.js",
   devDependencies: {
     "@types/bun": "latest",
     "@typescript-eslint/parser": "^8.33.0",
+    "clean-jsdoc-theme": "^4.3.0",
     eslint: "^9.28.0",
+    jsdoc: "^4.0.4",
     prettier: "^3.5.3",
     "prettier-eslint": "^16.4.2",
     typescript: "^5.8.3"
@@ -55,18 +59,29 @@ var data_default = {
     description: "bunbuilder help",
     usage: "$ bunx bunbuilder [OPTIONS] [[FILES][DIRECTORIES]]",
     options: {
-      build: "-b, --build   build bun app",
-      watch: "-w, --watch   watch source directory for changes",
-      serve: "-s, --serve   start http server on localhost:3000",
-      clean: "-c, --clean   clean dist directory",
-      help: "-h, --help    print this help"
+      build: "-b, --build     build bun app",
+      watch: "-w, --watch     watch source directory for changes",
+      serve: "-s, --serve     start http server on localhost:3000",
+      clean: "-c, --clean     clean dist directory",
+      verbose: "-v, --verbose   verbose output",
+      help: "-h, --help      print this help"
     },
     examples: {
       build: "$ bunx bunbuilder -b .\\src\\ts\\index.ts",
       watch: "$ bunx bunbuilder -w",
       serve: "$ bunx bunbuilder -s",
       clean: "$ bunx bunbuilder -c",
-      combo: "$ bunx bunbuilder -cbsw"
+      combo: "$ bunx bunbuilder -cbswv"
+    }
+  },
+  buildTargets: {
+    browser: {
+      name: "browser",
+      compileExts: [".ts", ".mts"],
+      buildOps: {
+        copy: "copy",
+        compile: "compile"
+      }
     }
   }
 };
@@ -119,6 +134,7 @@ function _hewHelpOptions() {
   options.str = _appendHelpStr(options.str, data_default.help.options.watch);
   options.str = _appendHelpStr(options.str, data_default.help.options.serve);
   options.str = _appendHelpStr(options.str, data_default.help.options.clean);
+  options.str = _appendHelpStr(options.str, data_default.help.options.verbose);
   options.str = _appendHelpStr(options.str, data_default.help.options.help);
   return options;
 }
@@ -205,6 +221,10 @@ function _hewParseArgsOptions() {
       type: "boolean",
       short: "c"
     },
+    verbose: {
+      type: "boolean",
+      short: "v"
+    },
     help: {
       type: "boolean",
       short: "h"
@@ -253,24 +273,287 @@ var cli = {
 };
 var cli_default = cli;
 
+// src/api/buildConfig.ts
+var _state = {
+  config: null,
+  verbose: false
+};
+function _setState(config2) {
+  _state.config = { ...config2 };
+}
+function _getState() {
+  if (_state.config == null) {
+    throw new Error("bunbuilder config state was not set");
+  } else {
+    return _state.config;
+  }
+}
+function _setVerbose(value) {
+  _state.verbose = value;
+}
+function _getVerbose() {
+  return _state.verbose;
+}
+var buildConfig = {
+  set state(config2) {
+    _setState(config2);
+  },
+  get state() {
+    return _getState();
+  },
+  set verbose(value) {
+    _setVerbose(value);
+  },
+  get verbose() {
+    return _getVerbose();
+  }
+};
+var buildConfig_default = buildConfig;
+
+// src/api/buildOp.ts
+import { extname } from "path";
+function _hewBrowserCompileExts() {
+  const browser = data_default.buildTargets.browser;
+  const compileExts = browser.compileExts;
+  return compileExts;
+}
+function _hewBrowserOpMap(ext) {
+  const compileExts = _hewBrowserCompileExts();
+  const buildOps = data_default.buildTargets.browser.buildOps;
+  const opMap = {
+    ext: ext.valueOf(),
+    op: buildOps.copy
+  };
+  if (compileExts.includes(ext))
+    opMap.op = buildOps.compile;
+  return opMap;
+}
+function _inferBuildOpMap(ext) {
+  const config2 = buildConfig_default.state;
+  const buildTargets = data_default.buildTargets;
+  const retVal = { opMap: {} };
+  switch (config2.target) {
+    case buildTargets.browser.name:
+      const opMap = _hewBrowserOpMap(ext);
+      retVal.opMap = opMap;
+      break;
+  }
+  return retVal.opMap;
+}
+function _listExtensions(files) {
+  const extensions = [];
+  files.forEach((file) => {
+    const ext = extname(file);
+    if (!extensions.includes(ext))
+      extensions.push(ext);
+  });
+  return extensions;
+}
+function _inferOpsMapArray(extensions) {
+  const opMapArr = [];
+  extensions.forEach((ext) => {
+    const opMap = _inferBuildOpMap(ext);
+    opMapArr.push(opMap);
+  });
+  return opMapArr;
+}
+function _inferOps(files) {
+  const extensions = _listExtensions(files);
+  const opMapArr = _inferOpsMapArray(extensions);
+  return opMapArr;
+}
+var buildOp = {
+  inferOps: (files) => {
+    return _inferOps(files);
+  }
+};
+var buildOp_default = buildOp;
+
+// src/api/build.ts
+import { readdirSync, lstatSync } from "fs";
+import { extname as extname2, sep as sep3 } from "path";
+
+// src/api/buildTask.ts
+import { cp, existsSync, mkdirSync } from "fs";
+import { sep as sep2 } from "path";
+function _copyFile(dir, file, dest) {
+  const out = dest + sep2 + file;
+  const src = dir + sep2 + file;
+  const options = { recursive: true };
+  cp(src, out, options, (err) => {
+    if (err)
+      throw err;
+  });
+}
+function _makeDestDir(dest) {
+  if (!existsSync(dest)) {
+    mkdirSync(dest);
+  }
+}
+function _compileTargetBrowser(dir, files, dest) {
+  const src = { files: [] };
+  files.forEach((file) => {
+    src.files.push(dir + sep2 + file);
+  });
+  Bun.build({
+    entrypoints: src.files,
+    outdir: dest + sep2 + "js"
+  });
+}
+function _compile(dir, files, dest) {
+  const config2 = buildConfig_default.state;
+  const targets = data_default.buildTargets;
+  switch (config2.target) {
+    case targets.browser.name:
+      _compileTargetBrowser(dir, files, dest);
+      break;
+  }
+}
+var buildTask = {
+  copyFile: (dir, file, dest) => {
+    _copyFile(dir, file, dest);
+  },
+  makeDestDir: (dest) => {
+    _makeDestDir(dest);
+  },
+  compile: (dir, files, dest) => {
+    _compile(dir, files, dest);
+  }
+};
+var buildTask_default = buildTask;
+
+// src/api/verbose.ts
+var cyan = { color: "cyan" };
+function _applyVerbose() {
+  return buildConfig_default.verbose;
+}
+async function _buildStart() {
+  if (_applyVerbose()) {
+    const config2 = buildConfig_default.state;
+    await io_default.echo("starting build...", newLine);
+    await io_default.echo("target: ");
+    await io_default.echo(config2.target, cyan);
+    await io_default.echo("", newLine);
+  }
+}
+async function _copy(file) {
+  if (_applyVerbose()) {
+    const config2 = buildConfig_default.state;
+    await io_default.echo("copying file ");
+    await io_default.echo(file, cyan);
+    await io_default.echo(" to ");
+    await io_default.echo(config2.options.output, cyan);
+    await io_default.echo("", newLine);
+  }
+}
+var verbose = {
+  buildStart: async () => {
+    await _buildStart();
+  },
+  copy: async (file) => {
+    await _copy(file);
+  }
+};
+var verbose_default = verbose;
+
+// src/api/build.ts
+function _getFiles(dir) {
+  const retVal = { files: [] };
+  const files = readdirSync(dir, { encoding: "utf-8", recursive: true });
+  files.filter((item) => {
+    const relativePath = dir + sep3 + item;
+    return lstatSync(relativePath).isFile();
+  }).forEach((file) => retVal.files.push(file));
+  return retVal.files;
+}
+async function _applyBrowserBuildOp(dir, file, buildOp2) {
+  const config2 = buildConfig_default.state;
+  const buildOps = data_default.buildTargets.browser.buildOps;
+  if (typeof file === "string") {
+    switch (buildOp2) {
+      case buildOps.copy:
+        await verbose_default.copy(file);
+        buildTask_default.copyFile(dir, file, config2.options.output);
+        break;
+    }
+  } else {
+    switch (buildOp2) {
+      case buildOps.compile:
+        buildTask_default.compile(dir, file, config2.options.output);
+        break;
+    }
+  }
+}
+async function _browserOpMapBuild(dir, files, buildOpMaps) {
+  const buildOps = data_default.buildTargets.browser.buildOps;
+  await buildOpMaps.forEach(async (opMap) => {
+    const targets = files.filter((file) => extname2(file) == opMap.ext);
+    if (opMap.op == buildOps.compile) {
+      await _applyBrowserBuildOp(dir, targets, opMap.op);
+    } else {
+      await targets.forEach(async (target) => {
+        await _applyBrowserBuildOp(dir, target, opMap.op);
+      });
+    }
+  });
+}
+async function _opMapBuild(dir, files, buildOpMaps) {
+  const config2 = buildConfig_default.state;
+  const targets = data_default.buildTargets;
+  switch (config2.target) {
+    case targets.browser.name: {
+      buildTask_default.makeDestDir(config2.options.output);
+      await _browserOpMapBuild(dir, files, buildOpMaps);
+    }
+  }
+}
+async function _digestFiles(dir, files) {
+  const buildOpMaps = buildOp_default.inferOps(files);
+  await _opMapBuild(dir, files, buildOpMaps);
+}
+async function _digestInput(input) {
+  for (const src of input) {
+    const stat = lstatSync(src);
+    if (stat.isDirectory()) {
+      const files = _getFiles(src);
+      await _digestFiles(src, files);
+    } else {}
+  }
+}
+async function _buildAll() {
+  const config2 = buildConfig_default.state;
+  await _digestInput(config2.options.input);
+}
+var build = {
+  all: async () => {
+    await _buildAll();
+  }
+};
+var build_default = build;
+
 // src/api/types.ts
 var ACTION = {
   build: "build",
   watch: "watch",
   serve: "serve",
   clean: "clean",
-  help: "help",
-  "?": "?"
+  help: "help"
 };
 
 // src/api/action.ts
 async function _takeActionHelp() {
   await util_default.printHelp();
 }
-async function _processAction(action) {
+async function _takeActionBuild(files) {
+  if (!files) {
+    await build_default.all();
+  }
+}
+async function _processAction(action, files) {
   switch (action) {
     case ACTION.build:
-      console.log(action);
+      await verbose_default.buildStart();
+      await _takeActionBuild(files);
       break;
     case ACTION.clean:
       console.log(action);
@@ -291,15 +574,22 @@ async function _processAction(action) {
 }
 async function _processActions(actionPlan) {
   for (const action in actionPlan.actions) {
-    await _processAction(action);
+    await _processAction(action, actionPlan.files);
   }
 }
-async function _start(actionPlan, config2) {
+function _filterVerbose(actionPlan) {
+  if (actionPlan.actions.verbose) {
+    buildConfig_default.verbose = true;
+    delete actionPlan.actions.verbose;
+  }
+}
+async function _start(actionPlan) {
+  _filterVerbose(actionPlan);
   await _processActions(actionPlan);
 }
 var action = {
-  start: async (actionPlan, config2) => {
-    await _start(actionPlan, config2);
+  start: async (actionPlan) => {
+    await _start(actionPlan);
   }
 };
 var action_default = action;
@@ -310,7 +600,8 @@ var action_default = action;
     const conf = config_default.parse();
     const actionPlan = cli_default.argsParse();
     util_default.greet();
-    await action_default.start(actionPlan, conf);
+    buildConfig_default.state = conf;
+    await action_default.start(actionPlan);
   }
   try {
     await _bunbuilder();
