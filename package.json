@@ -7,13 +7,16 @@
   "module": "build.ts",
   "type": "module",
   "scripts": {
-    "ship": "bun run make && npm pack"
+    "ship": "bun run make && npm pack",
+    "doc": "rm -rf docs/ && jsdoc -c jsdoc.json"
   },
   "bin": "bin/bunbuilder.js",
   "devDependencies": {
     "@types/bun": "latest",
     "@typescript-eslint/parser": "^8.33.0",
+    "clean-jsdoc-theme": "^4.3.0",
     "eslint": "^9.28.0",
+    "jsdoc": "^4.0.4",
     "prettier": "^3.5.3",
     "prettier-eslint": "^16.4.2",
     "typescript": "^5.8.3"

@@ -1,0 +1,42 @@
+{
+	"source": {
+		"include": [
+			"src/",
+			"package.json",
+			"readme.md"
+		],
+		"includePattern": "\\.(ts)$",
+		"excludePattern": "(node_modules/|resources/|docs|dist/|data/)"
+	},
+	"opts": {
+		"encoding": "utf8",
+		"readme": "./readme.md",
+		"destination": "docs/",
+		"recurse": true,
+		"verbose": true,
+		"template": "node_modules/clean-jsdoc-theme",
+		"theme_opts": {
+			"default_theme": "dark",
+			"homepageTitle": "bunbuilder v0.0.1 docs",
+			"static_dir": [
+				"data/"
+			],
+			"sections": [
+				"Modules",
+				"Namespaces",
+				"Global"
+			],
+			"create_style": "code:not([class]) { padding-left: .5em };"
+		}
+	},
+	"tags": {
+		"allowUnknownTags": true
+	},
+	"plugins": [
+		"plugins/markdown"
+	],
+	"markdown": {
+		"hardwrap": false,
+		"idInHeadings": true
+	}
+}
