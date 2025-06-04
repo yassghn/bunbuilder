@@ -112,6 +112,10 @@ var data_default = {
         compile: "compile"
       }
     }
+  },
+  options: {
+    servePort: 3000,
+    watchTimeout: 3000
   }
 };
 
@@ -729,8 +733,9 @@ var dist_default = serveStatic;
 // src/api/serve.ts
 function _startServe() {
   const config2 = buildConfig_default.state;
+  const port = data_default.options.servePort;
   Bun.serve({
-    port: 3000,
+    port,
     fetch: dist_default(config2.options.output)
   });
 }
@@ -750,6 +755,47 @@ var ACTION = {
   help: "help"
 };
 
+// src/api/watch.ts
+import { watch as fsWatch, lstatSync as lstatSync2 } from "fs";
+var _options = {
+  timeout: data_default.options.watchTimeout
+};
+var _state2 = {
+  pause: false
+};
+function _findFirstDir(input) {
+  const dir = input.find((src) => lstatSync2(src).isDirectory());
+  if (!dir) {
+    const err = `cannot find a directory to watch: ${input}`;
+    throw new Error(err);
+  }
+  return dir;
+}
+function _digestWatchEvent(eventType, file) {
+  if (!_state2.pause) {
+    console.log(eventType);
+    console.log(file);
+    _state2.pause = true;
+    setTimeout(() => {
+      _state2.pause = false;
+    }, _options.timeout);
+  }
+}
+function _start() {
+  const config2 = buildConfig_default.state;
+  const dir = _findFirstDir(config2.options.input);
+  const options = { recursive: true, persistent: true, encoding: "utf-8" };
+  fsWatch(dir, options, (eventType, file) => {
+    _digestWatchEvent(eventType, file);
+  });
+}
+var watch = {
+  start: () => {
+    _start();
+  }
+};
+var watch_default = watch;
+
 // src/api/action.ts
 async function _takeActionHelp() {
   await util_default.printHelp();
@@ -765,6 +811,9 @@ function _takeActionClean() {
 function _takeActionServe() {
   serve_default.start();
 }
+function _takeActionWatch() {
+  watch_default.start();
+}
 async function _processAction(action, files) {
   switch (action) {
     case ACTION.build:
@@ -778,7 +827,7 @@ async function _processAction(action, files) {
       _takeActionServe();
       break;
     case ACTION.watch:
-      console.log(action);
+      _takeActionWatch();
       break;
     case ACTION.help:
       await _takeActionHelp();
@@ -799,13 +848,13 @@ function _filterVerbose(actionPlan) {
     delete actionPlan.actions.verbose;
   }
 }
-async function _start(actionPlan) {
+async function _start2(actionPlan) {
   _filterVerbose(actionPlan);
   await _processActions(actionPlan);
 }
 var action = {
   start: async (actionPlan) => {
-    await _start(actionPlan);
+    await _start2(actionPlan);
   }
 };
 var action_default = action;
