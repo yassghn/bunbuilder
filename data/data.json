@@ -28,5 +28,9 @@
                 "compile": "compile"
             }
         }
+    },
+    "options": {
+        "servePort": 3000,
+        "watchTimeout": 3000
     }
 }
