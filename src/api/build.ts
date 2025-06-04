@@ -13,6 +13,7 @@ import { readdirSync, lstatSync } from 'node:fs'
 import { extname, sep } from 'node:path'
 import type { BUILD_OP_MAP } from './types'
 import buildTask from './buildTask'
+import verbose from './verbose'
 
 /**
  * recursively traverse input directory and aggregate files
@@ -33,11 +34,12 @@ function _getFiles(dir: string): string[] {
     return retVal.files
 }
 
-function _applyBrowserBuildOp(dir: string, file: string, buildOp: string) {
+async function _applyBrowserBuildOp(dir: string, file: string, buildOp: string) {
     const config = buildConfig.state
     const buildOps = data.buildTargets.browser.buildOps
     switch (buildOp) {
         case buildOps.copy:
+            await verbose.copy(file)
             buildTask.copyFile(dir, file, config.options.output)
             break
         case buildOps.compile:
@@ -45,24 +47,24 @@ function _applyBrowserBuildOp(dir: string, file: string, buildOp: string) {
     }
 }
 
-function _browserOpMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
-    buildOpMaps.forEach((opMap: any) => {
+async function _browserOpMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
+    await buildOpMaps.forEach(async (opMap: any) => {
         // filter files current operation map target
         const targets = files.filter((file: string) => extname(file) == opMap.ext)
         // iterate targets and apply build operation
-        targets.forEach((target: string) => {
-            _applyBrowserBuildOp(dir, target, opMap.op)
+        await targets.forEach(async (target: string) => {
+            await _applyBrowserBuildOp(dir, target, opMap.op)
         })
     })
 }
 
-function _opMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
+async function _opMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
     const config = buildConfig.state
     const targets = data.buildTargets
     switch (config.target) {
         case targets.browser.name: {
             buildTask.makeDestDir(config.options.output)
-            _browserOpMapBuild(dir, files, buildOpMaps)
+            await _browserOpMapBuild(dir, files, buildOpMaps)
         }
     }
 }
@@ -73,9 +75,9 @@ function _opMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) 
  * @param {string} dir root source input directory
  * @param {string[]} files source files
  */
-function _digestFiles(dir: string, files: string[]) {
+async function _digestFiles(dir: string, files: string[]) {
     const buildOpMaps: BUILD_OP_MAP[] = buildOp.inferOps(files)
-    _opMapBuild(dir, files, buildOpMaps)
+    await _opMapBuild(dir, files, buildOpMaps)
 }
 
 /**
@@ -83,7 +85,7 @@ function _digestFiles(dir: string, files: string[]) {
  *
  * @param {string} input bunbuilder configuration input source
  */
-function _digestInput(input: string[]) {
+async function _digestInput(input: string[]) {
     // iterate all input array
     for (const src of input) {
         // lstat input
@@ -92,7 +94,7 @@ function _digestInput(input: string[]) {
         if (stat.isDirectory()) {
             // recursively get all files
             const files = _getFiles(src)
-            _digestFiles(src, files)
+            await _digestFiles(src, files)
         } else {
         }
     }
@@ -101,16 +103,16 @@ function _digestInput(input: string[]) {
 /**
  * build whole bun app
  */
-function _buildAll() {
+async function _buildAll() {
     // get config
     const config = buildConfig.state
     // digest all input sources
-    _digestInput(config.options.input)
+    await _digestInput(config.options.input)
 }
 
 const build = {
-    all: () => {
-        _buildAll()
+    all: async () => {
+        await _buildAll()
     }
 }
 

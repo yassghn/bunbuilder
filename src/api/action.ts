@@ -27,7 +27,7 @@ async function _takeActionHelp() {
  */
 async function _takeActionBuild(files: string[] | undefined) {
     if (!files) {
-        build.all()
+        await build.all()
     }
 }
 
@@ -40,8 +40,8 @@ async function _takeActionBuild(files: string[] | undefined) {
 async function _processAction(action: string, files: string[] | undefined) {
     switch (action) {
         case ACTION.build:
-            verbose.buildStart()
-            _takeActionBuild(files)
+            await verbose.buildStart()
+            await _takeActionBuild(files)
             break
         case ACTION.clean:
             console.log(action)

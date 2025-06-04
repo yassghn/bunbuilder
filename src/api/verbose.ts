@@ -8,6 +8,9 @@
 
 import buildConfig from './buildConfig'
 import io from './io'
+import { newLine } from './io'
+
+const cyan = { color: 'cyan' }
 
 function _applyVerbose(): boolean {
     return buildConfig.verbose
@@ -16,16 +19,30 @@ function _applyVerbose(): boolean {
 async function _buildStart() {
     if (_applyVerbose()) {
         const config = buildConfig.state
-        const newLine = { newLine: true }
         await io.echo('starting build...', newLine)
         await io.echo('target: ')
-        await io.echo(config.target, { color: 'cyan' })
+        await io.echo(config.target, cyan)
+        await io.echo('', newLine)
+    }
+}
+
+async function _copy(file: string) {
+    if (_applyVerbose()) {
+        const config = buildConfig.state
+        await io.echo('copying file ')
+        await io.echo(file, cyan)
+        await io.echo(' to ')
+        await io.echo(config.options.output, cyan)
+        await io.echo('', newLine)
     }
 }
 
 const verbose = {
     buildStart: async () => {
         await _buildStart()
+    },
+    copy: async (file: string) => {
+        await _copy(file)
     }
 }
 
