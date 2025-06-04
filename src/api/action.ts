@@ -11,6 +11,7 @@ import buildConfig from './buildConfig'
 import { ACTION } from './types'
 import type { ACTION_PLAN } from './types'
 import util from './util'
+import verbose from './verbose'
 
 /**
  * invoke help action
@@ -39,6 +40,7 @@ async function _takeActionBuild(files: string[] | undefined) {
 async function _processAction(action: string, files: string[] | undefined) {
     switch (action) {
         case ACTION.build:
+            verbose.buildStart()
             _takeActionBuild(files)
             break
         case ACTION.clean:
