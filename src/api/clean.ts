@@ -6,8 +6,26 @@
  * @property {bunbuilder.module:bunbuilder/api/clean}
  */
 
-const clean = {
+import buildConfig from './buildConfig'
+import { rmSync, readdirSync } from 'node:fs'
+import path from 'node:path'
 
+/**
+ * delete everything inside of bunbuilder configuration output directory
+ */
+function _cleanOutdir() {
+    const config = buildConfig.state
+    const outdir = config.options.output
+    const options = { force: true, recursive: true }
+    readdirSync(outdir).forEach((item: string) => {
+        rmSync(path.join(outdir, item), options)
+    })
+}
+
+const clean = {
+    outdir: () => {
+        _cleanOutdir()
+    }
 }
 
 export default clean
