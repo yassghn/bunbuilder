@@ -6,6 +6,7 @@
  * @property {bunbuilder.module:bunbuilder/api/cli}
  */
 
+import util from './util'
 import type { PARSED_ARGS, ACTION_PLAN } from './types'
 import { parseArgs } from 'node:util'
 
@@ -107,6 +108,8 @@ function _processParsed(parsed: PARSED_ARGS): ACTION_PLAN {
     const files = _hewParsedFiles(parsed)
     // action plan
     const actionPlan = _hewActionPlan(parsed, files)
+    // solo help checkup
+    util.soloHelpCheckup(actionPlan)
     return actionPlan
 }
 

@@ -9,7 +9,7 @@
 import io from './io'
 import packageData from '../../package.json' assert { type: 'json' }
 import data from '../../data/data.json' assert { type: 'json' }
-import type { HELP_STRING } from './types'
+import type { ACTION_PLAN, HELP_STRING } from './types'
 
 /**
  * hew package info from package.json
@@ -130,6 +130,21 @@ async function _printHelp() {
     await io.echo(examples.str)
 }
 
+/**
+ * close echo hold timeout if only help action is invoked
+ *
+ * @param {ACTION_PLAN} actionPlan bunbuilder action plan
+ */
+function _soloHelpCheckup(actionPlan: ACTION_PLAN) {
+    const keys = Object.keys(actionPlan.actions)
+    const numActions = keys.length
+    const isHelp = keys.includes('help') || keys.includes('?')
+    if (numActions == 1 && isHelp) {
+        // close echo hold timeout
+        io.closeEchoHoldTimeout()
+    }
+}
+
 const util = {
     greet: () => {
         _greet()
@@ -137,6 +152,10 @@ const util = {
 
     printHelp: async () => {
         await _printHelp()
+    },
+
+    soloHelpCheckup: (actionPlan: ACTION_PLAN) => {
+        _soloHelpCheckup(actionPlan)
     }
 }
 
