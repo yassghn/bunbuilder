@@ -63,26 +63,38 @@ type BUILD_TARGET = 'browser' | 'OTHER_UNCONFIGURED_TARGETS'
  */
 type BROWSER_BUILD_OPS = 'copy' | 'compile'
 
+type OTHER_UNCONFIGURED_BUILD_OPS = ''
+
 /**
  * @typedef {string} BUILD_OPS
  * @type {BUILD_OPS} build operations aggregate
  */
-type BUILD_OPS = BROWSER_BUILD_OPS | 'OTHER_UNCONFIGURED_BUILD_OPS'
+type BUILD_OPS = BROWSER_BUILD_OPS | OTHER_UNCONFIGURED_BUILD_OPS
 
 /**
- * @typedef {object} BROWSER_BUILD_OP_MAP
- * @type {BROWSER_BUILD_OP_MAP} browser target build operation per extension
+ * @typedef {object} OP_MAP
+ * @type {OP_MAP} map build operations to extensions
+ * @property {string} ext file extension
+ * @property {BUILD_OPS} op build operation
  */
-interface BROWSER_BUILD_OP_MAP {
+interface OP_MAP {
     ext: string
-    op: BROWSER_BUILD_OPS
+    op: BUILD_OPS
 }
 
 /**
- * @typedef {object} BUILD_OP_MAP
+ * @typedef {OP_MAP} BROWSER_BUILD_OP_MAP
+ * @type {BROWSER_BUILD_OP_MAP} browser target build operation per extension
+ */
+interface BROWSER_BUILD_OP_MAP extends OP_MAP {}
+
+interface OTHER_UNCONFIGURED_BUILD_OP_MAP extends OP_MAP {}
+
+/**
+ * @typedef {OP_MAP} BUILD_OP_MAP
  * @type {BUILD_OP_MAP} build operations map aggregate
  */
-type BUILD_OP_MAP = BROWSER_BUILD_OP_MAP | 'OTHER_UNCONFIGURED_BUILD_OP_MAP'
+type BUILD_OP_MAP = BROWSER_BUILD_OP_MAP | OTHER_UNCONFIGURED_BUILD_OP_MAP
 
 /**
  * @typedef {object} TARGET_OPTIONS
@@ -104,10 +116,6 @@ interface BROWSER_TARGET_OPTIONS extends TARGET_OPTIONS {
     singlePage: boolean
 }
 
-/**
- * @typedef {object} OTHER_UNCONFIGURED_TARGET_OPTIONS
- * @type {OTHER_UNCONFIGURED_TARGET_OPTIONS} temp
- */
 interface OTHER_UNCONFIGURED_TARGET_OPTIONS extends TARGET_OPTIONS {}
 
 /**
@@ -145,9 +153,12 @@ export type {
     BUILD_TARGET,
     BROWSER_BUILD_OPS,
     BUILD_OPS,
+    OP_MAP,
     BROWSER_BUILD_OP_MAP,
     BUILD_OP_MAP,
+    TARGET_OPTIONS,
     BROWSER_TARGET_OPTIONS,
+    BUILD_TARGET_OPTIONS,
     BUNBUILDER_CONFIG,
     HELP_STRING
 }
