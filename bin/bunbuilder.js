@@ -15,8 +15,8 @@ var exports_collapse_slashes = {};
 __export(exports_collapse_slashes, {
   collapseSlashes: () => collapseSlashes
 });
-function collapseSlashes(str, options = {}) {
-  const { keepLeading = true, keepTrailing = true } = options;
+function collapseSlashes(str, options2 = {}) {
+  const { keepLeading = true, keepTrailing = true } = options2;
   str = `/${str}/`.replaceAll(/[/]+/g, "/");
   if (!keepLeading) {
     str = str.substring(1);
@@ -62,6 +62,7 @@ var data_default = {
     servePort: 3000,
     watchTimeout: 3000,
     echoHoldTimeout: 50,
+    limitTimeoutMultiplier: 4,
     verboseHighlightColor: "cyan"
   }
 };
@@ -69,12 +70,15 @@ var data_default = {
 // src/api/io.ts
 import { styleText } from "util";
 import { stdout } from "process";
-var _echoHoldTimeout = data_default.options.echoHoldTimeout;
+var options = {
+  echoHoldTimeout: data_default.options.echoHoldTimeout,
+  limitTimeoutMultiplier: data_default.options.limitTimeoutMultiplier
+};
 var newLine = { newLine: true };
 var _echoHold = {
   queue: [],
   timeout: undefined,
-  limit: _echoHoldTimeout * 4,
+  limit: options.echoHoldTimeout * options.limitTimeoutMultiplier,
   queueTimer: 0
 };
 function _closeEchoHoldTimeout() {
@@ -82,10 +86,10 @@ function _closeEchoHoldTimeout() {
     _echoHold.timeout.close();
   }
 }
-function _hewEchoStrOpts(str, options = undefined) {
+function _hewEchoStrOpts(str, options2 = undefined) {
   const echoStrOpts = {
     str,
-    options
+    options: options2
   };
   return echoStrOpts;
 }
@@ -96,7 +100,7 @@ function _timeoutLimit() {
   if (_echoHold.queueTimer >= _echoHold.limit) {
     _closeEchoHoldTimeout();
   } else {
-    _echoHold.queueTimer += _echoHoldTimeout;
+    _echoHold.queueTimer += options.echoHoldTimeout;
   }
 }
 async function _digestEchoHold() {
@@ -112,40 +116,40 @@ async function _digestEchoHold() {
     _timeoutLimit();
   }
 }
-function _queueEcho(str, options = undefined) {
-  const echoStrOpts = _hewEchoStrOpts(str, options);
+function _queueEcho(str, options2 = undefined) {
+  const echoStrOpts = _hewEchoStrOpts(str, options2);
   _appendEchoHold(echoStrOpts);
   _echoHold.queueTimer = 0;
 }
 function _pollEchoHold() {
-  const timeout = setInterval(_digestEchoHold, _echoHoldTimeout);
+  const timeout = setInterval(_digestEchoHold, options.echoHoldTimeout);
   _echoHold.timeout = timeout;
 }
-function _addEchoOptions(str, options) {
+function _addEchoOptions(str, options2) {
   const output = { str: str.valueOf() };
-  if (options.color) {
-    output.str = styleText(options.color, str, { stream: stdout, validateStream: true });
+  if (options2.color) {
+    output.str = styleText(options2.color, str, { stream: stdout, validateStream: true });
   }
-  if (options.newLine) {
+  if (options2.newLine) {
     output.str += `
 `;
   }
   return output.str;
 }
-async function _echo(str, options = undefined) {
+async function _echo(str, options2 = undefined) {
   const output = { str: str.valueOf() };
-  if (options) {
-    output.str = _addEchoOptions(str, options);
+  if (options2) {
+    output.str = _addEchoOptions(str, options2);
   }
   await Bun.write(Bun.stdout, output.str);
 }
 _pollEchoHold();
 var io = {
-  echo: async (str, options = undefined) => {
-    await _echo(str, options);
+  echo: async (str, options2 = undefined) => {
+    await _echo(str, options2);
   },
-  queueEcho: (str, options = undefined) => {
-    _queueEcho(str, options);
+  queueEcho: (str, options2 = undefined) => {
+    _queueEcho(str, options2);
   },
   closeEchoHoldTimeout: () => {
     _closeEchoHoldTimeout();
@@ -168,7 +172,7 @@ var package_default = {
   bin: "bin/bunbuilder.js",
   devDependencies: {
     "@types/bun": "latest",
-    "@typescript-eslint/parser": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.1",
     "clean-jsdoc-theme": "^4.3.0",
     eslint: "^9.28.0",
     jsdoc: "^4.0.4",
@@ -221,16 +225,16 @@ function _hewHelpUsage() {
 }
 function _hewHelpOptions() {
   const port = data_default.options.servePort.toString();
-  const options = { label: "", str: "" };
+  const options2 = { label: "", str: "" };
   const label = Object.keys(data_default.help)[2] ?? "";
-  options.label = _appendHelpStr(options.label, label.toLocaleUpperCase(), true);
-  options.str = _appendHelpStr(options.str, data_default.help.options.build);
-  options.str = _appendHelpStr(options.str, data_default.help.options.watch);
-  options.str = _appendHelpStr(options.str, data_default.help.options.serve.replace("_", port));
-  options.str = _appendHelpStr(options.str, data_default.help.options.clean);
-  options.str = _appendHelpStr(options.str, data_default.help.options.verbose);
-  options.str = _appendHelpStr(options.str, data_default.help.options.help);
-  return options;
+  options2.label = _appendHelpStr(options2.label, label.toLocaleUpperCase(), true);
+  options2.str = _appendHelpStr(options2.str, data_default.help.options.build);
+  options2.str = _appendHelpStr(options2.str, data_default.help.options.watch);
+  options2.str = _appendHelpStr(options2.str, data_default.help.options.serve.replace("_", port));
+  options2.str = _appendHelpStr(options2.str, data_default.help.options.clean);
+  options2.str = _appendHelpStr(options2.str, data_default.help.options.verbose);
+  options2.str = _appendHelpStr(options2.str, data_default.help.options.help);
+  return options2;
 }
 function _hewHelpExamples() {
   const examples = { label: "", str: "" };
@@ -246,14 +250,14 @@ function _hewHelpExamples() {
 async function _printHelp() {
   const description = _hewHelpDescription();
   const usage = _hewHelpUsage();
-  const options = _hewHelpOptions();
+  const options2 = _hewHelpOptions();
   const examples = _hewHelpExamples();
   const labelColor = { color: "yellow" };
   await io_default.echo(description.str);
   await io_default.echo(usage.label, labelColor);
   await io_default.echo(usage.str);
-  await io_default.echo(options.label, labelColor);
-  await io_default.echo(options.str);
+  await io_default.echo(options2.label, labelColor);
+  await io_default.echo(options2.str);
   await io_default.echo(examples.label, labelColor);
   await io_default.echo(examples.str);
 }
@@ -309,7 +313,7 @@ var config_default = config;
 // src/api/cli.ts
 import { parseArgs } from "util";
 function _hewParseArgsOptions() {
-  const options = {
+  const options2 = {
     build: {
       type: "boolean",
       short: "b"
@@ -339,15 +343,15 @@ function _hewParseArgsOptions() {
       short: "?"
     }
   };
-  return options;
+  return options2;
 }
 function _hewParseArgsConfig() {
-  const options = _hewParseArgsOptions();
+  const options2 = _hewParseArgsOptions();
   const config2 = {
     args: Bun.argv,
     strict: true,
     allowPositionals: true,
-    options: { ...options }
+    options: { ...options2 }
   };
   return config2;
 }
@@ -488,8 +492,8 @@ import { sep as sep2 } from "path";
 function _copyFile(dir, file, dest) {
   const out = dest + sep2 + file;
   const src = dir + sep2 + file;
-  const options = { recursive: true };
-  cp(src, out, options, (err) => {
+  const options2 = { recursive: true };
+  cp(src, out, options2, (err) => {
     if (err)
       throw err;
   });
@@ -648,9 +652,9 @@ import path from "path";
 function _cleanOutdir() {
   const config2 = buildConfig_default.state;
   const outdir = config2.options.output;
-  const options = { force: true, recursive: true };
+  const options2 = { force: true, recursive: true };
   readdirSync2(outdir).forEach((item) => {
-    rmSync(path.join(outdir, item), options);
+    rmSync(path.join(outdir, item), options2);
   });
 }
 var clean = {
@@ -745,8 +749,8 @@ async function getFileInfo(path2) {
 }
 
 // node_modules/serve-static-bun/dist/serve-static.js
-function isMiddleware(options) {
-  return Object.hasOwn(options, "middlewareMode");
+function isMiddleware(options2) {
+  return Object.hasOwn(options2, "middlewareMode");
 }
 function getPathname({ pathname }, stripFromPathname) {
   return stripFromPathname ? pathname.replace(stripFromPathname, "") : pathname;
@@ -775,10 +779,10 @@ async function getFileToServe(pathname, requestedFile, root, { index, dotfiles }
   }
   return null;
 }
-function serveStatic(root, options = {}) {
+function serveStatic(root, options2 = {}) {
   root = `${process.cwd()}/${root}`;
-  const { index = "index.html", dirTrailingSlash = true, collapseSlashes: collapseSlashes2 = true, stripFromPathname, headers, dotfiles = "deny", defaultMimeType = "text/plain", charset = "utf-8" } = options;
-  const wantsMiddleware = isMiddleware(options);
+  const { index = "index.html", dirTrailingSlash = true, collapseSlashes: collapseSlashes2 = true, stripFromPathname, headers, dotfiles = "deny", defaultMimeType = "text/plain", charset = "utf-8" } = options2;
+  const wantsMiddleware = isMiddleware(options2);
   const getResponse = async (req) => {
     const pathname = getPathname(new URL(req.url), stripFromPathname);
     const requestedFile = await getFileInfo(`${root}/${pathname}`);
@@ -822,7 +826,7 @@ function serveStatic(root, options = {}) {
     });
   };
   if (wantsMiddleware) {
-    const { middlewareMode, handleErrors = false } = options;
+    const { middlewareMode, handleErrors = false } = options2;
     switch (middlewareMode) {
       case "bao":
         return getBaoMiddleware(getResponse, handleErrors);
@@ -889,8 +893,8 @@ function _setCloser2(watcher) {
 function _start() {
   const config2 = buildConfig_default.state;
   const dir = _findFirstDir(config2.options.input);
-  const options = { recursive: true, persistent: true, encoding: "utf-8" };
-  const watcher = fsWatch(dir, options, (eventType, file) => {
+  const options2 = { recursive: true, persistent: true, encoding: "utf-8" };
+  const watcher = fsWatch(dir, options2, (eventType, file) => {
     _digestWatchEvent(eventType, file);
   });
   _setCloser2(watcher);
