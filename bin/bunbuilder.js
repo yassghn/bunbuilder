@@ -995,13 +995,19 @@ var osEvents_default = osEvents;
 
 // src/bunbuilder.ts
 (async function() {
-  async function _bunbuilder() {
+  function _parseConfig() {
     const conf = config_default.parse();
+    buildConfig_default.state = conf;
+  }
+  async function _startActionPlan() {
     const actionPlan = cli_default.argsParse();
+    await action_default.start(actionPlan);
+  }
+  async function _bunbuilder() {
     osEvents_default.handle();
     util_default.greet();
-    buildConfig_default.state = conf;
-    await action_default.start(actionPlan);
+    _parseConfig();
+    await _startActionPlan();
   }
   try {
     await _bunbuilder();
