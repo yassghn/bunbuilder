@@ -13,7 +13,7 @@
   "bin": "bin/bunbuilder.js",
   "devDependencies": {
     "@types/bun": "latest",
-    "@typescript-eslint/parser": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.1",
     "clean-jsdoc-theme": "^4.3.0",
     "eslint": "^9.28.0",
     "jsdoc": "^4.0.4",
