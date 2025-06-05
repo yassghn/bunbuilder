@@ -1,6 +1,6 @@
 {
     // includes for linting and imports
-    "include": ["make.ts", "src/**/*"],
+    "include": ["src/**/*"],
 
     "compilerOptions": {
         // environment setup & latest features
