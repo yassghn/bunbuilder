@@ -7,8 +7,8 @@ import config from 'api/config'
 import cli from 'api/cli'
 import action from 'api/action'
 import buildConfig from 'api/buildConfig'
-import type { ACTION_PLAN, BUNBUILDER_CONFIG } from 'api/types'
 import osEvents from 'api/osEvents'
+import type { ACTION_PLAN, BUNBUILDER_CONFIG } from 'api/types'
 
 (async function () {
 

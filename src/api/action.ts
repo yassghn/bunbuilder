@@ -10,11 +10,11 @@ import build from './build'
 import buildConfig from './buildConfig'
 import clean from './clean'
 import serve from './serve'
-import { ACTION } from './types'
-import type { ACTION_PLAN } from './types'
 import util from './util'
 import verbose from './verbose'
 import watch from './watch'
+import { ACTION } from './types'
+import type { ACTION_PLAN } from './types'
 
 /**
  * invoke help action

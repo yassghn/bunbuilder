@@ -8,12 +8,12 @@
 
 import buildOp from './buildOp'
 import buildConfig from './buildConfig'
-import data from '../../data/data.json' assert { type: 'json' }
-import { readdirSync, lstatSync } from 'node:fs'
-import { extname, sep } from 'node:path'
-import type { BUILD_OP_MAP } from './types'
 import buildTask from './buildTask'
 import verbose from './verbose'
+import data from '../../data/data.json' assert { type: 'json' }
+import type { BUILD_OP_MAP } from './types'
+import { readdirSync, lstatSync } from 'node:fs'
+import { extname, sep } from 'node:path'
 
 /**
  * recursively traverse input directory and aggregate files

@@ -7,8 +7,8 @@
  */
 
 import buildConfig from './buildConfig'
-import type { BROWSER_BUILD_OP_MAP, BROWSER_BUILD_OPS, BUILD_OP_MAP } from './types'
 import data from '../../data/data.json' assert { type: 'json' }
+import type { BROWSER_BUILD_OP_MAP, BROWSER_BUILD_OPS, BUILD_OP_MAP } from './types'
 import { extname } from 'node:path'
 
 /**

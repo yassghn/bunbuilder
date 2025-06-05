@@ -6,11 +6,11 @@
  * @property {bunbuilder.module:bunbuilder/api/shutdown} shutdown build end cleanup
  */
 
-import fs, { type FSWatcher } from 'node:fs'
+import { type FSWatcher } from 'node:fs'
 
 const _state = {
     closers: {
-        watcher: undefined as unknown as fs.FSWatcher,
+        watcher: undefined as unknown as FSWatcher,
         server: undefined as unknown as Bun.Server
     }
 }
@@ -51,7 +51,7 @@ const shutdown = {
         _close()
     },
 
-    set watcher(value: fs.FSWatcher) {
+    set watcher(value: FSWatcher) {
         _setWatcher(value)
     },
 
