@@ -26,11 +26,50 @@ function collapseSlashes(str, options = {}) {
   }
   return str;
 }
+// data/data.json
+var data_default = {
+  configFileName: "bunbuilder.config.json",
+  help: {
+    description: "bunbuilder help",
+    usage: "$ bunx bunbuilder [OPTIONS] [[FILES][DIRECTORIES]]",
+    options: {
+      build: "-b, --build     build bun app",
+      watch: "-w, --watch     watch source directory for changes",
+      serve: "-s, --serve     start http server on localhost:_",
+      clean: "-c, --clean     clean dist directory",
+      verbose: "-v, --verbose   verbose output",
+      help: "-h, --help      print this help"
+    },
+    examples: {
+      build: "$ bunx bunbuilder -b .\\src\\ts\\index.ts",
+      watch: "$ bunx bunbuilder -w",
+      serve: "$ bunx bunbuilder -s",
+      clean: "$ bunx bunbuilder -c",
+      combo: "$ bunx bunbuilder -cbswv"
+    }
+  },
+  buildTargets: {
+    browser: {
+      name: "browser",
+      compileExts: [".ts", ".mts"],
+      buildOps: {
+        copy: "copy",
+        compile: "compile"
+      }
+    }
+  },
+  options: {
+    servePort: 3000,
+    watchTimeout: 3000,
+    echoHoldTimeout: 50,
+    verboseHighlightColor: "cyan"
+  }
+};
 
 // src/api/io.ts
 import { styleText } from "util";
 import { stdout } from "process";
-var _echoHoldTimeout = 300;
+var _echoHoldTimeout = data_default.options.echoHoldTimeout;
 var newLine = { newLine: true };
 var _echoHold = {
   queue: [],
@@ -137,43 +176,6 @@ var package_default = {
     "prettier-eslint": "^16.4.2",
     "serve-static-bun": "^0.5.3",
     typescript: "^5.8.3"
-  }
-};
-// data/data.json
-var data_default = {
-  configFileName: "bunbuilder.config.json",
-  help: {
-    description: "bunbuilder help",
-    usage: "$ bunx bunbuilder [OPTIONS] [[FILES][DIRECTORIES]]",
-    options: {
-      build: "-b, --build     build bun app",
-      watch: "-w, --watch     watch source directory for changes",
-      serve: "-s, --serve     start http server on localhost:_",
-      clean: "-c, --clean     clean dist directory",
-      verbose: "-v, --verbose   verbose output",
-      help: "-h, --help      print this help"
-    },
-    examples: {
-      build: "$ bunx bunbuilder -b .\\src\\ts\\index.ts",
-      watch: "$ bunx bunbuilder -w",
-      serve: "$ bunx bunbuilder -s",
-      clean: "$ bunx bunbuilder -c",
-      combo: "$ bunx bunbuilder -cbswv"
-    }
-  },
-  buildTargets: {
-    browser: {
-      name: "browser",
-      compileExts: [".ts", ".mts"],
-      buildOps: {
-        copy: "copy",
-        compile: "compile"
-      }
-    }
-  },
-  options: {
-    servePort: 3000,
-    watchTimeout: 3000
   }
 };
 
@@ -530,7 +532,7 @@ var buildTask = {
 var buildTask_default = buildTask;
 
 // src/api/verbose.ts
-var cyan = { color: "cyan" };
+var highlight = { color: data_default.options.verboseHighlightColor };
 function _applyVerbose() {
   return buildConfig_default.verbose;
 }
@@ -539,7 +541,7 @@ async function _buildStart() {
     const config2 = buildConfig_default.state;
     await io_default.echo("starting build...", newLine);
     await io_default.echo("target: ");
-    await io_default.echo(config2.target, cyan);
+    await io_default.echo(config2.target, highlight);
     await io_default.echo("", newLine);
   }
 }
@@ -547,9 +549,9 @@ function _copy(file) {
   if (_applyVerbose()) {
     const config2 = buildConfig_default.state;
     io_default.queueEcho("copying file ");
-    io_default.queueEcho(file, cyan);
+    io_default.queueEcho(file, highlight);
     io_default.queueEcho(" to ");
-    io_default.queueEcho(config2.options.output, cyan);
+    io_default.queueEcho(config2.options.output, highlight);
     io_default.queueEcho("", newLine);
   }
 }
@@ -975,7 +977,6 @@ var action_default = action;
 // src/api/osEvents.ts
 import process2 from "process";
 function _closer(code) {
-  console.log("closer");
   console.log(code);
   shutdown_default.close();
 }
