@@ -11,7 +11,7 @@ import buildConfig from './buildConfig'
 import buildTask from './buildTask'
 import verbose from './verbose'
 import data from '../../data/data.json' assert { type: 'json' }
-import type { BUILD_OP_MAP } from './types'
+import type { BROWSER_BUILD_OP_MAP, BUILD_OP_MAP } from './types'
 import { readdirSync, lstatSync } from 'node:fs'
 import { extname, sep } from 'node:path'
 
@@ -87,7 +87,7 @@ function _applyBrowserBuildOp(dir: string, file: string | string[], buildOp: str
  */
 function _browserOpMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
     const buildOps = data.buildTargets.browser.buildOps
-    buildOpMaps.forEach(async (opMap: any) => {
+    buildOpMaps.forEach(async (opMap: BROWSER_BUILD_OP_MAP) => {
         // filter files current operation map target
         const targets = files.filter((file: string) => extname(file) == opMap.ext)
         if (opMap.op == buildOps.compile) {
