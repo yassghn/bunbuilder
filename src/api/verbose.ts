@@ -39,14 +39,14 @@ async function _buildStart() {
  *
  * @param {string} file target for copy operation
  */
-async function _copy(file: string) {
+function _copy(file: string) {
     if (_applyVerbose()) {
         const config = buildConfig.state
-        await io.echo('copying file ')
-        await io.echo(file, cyan)
-        await io.echo(' to ')
-        await io.echo(config.options.output, cyan)
-        await io.echo('', newLine)
+        io.queueEcho('copying file ')
+        io.queueEcho(file, cyan)
+        io.queueEcho(' to ')
+        io.queueEcho(config.options.output, cyan)
+        io.queueEcho('', newLine)
     }
 }
 
@@ -54,9 +54,9 @@ const verbose = {
     buildStart: async () => {
         await _buildStart()
     },
-    
-    copy: async (file: string) => {
-        await _copy(file)
+
+    copy: (file: string) => {
+        _copy(file)
     }
 }
 
