@@ -56,23 +56,23 @@ function _applyBrowserBuildOp(dir: string, files: string[], buildOp: string): vo
  * overloaded function to process build operations
  *
  * @param {string} dir root source file directory
- * @param {string|string[]} file source file
+ * @param {string|string[]} input source file(s)
  * @param {string} buildOp build operation
  */
-function _applyBrowserBuildOp(dir: string, file: string | string[], buildOp: string) {
+function _applyBrowserBuildOp(dir: string, input: string | string[], buildOp: string) {
     const config = buildConfig.state
     const buildOps = data.buildTargets.browser.buildOps
-    if (typeof file === 'string') {
+    if (typeof input === 'string') {
         switch (buildOp) {
             case buildOps.copy:
-                verbose.copy(file)
-                buildTask.copyFile(dir, file, config.options.output)
+                verbose.copy(input)
+                buildTask.copyFile(dir, input, config.options.output)
                 break
         }
     } else {
         switch (buildOp) {
             case buildOps.compile:
-                buildTask.compile(dir, file, config.options.output)
+                buildTask.compile(dir, input, config.options.output)
                 break
         }
     }
