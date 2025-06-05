@@ -7,8 +7,9 @@
  */
 
 import buildConfig from './buildConfig'
+import shutdown from './shutdown'
 import data from '../../data/data.json' assert { type: 'json' }
-import { watch as fsWatch, lstatSync, type WatchEventType, type WatchOptions } from 'node:fs'
+import fs, { watch as fsWatch, lstatSync, type WatchEventType, type WatchOptions } from 'node:fs'
 
 const _options = {
     timeout: data.options.watchTimeout
@@ -43,11 +44,18 @@ function _digestWatchEvent(eventType: WatchEventType, file: string | null) {
     }
 }
 
+function _setCloser(watcher: fs.FSWatcher) {
+    shutdown.watcher = watcher
+}
+
 function _start() {
     const config = buildConfig.state
     const dir = _findFirstDir(config.options.input)
     const options: WatchOptions = { recursive: true, persistent: true, encoding: 'utf-8' }
-    fsWatch(dir, options, (eventType, file) => { _digestWatchEvent(eventType, file)})
+    const watcher = fsWatch(dir, options, (eventType, file) => {
+        _digestWatchEvent(eventType, file)
+    })
+    _setCloser(watcher)
 }
 
 const watch = {

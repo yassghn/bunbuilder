@@ -7,16 +7,22 @@
  */
 
 import buildConfig from './buildConfig'
+import shutdown from './shutdown'
 import data from '../../data/data.json' assert { type: 'json' }
 import serveStatic from 'serve-static-bun'
+
+function _setCloser(server: Bun.Server) {
+    shutdown.server = server
+}
 
 function _startServe() {
     const config = buildConfig.state
     const port = data.options.servePort
-    Bun.serve({
+    const server: Bun.Server = Bun.serve({
         port: port,
         fetch: serveStatic(config.options.output)
     })
+    _setCloser(server)
 }
 
 const serve = {
