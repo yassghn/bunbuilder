@@ -10,7 +10,10 @@ import data from '../../data/data.json' assert { type: 'json' }
 import { styleText } from 'node:util'
 import { stdout } from 'node:process'
 
-const _echoHoldTimeout = data.options.echoHoldTimeout
+const options = {
+    echoHoldTimeout: data.options.echoHoldTimeout,
+    limitTimeoutMultiplier: data.options.limitTimeoutMultiplier
+}
 
 /**
  * @typedef {object} ECHO_OPTIONS
@@ -39,7 +42,7 @@ const newLine = { newLine: true }
 const _echoHold = {
     queue: [] as ECHO_STR_OPTS[],
     timeout: undefined as unknown as NodeJS.Timeout,
-    limit: _echoHoldTimeout * 4,
+    limit: options.echoHoldTimeout * options.limitTimeoutMultiplier,
     queueTimer: 0
 }
 
@@ -86,7 +89,7 @@ function _timeoutLimit() {
     if (_echoHold.queueTimer >= _echoHold.limit) {
         _closeEchoHoldTimeout()
     } else {
-        _echoHold.queueTimer += _echoHoldTimeout
+        _echoHold.queueTimer += options.echoHoldTimeout
     }
 }
 
@@ -127,7 +130,7 @@ function _queueEcho(str: string, options: ECHO_OPTIONS | undefined = undefined) 
  * poll echo hold queue
  */
 function _pollEchoHold() {
-    const timeout: NodeJS.Timeout = setInterval(_digestEchoHold, _echoHoldTimeout)
+    const timeout: NodeJS.Timeout = setInterval(_digestEchoHold, options.echoHoldTimeout)
     _echoHold.timeout = timeout
 }
 
