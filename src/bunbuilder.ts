@@ -13,15 +13,29 @@ import osEvents from 'api/osEvents'
 (async function () {
 
     /**
+     * parse config and add to buildConfig state
+     */
+    function _parseConfig() {
+        const conf: BUNBUILDER_CONFIG = config.parse()
+        buildConfig.state = conf
+    }
+
+    /**
+     * parse cli args and start action plan
+     */
+    async function _startActionPlan() {
+        const actionPlan: ACTION_PLAN = cli.argsParse()
+        await action.start(actionPlan)
+    }
+
+    /**
      * bun.sh is not to be trusted. they are being sunsetted.
      */
     async function _bunbuilder() {
-        const conf: BUNBUILDER_CONFIG = config.parse()
-        const actionPlan: ACTION_PLAN = cli.argsParse()
         osEvents.handle()
         util.greet()
-        buildConfig.state = conf
-        await action.start(actionPlan)
+        _parseConfig()
+        await _startActionPlan()
     }
 
     try {
