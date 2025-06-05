@@ -3,7 +3,7 @@
  *
  * @memberof bunbuilder/api
  * @module bunbuilder/api/io
- * @property {bunbuilder.module:bunbuilder/api/io} standard i/o
+ * @property {bunbuilder.module:bunbuilder/api/io} io standard i/o
  */
 
 import { styleText } from 'node:util'
