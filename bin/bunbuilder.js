@@ -30,7 +30,53 @@ function collapseSlashes(str, options = {}) {
 // src/api/io.ts
 import { styleText } from "util";
 import { stdout } from "process";
+var _echoHoldTimeout = 300;
 var newLine = { newLine: true };
+var _echoHold = {
+  queue: [],
+  timeout: undefined,
+  limit: _echoHoldTimeout * 4,
+  queueTimer: 0
+};
+function _hewEchoStrOpts(str, options = undefined) {
+  const echoStrOpts = {
+    str,
+    options
+  };
+  return echoStrOpts;
+}
+function _appendEchoHold(echoStrOpts) {
+  _echoHold.queue.push(echoStrOpts);
+}
+function _timeoutLimit() {
+  if (_echoHold.queueTimer >= _echoHold.limit) {
+    _echoHold.timeout.close();
+  } else {
+    _echoHold.queueTimer += _echoHoldTimeout;
+  }
+}
+async function _digestEchoHold() {
+  const numQueued = _echoHold.queue.length;
+  if (numQueued > 0) {
+    for (let i = 0;i < numQueued; i++) {
+      const echoStrOpts = _echoHold.queue.shift();
+      if (echoStrOpts) {
+        await _echo(echoStrOpts.str, echoStrOpts.options);
+      }
+    }
+  } else {
+    _timeoutLimit();
+  }
+}
+function _queueEcho(str, options = undefined) {
+  const echoStrOpts = _hewEchoStrOpts(str, options);
+  _appendEchoHold(echoStrOpts);
+  _echoHold.queueTimer = 0;
+}
+async function _pollEchoHold() {
+  const timeout = setInterval(_digestEchoHold, _echoHoldTimeout);
+  _echoHold.timeout = timeout;
+}
 function _addEchoOptions(str, options) {
   const output = { str: str.valueOf() };
   if (options.color) {
@@ -49,9 +95,13 @@ async function _echo(str, options = undefined) {
   }
   await Bun.write(Bun.stdout, output.str);
 }
+_pollEchoHold();
 var io = {
   echo: async (str, options = undefined) => {
     await _echo(str, options);
+  },
+  queueEcho: (str, options = undefined) => {
+    _queueEcho(str, options);
   }
 };
 var io_default = io;
@@ -476,22 +526,22 @@ async function _buildStart() {
     await io_default.echo("", newLine);
   }
 }
-async function _copy(file) {
+function _copy(file) {
   if (_applyVerbose()) {
     const config2 = buildConfig_default.state;
-    await io_default.echo("copying file ");
-    await io_default.echo(file, cyan);
-    await io_default.echo(" to ");
-    await io_default.echo(config2.options.output, cyan);
-    await io_default.echo("", newLine);
+    io_default.queueEcho("copying file ");
+    io_default.queueEcho(file, cyan);
+    io_default.queueEcho(" to ");
+    io_default.queueEcho(config2.options.output, cyan);
+    io_default.queueEcho("", newLine);
   }
 }
 var verbose = {
   buildStart: async () => {
     await _buildStart();
   },
-  copy: async (file) => {
-    await _copy(file);
+  copy: (file) => {
+    _copy(file);
   }
 };
 var verbose_default = verbose;
@@ -506,13 +556,13 @@ function _getFiles(dir) {
   }).forEach((file) => retVal.files.push(file));
   return retVal.files;
 }
-async function _applyBrowserBuildOp(dir, file, buildOp2) {
+function _applyBrowserBuildOp(dir, file, buildOp2) {
   const config2 = buildConfig_default.state;
   const buildOps = data_default.buildTargets.browser.buildOps;
   if (typeof file === "string") {
     switch (buildOp2) {
       case buildOps.copy:
-        await verbose_default.copy(file);
+        verbose_default.copy(file);
         buildTask_default.copyFile(dir, file, config2.options.output);
         break;
     }
@@ -524,49 +574,49 @@ async function _applyBrowserBuildOp(dir, file, buildOp2) {
     }
   }
 }
-async function _browserOpMapBuild(dir, files, buildOpMaps) {
+function _browserOpMapBuild(dir, files, buildOpMaps) {
   const buildOps = data_default.buildTargets.browser.buildOps;
-  await buildOpMaps.forEach(async (opMap) => {
+  buildOpMaps.forEach(async (opMap) => {
     const targets = files.filter((file) => extname2(file) == opMap.ext);
     if (opMap.op == buildOps.compile) {
-      await _applyBrowserBuildOp(dir, targets, opMap.op);
+      _applyBrowserBuildOp(dir, targets, opMap.op);
     } else {
-      await targets.forEach(async (target) => {
-        await _applyBrowserBuildOp(dir, target, opMap.op);
+      targets.forEach(async (target) => {
+        _applyBrowserBuildOp(dir, target, opMap.op);
       });
     }
   });
 }
-async function _opMapBuild(dir, files, buildOpMaps) {
+function _opMapBuild(dir, files, buildOpMaps) {
   const config2 = buildConfig_default.state;
   const targets = data_default.buildTargets;
   switch (config2.target) {
     case targets.browser.name: {
       buildTask_default.makeDestDir(config2.options.output);
-      await _browserOpMapBuild(dir, files, buildOpMaps);
+      _browserOpMapBuild(dir, files, buildOpMaps);
     }
   }
 }
-async function _digestFiles(dir, files) {
+function _digestFiles(dir, files) {
   const buildOpMaps = buildOp_default.inferOps(files);
-  await _opMapBuild(dir, files, buildOpMaps);
+  _opMapBuild(dir, files, buildOpMaps);
 }
-async function _digestInput(input) {
+function _digestInput(input) {
   for (const src of input) {
     const stat = lstatSync(src);
     if (stat.isDirectory()) {
       const files = _getFiles(src);
-      await _digestFiles(src, files);
+      _digestFiles(src, files);
     } else {}
   }
 }
-async function _buildAll() {
+function _buildAll() {
   const config2 = buildConfig_default.state;
-  await _digestInput(config2.options.input);
+  _digestInput(config2.options.input);
 }
 var build = {
-  all: async () => {
-    await _buildAll();
+  all: () => {
+    _buildAll();
   }
 };
 var build_default = build;
@@ -588,6 +638,39 @@ var clean = {
   }
 };
 var clean_default = clean;
+
+// src/api/shutdown.ts
+var _state2 = {
+  closers: {
+    watcher: undefined,
+    server: undefined
+  }
+};
+function _setWatcher(value) {
+  _state2.closers.watcher = value;
+}
+function _setServer(value) {
+  _state2.closers.server = value;
+}
+function _close() {
+  const closers = _state2.closers;
+  if (closers.watcher)
+    closers.watcher.close();
+  if (closers.server)
+    closers.server.stop();
+}
+var shutdown = {
+  close: () => {
+    _close();
+  },
+  set watcher(value) {
+    _setWatcher(value);
+  },
+  set server(value) {
+    _setServer(value);
+  }
+};
+var shutdown_default = shutdown;
 
 // node_modules/serve-static-bun/dist/middleware/bao.js
 function getBaoMiddleware(getResponse, handleErrors) {
@@ -731,13 +814,17 @@ function serveStatic(root, options = {}) {
 var dist_default = serveStatic;
 
 // src/api/serve.ts
+function _setCloser(server) {
+  shutdown_default.server = server;
+}
 function _startServe() {
   const config2 = buildConfig_default.state;
   const port = data_default.options.servePort;
-  Bun.serve({
+  const server = Bun.serve({
     port,
     fetch: dist_default(config2.options.output)
   });
+  _setCloser(server);
 }
 var serve = {
   start: () => {
@@ -760,7 +847,7 @@ import { watch as fsWatch, lstatSync as lstatSync2 } from "fs";
 var _options = {
   timeout: data_default.options.watchTimeout
 };
-var _state2 = {
+var _state3 = {
   pause: false
 };
 function _findFirstDir(input) {
@@ -772,22 +859,26 @@ function _findFirstDir(input) {
   return dir;
 }
 function _digestWatchEvent(eventType, file) {
-  if (!_state2.pause) {
+  if (!_state3.pause) {
     console.log(eventType);
     console.log(file);
-    _state2.pause = true;
+    _state3.pause = true;
     setTimeout(() => {
-      _state2.pause = false;
+      _state3.pause = false;
     }, _options.timeout);
   }
+}
+function _setCloser2(watcher) {
+  shutdown_default.watcher = watcher;
 }
 function _start() {
   const config2 = buildConfig_default.state;
   const dir = _findFirstDir(config2.options.input);
   const options = { recursive: true, persistent: true, encoding: "utf-8" };
-  fsWatch(dir, options, (eventType, file) => {
+  const watcher = fsWatch(dir, options, (eventType, file) => {
     _digestWatchEvent(eventType, file);
   });
+  _setCloser2(watcher);
 }
 var watch = {
   start: () => {
@@ -800,9 +891,9 @@ var watch_default = watch;
 async function _takeActionHelp() {
   await util_default.printHelp();
 }
-async function _takeActionBuild(files) {
+function _takeActionBuild(files) {
   if (!files) {
-    await build_default.all();
+    build_default.all();
   }
 }
 function _takeActionClean() {
@@ -818,7 +909,7 @@ async function _processAction(action, files) {
   switch (action) {
     case ACTION.build:
       await verbose_default.buildStart();
-      await _takeActionBuild(files);
+      _takeActionBuild(files);
       break;
     case ACTION.clean:
       _takeActionClean();
