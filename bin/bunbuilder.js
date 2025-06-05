@@ -480,10 +480,6 @@ var buildOp = {
 };
 var buildOp_default = buildOp;
 
-// src/api/build.ts
-import { readdirSync, lstatSync } from "fs";
-import { extname as extname2, sep as sep3 } from "path";
-
 // src/api/buildTask.ts
 import { cp, existsSync, mkdirSync } from "fs";
 import { sep as sep2 } from "path";
@@ -568,6 +564,8 @@ var verbose = {
 var verbose_default = verbose;
 
 // src/api/build.ts
+import { readdirSync, lstatSync } from "fs";
+import { extname as extname2, sep as sep3 } from "path";
 function _getFiles(dir) {
   const retVal = { files: [] };
   const files = readdirSync(dir, { encoding: "utf-8", recursive: true });
@@ -854,15 +852,6 @@ var serve = {
 };
 var serve_default = serve;
 
-// src/api/types.ts
-var ACTION = {
-  build: "build",
-  watch: "watch",
-  serve: "serve",
-  clean: "clean",
-  help: "help"
-};
-
 // src/api/watch.ts
 import {
   watch as fsWatch,
@@ -910,6 +899,15 @@ var watch = {
   }
 };
 var watch_default = watch;
+
+// src/api/types.ts
+var ACTION = {
+  build: "build",
+  watch: "watch",
+  serve: "serve",
+  clean: "clean",
+  help: "help"
+};
 
 // src/api/action.ts
 async function _takeActionHelp() {
@@ -977,6 +975,7 @@ var action_default = action;
 // src/api/osEvents.ts
 import process2 from "process";
 function _closer(code) {
+  console.log("closer");
   console.log(code);
   shutdown_default.close();
 }
