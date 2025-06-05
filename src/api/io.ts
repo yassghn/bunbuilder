@@ -116,7 +116,7 @@ function _queueEcho(str: string, options: ECHO_OPTIONS | undefined = undefined) 
 /**
  * poll echo hold queue
  */
-async function _pollEchoHold() {
+function _pollEchoHold() {
     const timeout: NodeJS.Timeout = setInterval(_digestEchoHold, _echoHoldTimeout)
     _echoHold.timeout = timeout
 }
