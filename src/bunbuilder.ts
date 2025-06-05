@@ -8,6 +8,7 @@ import cli from 'api/cli'
 import action from 'api/action'
 import buildConfig from 'api/buildConfig'
 import type { ACTION_PLAN, BUNBUILDER_CONFIG } from 'api/types'
+import osEvents from 'api/osEvents'
 
 (async function () {
 
@@ -17,6 +18,7 @@ import type { ACTION_PLAN, BUNBUILDER_CONFIG } from 'api/types'
     async function _bunbuilder() {
         const conf: BUNBUILDER_CONFIG = config.parse()
         const actionPlan: ACTION_PLAN = cli.argsParse()
+        osEvents.handle()
         util.greet()
         buildConfig.state = conf
         await action.start(actionPlan)
