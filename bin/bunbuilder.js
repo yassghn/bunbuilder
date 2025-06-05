@@ -654,6 +654,7 @@ function _setServer(value) {
 }
 function _close() {
   const closers = _state2.closers;
+  console.log("close");
   if (closers.watcher)
     closers.watcher.close();
   if (closers.server)
@@ -950,11 +951,31 @@ var action = {
 };
 var action_default = action;
 
+// src/api/osEvents.ts
+import process2 from "process";
+function _closer(code) {
+  console.log(code);
+  shutdown_default.close();
+}
+function _addEventListeners() {
+  process2.on("SIGINT", _closer);
+}
+function _handle() {
+  _addEventListeners();
+}
+var osEvents = {
+  handle: () => {
+    _handle();
+  }
+};
+var osEvents_default = osEvents;
+
 // src/bunbuilder.ts
 (async function() {
   async function _bunbuilder() {
     const conf = config_default.parse();
     const actionPlan = cli_default.argsParse();
+    osEvents_default.handle();
     util_default.greet();
     buildConfig_default.state = conf;
     await action_default.start(actionPlan);
