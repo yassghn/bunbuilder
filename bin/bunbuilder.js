@@ -38,6 +38,11 @@ var _echoHold = {
   limit: _echoHoldTimeout * 4,
   queueTimer: 0
 };
+function _closeEchoHoldTimeout() {
+  if (_echoHold.timeout) {
+    _echoHold.timeout.close();
+  }
+}
 function _hewEchoStrOpts(str, options = undefined) {
   const echoStrOpts = {
     str,
@@ -50,7 +55,7 @@ function _appendEchoHold(echoStrOpts) {
 }
 function _timeoutLimit() {
   if (_echoHold.queueTimer >= _echoHold.limit) {
-    _echoHold.timeout.close();
+    _closeEchoHoldTimeout();
   } else {
     _echoHold.queueTimer += _echoHoldTimeout;
   }
@@ -73,7 +78,7 @@ function _queueEcho(str, options = undefined) {
   _appendEchoHold(echoStrOpts);
   _echoHold.queueTimer = 0;
 }
-async function _pollEchoHold() {
+function _pollEchoHold() {
   const timeout = setInterval(_digestEchoHold, _echoHoldTimeout);
   _echoHold.timeout = timeout;
 }
@@ -102,6 +107,9 @@ var io = {
   },
   queueEcho: (str, options = undefined) => {
     _queueEcho(str, options);
+  },
+  closeEchoHoldTimeout: () => {
+    _closeEchoHoldTimeout();
   }
 };
 var io_default = io;
@@ -140,7 +148,7 @@ var data_default = {
     options: {
       build: "-b, --build     build bun app",
       watch: "-w, --watch     watch source directory for changes",
-      serve: "-s, --serve     start http server on localhost:3000",
+      serve: "-s, --serve     start http server on localhost:_",
       clean: "-c, --clean     clean dist directory",
       verbose: "-v, --verbose   verbose output",
       help: "-h, --help      print this help"
@@ -210,12 +218,13 @@ function _hewHelpUsage() {
   return usage;
 }
 function _hewHelpOptions() {
+  const port = data_default.options.servePort.toString();
   const options = { label: "", str: "" };
   const label = Object.keys(data_default.help)[2] ?? "";
   options.label = _appendHelpStr(options.label, label.toLocaleUpperCase(), true);
   options.str = _appendHelpStr(options.str, data_default.help.options.build);
   options.str = _appendHelpStr(options.str, data_default.help.options.watch);
-  options.str = _appendHelpStr(options.str, data_default.help.options.serve);
+  options.str = _appendHelpStr(options.str, data_default.help.options.serve.replace("_", port));
   options.str = _appendHelpStr(options.str, data_default.help.options.clean);
   options.str = _appendHelpStr(options.str, data_default.help.options.verbose);
   options.str = _appendHelpStr(options.str, data_default.help.options.help);
@@ -246,12 +255,23 @@ async function _printHelp() {
   await io_default.echo(examples.label, labelColor);
   await io_default.echo(examples.str);
 }
+function _soloHelpCheckup(actionPlan) {
+  const keys = Object.keys(actionPlan.actions);
+  const numActions = keys.length;
+  const isHelp = keys.includes("help") || keys.includes("?");
+  if (numActions == 1 && isHelp) {
+    io_default.closeEchoHoldTimeout();
+  }
+}
 var util = {
   greet: () => {
     _greet();
   },
   printHelp: async () => {
     await _printHelp();
+  },
+  soloHelpCheckup: (actionPlan) => {
+    _soloHelpCheckup(actionPlan);
   }
 };
 var util_default = util;
@@ -348,6 +368,7 @@ function _hewActionPlan(parsed, files) {
 function _processParsed(parsed) {
   const files = _hewParsedFiles(parsed);
   const actionPlan = _hewActionPlan(parsed, files);
+  util_default.soloHelpCheckup(actionPlan);
   return actionPlan;
 }
 function _argsParse() {
@@ -654,7 +675,6 @@ function _setServer(value) {
 }
 function _close() {
   const closers = _state2.closers;
-  console.log("close");
   if (closers.watcher)
     closers.watcher.close();
   if (closers.server)
@@ -844,7 +864,10 @@ var ACTION = {
 };
 
 // src/api/watch.ts
-import { watch as fsWatch, lstatSync as lstatSync2 } from "fs";
+import {
+  watch as fsWatch,
+  lstatSync as lstatSync2
+} from "fs";
 var _options = {
   timeout: data_default.options.watchTimeout
 };
