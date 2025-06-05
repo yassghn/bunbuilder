@@ -33,6 +33,7 @@
         "servePort": 3000,
         "watchTimeout": 3000,
         "echoHoldTimeout": 50,
+        "limitTimeoutMultiplier": 4,
         "verboseHighlightColor": "cyan"
     }
 }
