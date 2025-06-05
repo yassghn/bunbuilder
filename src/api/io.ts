@@ -43,6 +43,15 @@ const _echoHold = {
 }
 
 /**
+ * close echo hold timeout
+ */
+function _closeEchoHoldTimeout() {
+    if (_echoHold.timeout) {
+        _echoHold.timeout.close()
+    }
+}
+
+/**
  * hew echo str opts
  *
  * @param {string} str echo string
@@ -74,7 +83,7 @@ function _appendEchoHold(echoStrOpts: ECHO_STR_OPTS) {
  */
 function _timeoutLimit() {
     if (_echoHold.queueTimer >= _echoHold.limit) {
-        _echoHold.timeout.close()
+        _closeEchoHoldTimeout()
     } else {
         _echoHold.queueTimer += _echoHoldTimeout
     }
@@ -170,6 +179,10 @@ const io = {
 
     queueEcho: (str: string, options: ECHO_OPTIONS | undefined = undefined) => {
         _queueEcho(str, options)
+    },
+
+    closeEchoHoldTimeout: () => {
+        _closeEchoHoldTimeout()
     }
 }
 
