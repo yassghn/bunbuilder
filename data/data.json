@@ -31,6 +31,7 @@
     },
     "options": {
         "servePort": 3000,
-        "watchTimeout": 3000
+        "watchTimeout": 3000,
+        "echoHoldTimeout": 50
     }
 }
