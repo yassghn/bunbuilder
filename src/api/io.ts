@@ -6,10 +6,11 @@
  * @property {bunbuilder.module:bunbuilder/api/io} io standard i/o
  */
 
+import data from '../../data/data.json' assert { type: 'json' }
 import { styleText } from 'node:util'
 import { stdout } from 'node:process'
 
-const _echoHoldTimeout = 300
+const _echoHoldTimeout = data.options.echoHoldTimeout
 
 /**
  * @typedef {object} ECHO_OPTIONS
