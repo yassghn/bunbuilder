@@ -9,6 +9,8 @@
 import { styleText } from 'node:util'
 import { stdout } from 'node:process'
 
+const _echoHoldTimeout = 300
+
 /**
  * @typedef {object} ECHO_OPTIONS
  * @type {ECHO_OPTIONS} options for echo
@@ -20,7 +22,71 @@ interface ECHO_OPTIONS {
     color?: any | undefined
 }
 
+interface ECHO_STR_OPTS {
+    str: string
+    options: ECHO_OPTIONS | undefined
+}
+
 const newLine = { newLine: true }
+
+const _echoHold = {
+    queue: [] as ECHO_STR_OPTS[],
+    timeout: undefined as unknown as NodeJS.Timeout,
+    limit: _echoHoldTimeout * 4,
+    queueTimer: 0
+}
+
+function _hewEchoStrOpts(
+    str: string,
+    options: ECHO_OPTIONS | undefined = undefined
+): ECHO_STR_OPTS {
+    const echoStrOpts: ECHO_STR_OPTS = {
+        str: str,
+        options: options
+    }
+    return echoStrOpts
+}
+
+function _appendEchoHold(echoStrOpts: ECHO_STR_OPTS) {
+    _echoHold.queue.push(echoStrOpts)
+}
+
+function _timeoutLimit() {
+    if (_echoHold.queueTimer >= _echoHold.limit) {
+        _echoHold.timeout.close()
+    } else {
+        _echoHold.queueTimer += _echoHoldTimeout
+    }
+}
+
+async function _digestEchoHold() {
+    const numQueued = _echoHold.queue.length
+    if (numQueued > 0) {
+        // iterate echo hold
+        for (let i = 0; i < numQueued; i++) {
+            // pop first item off the array
+            const echoStrOpts: ECHO_STR_OPTS | undefined = _echoHold.queue.shift()
+            if (echoStrOpts) {
+                // write array item
+                await _echo(echoStrOpts.str, echoStrOpts.options)
+            }
+        }
+    } else {
+        _timeoutLimit()
+    }
+}
+
+function _queueEcho(str: string, options: ECHO_OPTIONS | undefined = undefined) {
+    const echoStrOpts = _hewEchoStrOpts(str, options)
+    _appendEchoHold(echoStrOpts)
+    // reset echo hold queue timer
+    _echoHold.queueTimer = 0
+}
+
+async function _pollEchoHold() {
+    const timeout: NodeJS.Timeout = setInterval(_digestEchoHold, _echoHoldTimeout)
+    _echoHold.timeout = timeout
+}
 
 /**
  * add echo options to string
@@ -61,9 +127,16 @@ async function _echo(str: string, options: ECHO_OPTIONS | undefined = undefined)
     await Bun.write(Bun.stdout, output.str)
 }
 
+// begin polling echo hold
+_pollEchoHold()
+
 const io = {
     echo: async (str: string, options: ECHO_OPTIONS | undefined = undefined) => {
         await _echo(str, options)
+    },
+
+    queueEcho: (str: string, options: ECHO_OPTIONS | undefined = undefined) => {
+        _queueEcho(str, options)
     }
 }
 
