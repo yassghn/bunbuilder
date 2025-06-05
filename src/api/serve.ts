@@ -11,10 +11,18 @@ import shutdown from './shutdown'
 import data from '../../data/data.json' assert { type: 'json' }
 import serveStatic from 'serve-static-bun'
 
+/**
+ * set bun httper server shutdown handling
+ *
+ * @param {Bun.Server} server bun http server
+ */
 function _setCloser(server: Bun.Server) {
     shutdown.server = server
 }
 
+/**
+ * start http server
+ */
 function _startServe() {
     const config = buildConfig.state
     const port = data.options.servePort

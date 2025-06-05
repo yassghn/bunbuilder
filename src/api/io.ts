@@ -22,6 +22,12 @@ interface ECHO_OPTIONS {
     color?: any | undefined
 }
 
+/**
+ * @typedef {object} ECHO_STR_OPTS
+ * @type {ECHO_STR_OPTS} echo string and options
+ * @property {string} str echo string
+ * @property {ECHO_OPTIONS} options echo options
+ */
 interface ECHO_STR_OPTS {
     str: string
     options: ECHO_OPTIONS | undefined
@@ -36,6 +42,13 @@ const _echoHold = {
     queueTimer: 0
 }
 
+/**
+ * hew echo str opts
+ *
+ * @param {string} str echo string
+ * @param {ECHO_OPTIONS|undefined} options echo optins
+ * @returns {ECHO_STR_OPTS} echo string and options
+ */
 function _hewEchoStrOpts(
     str: string,
     options: ECHO_OPTIONS | undefined = undefined
@@ -47,10 +60,18 @@ function _hewEchoStrOpts(
     return echoStrOpts
 }
 
+/**
+ * add echo string with options to echo hold queue
+ *
+ * @param {ECHO_STR_OPTS} echoStrOpts echo string and options
+ */
 function _appendEchoHold(echoStrOpts: ECHO_STR_OPTS) {
     _echoHold.queue.push(echoStrOpts)
 }
 
+/**
+ * close echohold timeout if time limit is reached
+ */
 function _timeoutLimit() {
     if (_echoHold.queueTimer >= _echoHold.limit) {
         _echoHold.timeout.close()
@@ -59,6 +80,9 @@ function _timeoutLimit() {
     }
 }
 
+/**
+ * echo every echohold echo string and its options
+ */
 async function _digestEchoHold() {
     const numQueued = _echoHold.queue.length
     if (numQueued > 0) {
@@ -76,6 +100,12 @@ async function _digestEchoHold() {
     }
 }
 
+/**
+ * queue echo with options, reset queue timer
+ *
+ * @param {string} str echo string
+ * @param {ECHO_OPTIONS} options echo options
+ */
 function _queueEcho(str: string, options: ECHO_OPTIONS | undefined = undefined) {
     const echoStrOpts = _hewEchoStrOpts(str, options)
     _appendEchoHold(echoStrOpts)
@@ -83,6 +113,9 @@ function _queueEcho(str: string, options: ECHO_OPTIONS | undefined = undefined) 
     _echoHold.queueTimer = 0
 }
 
+/**
+ * poll echo hold queue
+ */
 async function _pollEchoHold() {
     const timeout: NodeJS.Timeout = setInterval(_digestEchoHold, _echoHoldTimeout)
     _echoHold.timeout = timeout

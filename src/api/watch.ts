@@ -9,7 +9,13 @@
 import buildConfig from './buildConfig'
 import shutdown from './shutdown'
 import data from '../../data/data.json' assert { type: 'json' }
-import fs, { watch as fsWatch, lstatSync, type WatchEventType, type WatchOptions } from 'node:fs'
+import {
+    watch as fsWatch,
+    lstatSync,
+    type FSWatcher,
+    type WatchEventType,
+    type WatchOptions
+} from 'node:fs'
 
 const _options = {
     timeout: data.options.watchTimeout
@@ -19,6 +25,12 @@ const _state = {
     pause: false
 }
 
+/**
+ * return first directory in input list
+ *
+ * @param {string[]} input bunconfiguration input sources
+ * @returns {string} first directory in input list
+ */
 function _findFirstDir(input: string[]): string {
     const dir = input.find((src: string) => lstatSync(src).isDirectory())
     if (!dir) {
@@ -28,6 +40,12 @@ function _findFirstDir(input: string[]): string {
     return dir
 }
 
+/**
+ * process watch event
+ *
+ * @param {WatchEventType} eventType watch event
+ * @param {string|null} file file triggering event
+ */
 function _digestWatchEvent(eventType: WatchEventType, file: string | null) {
     // prevent watch misfires using a timeout & pause flag
     if (!_state.pause) {
@@ -44,10 +62,18 @@ function _digestWatchEvent(eventType: WatchEventType, file: string | null) {
     }
 }
 
-function _setCloser(watcher: fs.FSWatcher) {
+/**
+ * add watcher to shutdown
+ *
+ * @param {FSWatcher} watcher
+ */
+function _setCloser(watcher: FSWatcher) {
     shutdown.watcher = watcher
 }
 
+/**
+ * begin watching source directory
+ */
 function _start() {
     const config = buildConfig.state
     const dir = _findFirstDir(config.options.input)

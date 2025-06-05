@@ -34,14 +34,23 @@ function _takeActionBuild(files: string[] | undefined) {
     }
 }
 
+/**
+ * invoke clean action
+ */
 function _takeActionClean() {
     clean.outdir()
 }
 
+/**
+ * invoke serve action
+ */
 function _takeActionServe() {
     serve.start()
 }
 
+/**
+ * invoke watch action
+ */
 function _takeActionWatch() {
     watch.start()
 }
@@ -87,6 +96,11 @@ async function _processActions(actionPlan: ACTION_PLAN) {
     }
 }
 
+/**
+ * enable verbose if flag is set, filter out from action plan
+ *
+ * @param {ACTION_PLAN} actionPlan bunbuilder action plan
+ */
 function _filterVerbose(actionPlan: ACTION_PLAN) {
     if (actionPlan.actions.verbose) {
         buildConfig.verbose = true

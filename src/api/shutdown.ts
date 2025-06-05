@@ -15,14 +15,27 @@ const _state = {
     }
 }
 
+/**
+ * add watcher to closers
+ *
+ * @param {FSWatcher} value node file watcher
+ */
 function _setWatcher(value: FSWatcher) {
     _state.closers.watcher = value
 }
 
+/**
+ * add http server to closers
+ *
+ * @param {Bun.Server} value bun http server
+ */
 function _setServer(value: Bun.Server) {
     _state.closers.server = value
 }
 
+/**
+ * shutdown running processes
+ */
 function _close() {
     const closers = _state.closers
     // close watcher
