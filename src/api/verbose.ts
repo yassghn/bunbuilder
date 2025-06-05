@@ -9,8 +9,9 @@
 import buildConfig from './buildConfig'
 import io from './io'
 import { newLine } from './io'
+import data from '../../data/data.json' assert { type: 'json' }
 
-const cyan = { color: 'cyan' }
+const highlight = { color: data.options.verboseHighlightColor }
 
 /**
  * check if we're applying verbose to the current process
@@ -29,7 +30,7 @@ async function _buildStart() {
         const config = buildConfig.state
         await io.echo('starting build...', newLine)
         await io.echo('target: ')
-        await io.echo(config.target, cyan)
+        await io.echo(config.target, highlight)
         await io.echo('', newLine)
     }
 }
@@ -43,9 +44,9 @@ function _copy(file: string) {
     if (_applyVerbose()) {
         const config = buildConfig.state
         io.queueEcho('copying file ')
-        io.queueEcho(file, cyan)
+        io.queueEcho(file, highlight)
         io.queueEcho(' to ')
-        io.queueEcho(config.options.output, cyan)
+        io.queueEcho(config.options.output, highlight)
         io.queueEcho('', newLine)
     }
 }
