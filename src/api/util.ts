@@ -82,12 +82,13 @@ function _hewHelpUsage(): HELP_STRING {
  * @returns {HELP_STRING} options help string
  */
 function _hewHelpOptions(): HELP_STRING {
+    const port = data.options.servePort.toString()
     const options = { label: '', str: '' }
     const label = Object.keys(data.help)[2] ?? ''
     options.label = _appendHelpStr(options.label, label.toLocaleUpperCase(), true)
     options.str = _appendHelpStr(options.str, data.help.options.build)
     options.str = _appendHelpStr(options.str, data.help.options.watch)
-    options.str = _appendHelpStr(options.str, data.help.options.serve)
+    options.str = _appendHelpStr(options.str, data.help.options.serve.replace('_', port))
     options.str = _appendHelpStr(options.str, data.help.options.clean)
     options.str = _appendHelpStr(options.str, data.help.options.verbose)
     options.str = _appendHelpStr(options.str, data.help.options.help)

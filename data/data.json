@@ -6,7 +6,7 @@
         "options": {
             "build":   "-b, --build     build bun app",
             "watch":   "-w, --watch     watch source directory for changes",
-            "serve":   "-s, --serve     start http server on localhost:3000",
+            "serve":   "-s, --serve     start http server on localhost:_",
             "clean":   "-c, --clean     clean dist directory",
             "verbose": "-v, --verbose   verbose output",
             "help" :   "-h, --help      print this help"
