@@ -28,9 +28,9 @@ async function _takeActionHelp() {
  *
  * @param {string[]} [files] individual files to build
  */
-async function _takeActionBuild(files: string[] | undefined) {
+function _takeActionBuild(files: string[] | undefined) {
     if (!files) {
-        await build.all()
+        build.all()
     }
 }
 
@@ -56,7 +56,7 @@ async function _processAction(action: string, files: string[] | undefined) {
     switch (action) {
         case ACTION.build:
             await verbose.buildStart()
-            await _takeActionBuild(files)
+            _takeActionBuild(files)
             break
         case ACTION.clean:
             _takeActionClean()
