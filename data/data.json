@@ -26,6 +26,9 @@
             "buildOps": {
                 "copy": "copy",
                 "compile": "compile"
+            },
+            "buildOptions": {
+                "bundleImports": false
             }
         }
     },
