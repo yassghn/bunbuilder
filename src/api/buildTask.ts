@@ -39,16 +39,37 @@ function _makeDestDir(dest: string) {
     }
 }
 
+function _hewVerboseBuildPlugin(dest: string): Bun.BunPlugin {
+    const plugin: Bun.BunPlugin = {
+        name: 'verbose build output plugin',
+        setup(build: Bun.PluginBuilder) {
+            // get current directory name
+            const dir = cwd().split(sep).pop() as unknown as string
+            build.onLoad({ filter: /\.ts/, namespace: 'file' }, (args) => {
+                // get relative path
+                const path = args.path
+                const index = path.indexOf(dir)
+                const relPath = path.substring(index, path.length).replace(dir, '.')
+                verbose.compile(relPath, dest)
+                return undefined
+            })
+        }
+    }
+    return plugin
+}
+
 function _hewBrowserBuildConfig(files: string[], dest: string): Bun.BuildConfig {
     const bundleImports = data.buildTargets.browser.buildOptions.bundleImports
     const packages = bundleImports ? 'bundle' : 'external'
+    const verbosePlugin = _hewVerboseBuildPlugin(dest)
     const config: Bun.BuildConfig = {
         entrypoints: [...files],
         outdir: dest + sep + 'js',
         target: 'browser',
         format: 'esm',
         packages: packages,
-        splitting: false
+        splitting: false,
+        plugins: [verbosePlugin]
     }
     return config
 }
