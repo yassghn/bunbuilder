@@ -51,9 +51,25 @@ function _copy(file: string) {
     }
 }
 
+function _buildResult(success: boolean) {
+    if (_applyVerbose()) {
+        if (success) {
+            const options = { newLine: true, color: 'green' }
+            io.queueEcho('build successful', options)
+        } else {
+            const options = { newLine: true, color: 'red' }
+            io.queueEcho('build failed', options)
+        }
+    }
+}
+
 const verbose = {
     buildStart: async () => {
         await _buildStart()
+    },
+
+    buildResult: (success: boolean) => {
+        _buildResult(success)
     },
 
     copy: (file: string) => {
