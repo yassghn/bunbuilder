@@ -10,6 +10,8 @@ import buildConfig from './buildConfig'
 import data from '../../data/data.json' assert { type: 'json' }
 import { cp, existsSync, mkdirSync } from 'node:fs'
 import { sep } from 'node:path'
+import { cwd } from 'node:process'
+import verbose from './verbose'
 
 /**
  * generic copy file
@@ -63,9 +65,18 @@ function _compileTargetBrowser(dir: string, files: string[], dest: string) {
     files.forEach((file: string) => {
         src.files.push(dir + sep + file)
     })
-    Bun.build({
-        entrypoints: src.files,
-        outdir: dest + sep + 'js'
+    const buildConfig = _hewBrowserBuildConfig(src.files, dest)
+    return Bun.build(buildConfig)
+}
+
+function _digestBuildOutput(buildOutput: Bun.BuildOutput) {
+    verbose.buildResult(buildOutput.success)
+    const files = [] as unknown as string[]
+    const dir = cwd().split(sep).pop() as unknown as string
+    buildOutput.outputs.forEach((artifact) => {
+        const index = artifact.path.indexOf(dir)
+        const relPath = artifact.path.substring(index, artifact.path.length)
+        files.push(relPath)
     })
 }
 
@@ -81,7 +92,9 @@ function _compile(dir: string, files: string[], dest: string) {
     const targets = data.buildTargets
     switch (config.target) {
         case targets.browser.name:
-            _compileTargetBrowser(dir, files, dest)
+            _compileTargetBrowser(dir, files, dest).then((buildOutput) => {
+                _digestBuildOutput(buildOutput)
+            })
             break
     }
 }
