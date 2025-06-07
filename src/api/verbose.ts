@@ -63,6 +63,16 @@ function _buildResult(success: boolean) {
     }
 }
 
+function _compile(file: string, dest: string) {
+    if (_applyVerbose()) {
+        io.queueEcho('compiling file ')
+        io.queueEcho(file, highlight)
+        io.queueEcho(' to ')
+        io.queueEcho(dest, highlight)
+        io.queueEcho('', newLine)
+    }
+}
+
 const verbose = {
     buildStart: async () => {
         await _buildStart()
@@ -70,6 +80,10 @@ const verbose = {
 
     buildResult: (success: boolean) => {
         _buildResult(success)
+    },
+
+    compile: (file: string, dest: string) => {
+        _compile(file, dest)
     },
 
     copy: (file: string) => {
