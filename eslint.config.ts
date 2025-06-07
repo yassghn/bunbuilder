@@ -7,7 +7,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 export default defineConfig([
     globalIgnores([]),
 	{
-        files: ['build.ts', 'src/**/*.ts'],
+        files: ['make.ts', 'src/**/*.ts'],
         ignores: [],
 		rules: {
 			semi: 'error',
