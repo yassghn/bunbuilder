@@ -37,6 +37,20 @@ function _makeDestDir(dest: string) {
     }
 }
 
+function _hewBrowserBuildConfig(files: string[], dest: string): Bun.BuildConfig {
+    const bundleImports = data.buildTargets.browser.buildOptions.bundleImports
+    const packages = bundleImports ? 'bundle' : 'external'
+    const config: Bun.BuildConfig = {
+        entrypoints: [...files],
+        outdir: dest + sep + 'js',
+        target: 'browser',
+        format: 'esm',
+        packages: packages,
+        splitting: false
+    }
+    return config
+}
+
 /**
  * browser compile target
  *
