@@ -90,13 +90,39 @@ function _compileTargetBrowser(dir: string, files: string[], dest: string) {
     return Bun.build(buildConfig)
 }
 
-function _correctImports(buildOutput: Bun.BuildOutput) {
+function _hewBuildArtifactFiles(buildOutput: Bun.BuildOutput): string[] {
     const files = [] as unknown as string[]
     const dir = cwd().split(sep).pop() as unknown as string
     buildOutput.outputs.forEach((artifact) => {
         const index = artifact.path.indexOf(dir)
-        const relPath = artifact.path.substring(index, artifact.path.length)
+        const relPath = artifact.path.substring(index, artifact.path.length).replace(dir, '.')
         files.push(relPath)
+    })
+    return files
+}
+
+function _prefixReplace(fileContents: string): string {
+    const prefix = data.options.noBundleHackImportPrefix
+    const regexStr = `\\"\\${prefix}`
+    const regex = new RegExp(regexStr, 'gim')
+    const newContents = fileContents.replaceAll(regex, '"./')
+    return newContents
+}
+
+function _addJsExtension(fileContents: string): string {
+    const regex = /(?<=from\s"[\S].*)"/gim
+    const newContents = fileContents.replaceAll(regex, '.js"')
+    return newContents
+}
+
+function _correctImports(buildOutput: Bun.BuildOutput) {
+    const files = _hewBuildArtifactFiles(buildOutput)
+    files.forEach(async (file: string) => {
+        const contents = await Bun.file(file).text()
+        const newContents = { str: '' }
+        newContents.str = _prefixReplace(contents)
+        newContents.str = _addJsExtension(newContents.str)
+        await Bun.write(file, newContents.str)
     })
 }
 
