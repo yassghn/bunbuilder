@@ -88,7 +88,7 @@ function _hewParsedFiles(parsed: PARSED_ARGS): string[] | null {
  * @param {string[]|null} files array of individual files
  * @returns {ACTION_PLAN} bunbuilder action plan
  */
-function _hewActionPlan(parsed: PARSED_ARGS, files: string[]|null): ACTION_PLAN {
+function _hewActionPlan(parsed: PARSED_ARGS, files: string[] | null): ACTION_PLAN {
     const actions = { ...parsed.values }
     const actionPlan: ACTION_PLAN = {
         actions: { ...actions },
@@ -98,12 +98,33 @@ function _hewActionPlan(parsed: PARSED_ARGS, files: string[]|null): ACTION_PLAN 
 }
 
 /**
+ * check if any arguments were parsed from cli
+ *
+ * @param parsed
+ * @returns {boolean} flag indicating if any arguments were parsed
+ */
+function _hasArgs(parsed: PARSED_ARGS): boolean {
+    if (Object.keys(parsed.values).length > 0) return true
+    return false
+}
+
+/**
  * process parsed args
  *
  * @param {PARSED_ARGS} parsed parsed cli arguments
  * @returns {ACTION_PLAN} bunbuilder action plan
  */
 function _processParsed(parsed: PARSED_ARGS): ACTION_PLAN {
+    if (!_hasArgs(parsed)) {
+        // when no args are passed default to cbswv
+        Object.assign(parsed.values, {
+            clean: true,
+            build: true,
+            serve: true,
+            watch: true,
+            verbose: true
+        })
+    }
     // get files
     const files = _hewParsedFiles(parsed)
     // action plan
