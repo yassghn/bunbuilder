@@ -123,27 +123,51 @@ function _hewBuildArtifactFiles(buildOutput: Bun.BuildOutput): string[] {
 /**
  * bun no bundle hack: replace preconfigured prefix with relative path prefix
  *
- * @param {string} fileContents build artifact file contents
- * @returns {string} file contents with relative path import prefix
+ * @param {string} importString build artifact import string
+ * @returns {string} import string with relative path import prefix
  */
-function _prefixReplace(fileContents: string): string {
+function _prefixReplace(importString: string): string {
     const prefix = data.options.noBundleHackImportPrefix
-    const regexStr = `"${prefix}`
-    const regex = new RegExp(regexStr, 'gim')
-    const newContents = fileContents.replaceAll(regex, '"./')
-    return newContents
+    const newImportString = importString.replace(prefix, './')
+    return newImportString
 }
 
 /**
  * bun no bundle hack: add missing js extensions
  *
- * @param {string} fileContents build artifact file contents
- * @returns {string} file contents with added js extensions
+ * @param {string} importString build artifact import string
+ * @returns {string} import string with added js extensions
  */
-function _addJsExtension(fileContents: string): string {
-    const regex = /(?<=from\s"\.\/[\S].*)(?<!\.js)"/gim
-    const newContents = fileContents.replaceAll(regex, '.js"')
-    return newContents
+function _addJsExtension(importString: string): string {
+    const jsExt = '.js'
+    if (!importString.endsWith(jsExt)) {
+        importString += jsExt
+    }
+    return importString
+}
+
+/**
+ * process import statements for a given build artifact
+ *
+ * @param {Bun.Transpiler} transpiler bun transpiler
+ * @param {string} file build artifact path
+ * @param {string} prefix no bundle hack prefix
+ */
+async function _digestImports(transpiler: Bun.Transpiler, file: string, prefix: string) {
+    const contents = await Bun.file(file).text()
+    const newContents = { str: null as unknown as string }
+    const newImportLine = { str: '' }
+    const imports = transpiler.scanImports(contents)
+    imports.forEach((bunImport: Bun.Import) => {
+        if (bunImport.kind == 'import-statement' && bunImport.path.startsWith(prefix)) {
+            newImportLine.str = _prefixReplace(bunImport.path)
+            newImportLine.str = _addJsExtension(newImportLine.str)
+            newContents.str = contents.replace(bunImport.path, newImportLine.str)
+        }
+    })
+    if (newContents.str !== null) {
+        await Bun.write(file, newContents.str)
+    }
 }
 
 /**
@@ -153,12 +177,10 @@ function _addJsExtension(fileContents: string): string {
  */
 function _correctImports(buildOutput: Bun.BuildOutput) {
     const files = _hewBuildArtifactFiles(buildOutput)
+    const transpiler = new Bun.Transpiler()
+    const prefix = data.options.noBundleHackImportPrefix
     files.forEach(async (file: string) => {
-        const contents = await Bun.file(file).text()
-        const newContents = { str: '' }
-        newContents.str = _prefixReplace(contents)
-        newContents.str = _addJsExtension(newContents.str)
-        await Bun.write(file, newContents.str)
+        await _digestImports(transpiler, file, prefix)
     })
 }
 
