@@ -42,6 +42,7 @@ async function _close() {
     const closers = _state.closers
     // close watcher
     if (closers.watchers) {
+        verbose.watcherShutdown()
         closers.watchers.forEach((watcher: FSWatcher) => {
             watcher.close()
         })

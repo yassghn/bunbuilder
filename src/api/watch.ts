@@ -10,6 +10,7 @@ import buildConfig from './buildConfig'
 import shutdown from './shutdown'
 import data from '../../data/data.json' assert { type: 'json' }
 import { watch as fsWatch, type FSWatcher, type WatchEventType, type WatchOptions } from 'node:fs'
+import verbose from './verbose'
 
 const _options = {
     timeout: data.options.watchTimeout
@@ -29,8 +30,9 @@ function _digestWatchEvent(eventType: WatchEventType, file: string | null) {
     // prevent watch misfires using a timeout & pause flag
     if (!_state.pause) {
         // process event
-        console.log(eventType)
-        console.log(file)
+        if (eventType == 'change') {
+            verbose.watcherChange(file as string)
+        }
         // set pause flag
         _state.pause = true
         // set timeout
@@ -59,6 +61,7 @@ function _start() {
     const options: WatchOptions = { recursive: true, persistent: true, encoding: 'utf-8' }
     const watchers = [] as unknown as FSWatcher[]
     input.forEach((src: string) => {
+        verbose.watcherStart(src)
         const watcher = fsWatch(src, options, (eventType, file) => {
             _digestWatchEvent(eventType, file)
         })

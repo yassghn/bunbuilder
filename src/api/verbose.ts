@@ -115,6 +115,22 @@ function _serverShutdown() {
     io.echoSync('shutting down http server', newLine)
 }
 
+function _watcherStart(input: string) {
+    io.echoSync('starting watcher on: ')
+    io.echoSync(input, highlight)
+    io.echoSync('', newLine)
+}
+
+function _watcherShutdown() {
+    io.echoSync('closing watchers', newLine)
+}
+
+function _watcherChange(file: string) {
+    io.echoSync('watcher detected change: ')
+    io.echoSync(file, highlight)
+    io.echoSync('', newLine)
+}
+
 const verbose = {
     buildStart: async () => {
         await _buildStart()
@@ -138,6 +154,18 @@ const verbose = {
 
     serverShutdown: () => {
         _serverShutdown()
+    },
+
+    watcherStart: (input: string) => {
+        _watcherStart(input)
+    },
+
+    watcherShutdown: () => {
+        _watcherShutdown()
+    },
+
+    watcherChange: (file: string) => {
+        _watcherChange(file)
     },
 
     sigint: () => {
