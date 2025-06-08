@@ -61,7 +61,7 @@ function _takeActionWatch() {
  * @param {string} action action to invoke
  * @param {string[]} [files] individual files to build
  */
-async function _processAction(action: string, files: string[] | undefined) {
+async function _digestAction(action: string, files: string[] | undefined) {
     switch (action) {
         case ACTION.build:
             await verbose.buildStart()
@@ -90,9 +90,9 @@ async function _processAction(action: string, files: string[] | undefined) {
  *
  * @param {ACTION_PLAN} actionPlan bunbuilder actions to process
  */
-async function _processActions(actionPlan: ACTION_PLAN) {
+async function _digestActions(actionPlan: ACTION_PLAN) {
     for (const action in actionPlan.actions) {
-        await _processAction(action, actionPlan.files)
+        await _digestAction(action, actionPlan.files)
     }
 }
 
@@ -115,7 +115,7 @@ function _filterVerbose(actionPlan: ACTION_PLAN) {
  */
 async function _start(actionPlan: ACTION_PLAN) {
     _filterVerbose(actionPlan)
-    await _processActions(actionPlan)
+    await _digestActions(actionPlan)
 }
 
 const action = {
