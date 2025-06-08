@@ -7,11 +7,11 @@
  */
 
 import buildConfig from './buildConfig'
+import verbose from './verbose'
 import data from '../../data/data.json' assert { type: 'json' }
 import { cp, existsSync, mkdirSync } from 'node:fs'
 import { sep } from 'node:path'
 import { cwd } from 'node:process'
-import verbose from './verbose'
 
 /**
  * generic copy file
