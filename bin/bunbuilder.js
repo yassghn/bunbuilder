@@ -55,6 +55,9 @@ var data_default = {
       buildOps: {
         copy: "copy",
         compile: "compile"
+      },
+      buildOptions: {
+        bundleImports: false
       }
     }
   },
@@ -63,7 +66,8 @@ var data_default = {
     watchTimeout: 3000,
     echoHoldTimeout: 50,
     limitTimeoutMultiplier: 4,
-    verboseHighlightColor: "cyan"
+    verboseHighlightColor: "cyan",
+    noBundleHackImportPrefix: "@"
   }
 };
 
@@ -82,7 +86,7 @@ var _echoHold = {
   queueTimer: 0
 };
 function _closeEchoHoldTimeout() {
-  if (_echoHold.timeout) {
+  if (_echoHold.timeout && _echoHold.timeout.hasRef()) {
     _echoHold.timeout.close();
   }
 }
@@ -489,51 +493,7 @@ var buildOp_default = buildOp;
 // src/api/buildTask.ts
 import { cp, existsSync, mkdirSync } from "fs";
 import { sep as sep2 } from "path";
-function _copyFile(dir, file, dest) {
-  const out = dest + sep2 + file;
-  const src = dir + sep2 + file;
-  const options2 = { recursive: true };
-  cp(src, out, options2, (err) => {
-    if (err)
-      throw err;
-  });
-}
-function _makeDestDir(dest) {
-  if (!existsSync(dest)) {
-    mkdirSync(dest);
-  }
-}
-function _compileTargetBrowser(dir, files, dest) {
-  const src = { files: [] };
-  files.forEach((file) => {
-    src.files.push(dir + sep2 + file);
-  });
-  Bun.build({
-    entrypoints: src.files,
-    outdir: dest + sep2 + "js"
-  });
-}
-function _compile(dir, files, dest) {
-  const config2 = buildConfig_default.state;
-  const targets = data_default.buildTargets;
-  switch (config2.target) {
-    case targets.browser.name:
-      _compileTargetBrowser(dir, files, dest);
-      break;
-  }
-}
-var buildTask = {
-  copyFile: (dir, file, dest) => {
-    _copyFile(dir, file, dest);
-  },
-  makeDestDir: (dest) => {
-    _makeDestDir(dest);
-  },
-  compile: (dir, files, dest) => {
-    _compile(dir, files, dest);
-  }
-};
-var buildTask_default = buildTask;
+import { cwd as cwd2 } from "process";
 
 // src/api/verbose.ts
 var highlight = { color: data_default.options.verboseHighlightColor };
@@ -559,15 +519,161 @@ function _copy(file) {
     io_default.queueEcho("", newLine);
   }
 }
+function _buildResult(success) {
+  if (_applyVerbose()) {
+    if (success) {
+      const options2 = { newLine: true, color: "green" };
+      io_default.queueEcho("build successful", options2);
+    } else {
+      const options2 = { newLine: true, color: "red" };
+      io_default.queueEcho("build failed", options2);
+    }
+  }
+}
+function _compile(file, dest) {
+  if (_applyVerbose()) {
+    io_default.queueEcho("compiling file ");
+    io_default.queueEcho(file, highlight);
+    io_default.queueEcho(" to ");
+    io_default.queueEcho(dest, highlight);
+    io_default.queueEcho("", newLine);
+  }
+}
 var verbose = {
   buildStart: async () => {
     await _buildStart();
+  },
+  buildResult: (success) => {
+    _buildResult(success);
+  },
+  compile: (file, dest) => {
+    _compile(file, dest);
   },
   copy: (file) => {
     _copy(file);
   }
 };
 var verbose_default = verbose;
+
+// src/api/buildTask.ts
+function _copyFile(dir, file, dest) {
+  const out = dest + sep2 + file;
+  const src = dir + sep2 + file;
+  const options2 = { recursive: true };
+  cp(src, out, options2, (err) => {
+    if (err)
+      throw err;
+  });
+}
+function _makeDestDir(dest) {
+  if (!existsSync(dest)) {
+    mkdirSync(dest);
+  }
+}
+function _hewVerboseBuildPlugin(dest) {
+  const plugin = {
+    name: "verbose build output plugin",
+    setup(build) {
+      const dir = cwd2().split(sep2).pop();
+      build.onLoad({ filter: /\.ts/, namespace: "file" }, (args) => {
+        const path = args.path;
+        const index = path.indexOf(dir);
+        const relPath = path.substring(index, path.length).replace(dir, ".");
+        verbose_default.compile(relPath, dest);
+        return;
+      });
+    }
+  };
+  return plugin;
+}
+function _hewBrowserBuildConfig(files, dest) {
+  const bundleImports = data_default.buildTargets.browser.buildOptions.bundleImports;
+  const packages = bundleImports ? "bundle" : "external";
+  const verbosePlugin = _hewVerboseBuildPlugin(dest);
+  const config2 = {
+    entrypoints: [...files],
+    outdir: dest + sep2 + "js",
+    target: "browser",
+    format: "esm",
+    packages,
+    splitting: false,
+    plugins: [verbosePlugin]
+  };
+  return config2;
+}
+function _compileTargetBrowser(dir, files, dest) {
+  const src = { files: [] };
+  files.forEach((file) => {
+    src.files.push(dir + sep2 + file);
+  });
+  const buildConfig2 = _hewBrowserBuildConfig(src.files, dest);
+  return Bun.build(buildConfig2);
+}
+function _hewBuildArtifactFiles(buildOutput) {
+  const files = [];
+  const dir = cwd2().split(sep2).pop();
+  buildOutput.outputs.forEach((artifact) => {
+    const index = artifact.path.indexOf(dir);
+    const relPath = artifact.path.substring(index, artifact.path.length).replace(dir, ".");
+    files.push(relPath);
+  });
+  return files;
+}
+function _prefixReplace(fileContents) {
+  const prefix = data_default.options.noBundleHackImportPrefix;
+  const regexStr = `"${prefix}`;
+  const regex = new RegExp(regexStr, "gim");
+  const newContents = fileContents.replaceAll(regex, '"./');
+  return newContents;
+}
+function _addJsExtension(fileContents) {
+  const regex = /(?<=from\s"\.\/[\S].*)(?<!\.js)"/gim;
+  const newContents = fileContents.replaceAll(regex, '.js"');
+  return newContents;
+}
+function _correctImports(buildOutput) {
+  const files = _hewBuildArtifactFiles(buildOutput);
+  files.forEach(async (file) => {
+    const contents = await Bun.file(file).text();
+    const newContents = { str: "" };
+    newContents.str = _prefixReplace(contents);
+    newContents.str = _addJsExtension(newContents.str);
+    await Bun.write(file, newContents.str);
+  });
+}
+function _digestBuildArtifacts(buildOutput) {
+  const config2 = buildConfig_default.state;
+  if (config2.options.noBundleHack) {
+    _correctImports(buildOutput);
+  }
+}
+function _digestBuildOutput(buildOutput) {
+  verbose_default.buildResult(buildOutput.success);
+  _digestBuildArtifacts(buildOutput);
+}
+function _compile2(dir, files, dest) {
+  const config2 = buildConfig_default.state;
+  const targets = data_default.buildTargets;
+  switch (config2.target) {
+    case targets.browser.name:
+      _compileTargetBrowser(dir, files, dest).then((buildOutput) => {
+        _digestBuildOutput(buildOutput);
+      });
+      break;
+  }
+}
+var buildTask = {
+  copyFile: (dir, file, dest) => {
+    _copyFile(dir, file, dest);
+  },
+  makeDestDir: (dest) => {
+    _makeDestDir(dest);
+  },
+  compile: (dir, files, dest) => {
+    _compile2(dir, files, dest);
+  }
+};
+var buildTask_default = buildTask;
 
 // src/api/build.ts
 import { readdirSync, lstatSync } from "fs";
@@ -581,20 +687,20 @@ function _getFiles(dir) {
   }).forEach((file) => retVal.files.push(file));
   return retVal.files;
 }
-function _applyBrowserBuildOp(dir, file, buildOp2) {
+function _applyBrowserBuildOp(dir, input, buildOp2) {
   const config2 = buildConfig_default.state;
   const buildOps = data_default.buildTargets.browser.buildOps;
-  if (typeof file === "string") {
+  if (typeof input === "string") {
     switch (buildOp2) {
       case buildOps.copy:
-        verbose_default.copy(file);
-        buildTask_default.copyFile(dir, file, config2.options.output);
+        verbose_default.copy(input);
+        buildTask_default.copyFile(dir, input, config2.options.output);
         break;
     }
   } else {
     switch (buildOp2) {
       case buildOps.compile:
-        buildTask_default.compile(dir, file, config2.options.output);
+        buildTask_default.compile(dir, input, config2.options.output);
         break;
     }
   }
