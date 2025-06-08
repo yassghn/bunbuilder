@@ -51,7 +51,7 @@ function _setCloser(watchers: FSWatcher[]) {
 }
 
 /**
- * begin watching source directory
+ * begin watching bunbuilder configuration inputs
  */
 function _start() {
     const config = buildConfig.state
