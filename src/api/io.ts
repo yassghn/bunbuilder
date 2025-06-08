@@ -52,6 +52,7 @@ const _echoHold = {
 function _closeEchoHoldTimeout() {
     if (_echoHold.timeout && _echoHold.timeout.hasRef()) {
         _echoHold.timeout.close()
+        _echoHold.timeout.unref()
     }
 }
 
