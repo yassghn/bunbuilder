@@ -6,6 +6,7 @@
  * @property {bunbuilder.module:bunbuilder/api/shutdown} shutdown build end cleanup
  */
 
+import io from './io'
 import { type FSWatcher } from 'node:fs'
 
 const _state = {
@@ -49,6 +50,8 @@ function _close() {
         closers.server.stop(true)
         closers.server.unref()
     }
+    // close io echo hold timeout
+    io.closeEchoHoldTimeout()
 }
 
 const shutdown = {
