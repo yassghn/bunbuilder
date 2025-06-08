@@ -12,13 +12,14 @@ import verbose from './verbose'
 
 /**
  * generic shutdown function
- *
- * @param {NodeJS.Signals} code os event code
  */
 async function _closer() {
     await shutdown.close()
 }
 
+/**
+ * handle sigint (ctrl+c) event
+ */
 async function _handleSigint() {
     verbose.sigint()
     await _closer().then(() => {
@@ -27,11 +28,17 @@ async function _handleSigint() {
     })
 }
 
+/**
+ * handle before exit event
+ */
 function _handleBeforeExit() {
     verbose.beforeExit()
     _closer()
 }
 
+/**
+ * handle exit event
+ */
 function _handleExit() {
     verbose.exit()
 }

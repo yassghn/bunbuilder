@@ -51,6 +51,11 @@ function _copy(file: string) {
     }
 }
 
+/**
+ * verbose build result
+ *
+ * @param {boolean} success bun build output compilation result
+ */
 function _buildResult(success: boolean) {
     if (_applyVerbose()) {
         if (success) {
@@ -63,6 +68,12 @@ function _buildResult(success: boolean) {
     }
 }
 
+/**
+ * verbose compile
+ *
+ * @param {string} file source input file
+ * @param {string} dest compilation destination
+ */
 function _compile(file: string, dest: string) {
     if (_applyVerbose()) {
         io.queueEcho('compiling file ')
@@ -73,14 +84,23 @@ function _compile(file: string, dest: string) {
     }
 }
 
+/**
+ * verbose sigint event
+ */
 function _sigint() {
     io.echo('sigint exit cleanup', newLine)
 }
 
+/**
+ * verbose before exit event
+ */
 function _beforeExit() {
     io.echoSync('cleanup', newLine)
 }
 
+/**
+ * verbose exit
+ */
 function _exit() {
     io.echo('shutting down bunbuilder', newLine)
 }
