@@ -88,6 +88,7 @@ var _echoHold = {
 function _closeEchoHoldTimeout() {
   if (_echoHold.timeout && _echoHold.timeout.hasRef()) {
     _echoHold.timeout.close();
+    _echoHold.timeout.unref();
   }
 }
 function _hewEchoStrOpts(str, options2 = undefined) {
@@ -147,10 +148,22 @@ async function _echo(str, options2 = undefined) {
   }
   await Bun.write(Bun.stdout, output.str);
 }
+function _echoSync(str, options2 = undefined) {
+  const output = { str: str.valueOf() };
+  if (options2) {
+    output.str = _addEchoOptions(str, options2);
+  }
+  const writer = Bun.stdout.writer();
+  writer.write(output.str);
+  writer.end();
+}
 _pollEchoHold();
 var io = {
   echo: async (str, options2 = undefined) => {
     await _echo(str, options2);
+  },
+  echoSync: (str, options2 = undefined) => {
+    _echoSync(str, options2);
   },
   queueEcho: (str, options2 = undefined) => {
     _queueEcho(str, options2);
@@ -375,7 +388,21 @@ function _hewActionPlan(parsed, files) {
   };
   return actionPlan;
 }
+function _hasArgs(parsed) {
+  if (Object.keys(parsed.values).length > 0)
+    return true;
+  return false;
+}
 function _processParsed(parsed) {
+  if (!_hasArgs(parsed)) {
+    Object.assign(parsed.values, {
+      clean: true,
+      build: true,
+      serve: true,
+      watch: true,
+      verbose: true
+    });
+  }
   const files = _hewParsedFiles(parsed);
   const actionPlan = _hewActionPlan(parsed, files);
   util_default.soloHelpCheckup(actionPlan);
@@ -490,11 +517,6 @@ var buildOp = {
 };
 var buildOp_default = buildOp;
 
-// src/api/buildTask.ts
-import { cp, existsSync, mkdirSync } from "fs";
-import { sep as sep2 } from "path";
-import { cwd as cwd2 } from "process";
-
 // src/api/verbose.ts
 var highlight = { color: data_default.options.verboseHighlightColor };
 function _applyVerbose() {
@@ -539,6 +561,15 @@ function _compile(file, dest) {
     io_default.queueEcho("", newLine);
   }
 }
+function _sigint() {
+  io_default.echo("sigint exit cleanup", newLine);
+}
+function _beforeExit() {
+  io_default.echoSync("cleanup", newLine);
+}
+function _exit() {
+  io_default.echo("shutting down bunbuilder", newLine);
+}
 var verbose = {
   buildStart: async () => {
     await _buildStart();
@@ -551,11 +582,23 @@ var verbose = {
   },
   copy: (file) => {
     _copy(file);
+  },
+  sigint: () => {
+    _sigint();
+  },
+  beforeExit: () => {
+    _beforeExit();
+  },
+  exit: () => {
+    _exit();
   }
 };
 var verbose_default = verbose;
 
 // src/api/buildTask.ts
+import { cp, existsSync, mkdirSync } from "fs";
+import { sep as sep2 } from "path";
+import { cwd as cwd2 } from "process";
 function _copyFile(dir, file, dest) {
   const out = dest + sep2 + file;
   const src = dir + sep2 + file;
@@ -619,26 +662,40 @@ function _hewBuildArtifactFiles(buildOutput) {
   });
   return files;
 }
-function _prefixReplace(fileContents) {
+function _prefixReplace(importString) {
   const prefix = data_default.options.noBundleHackImportPrefix;
-  const regexStr = `"${prefix}`;
-  const regex = new RegExp(regexStr, "gim");
-  const newContents = fileContents.replaceAll(regex, '"./');
-  return newContents;
+  const newImportString = importString.replace(prefix, "./");
+  return newImportString;
 }
-function _addJsExtension(fileContents) {
-  const regex = /(?<=from\s"\.\/[\S].*)(?<!\.js)"/gim;
-  const newContents = fileContents.replaceAll(regex, '.js"');
-  return newContents;
+function _addJsExtension(importString) {
+  const jsExt = ".js";
+  if (!importString.endsWith(jsExt)) {
+    importString += jsExt;
+  }
+  return importString;
+}
+async function _digestImports(transpiler, file, prefix) {
+  const contents = await Bun.file(file).text();
+  const newContents = { str: null };
+  const newImportLine = { str: "" };
+  const imports = transpiler.scanImports(contents);
+  imports.forEach((bunImport) => {
+    if (bunImport.kind == "import-statement" && bunImport.path.startsWith(prefix)) {
+      newImportLine.str = _prefixReplace(bunImport.path);
+      newImportLine.str = _addJsExtension(newImportLine.str);
+      newContents.str = contents.replace(bunImport.path, newImportLine.str);
+    }
+  });
+  if (newContents.str !== null) {
+    await Bun.write(file, newContents.str);
+  }
 }
 function _correctImports(buildOutput) {
   const files = _hewBuildArtifactFiles(buildOutput);
+  const transpiler = new Bun.Transpiler;
+  const prefix = data_default.options.noBundleHackImportPrefix;
   files.forEach(async (file) => {
-    const contents = await Bun.file(file).text();
-    const newContents = { str: "" };
-    newContents.str = _prefixReplace(contents);
-    newContents.str = _addJsExtension(newContents.str);
-    await Bun.write(file, newContents.str);
+    await _digestImports(transpiler, file, prefix);
   });
 }
 function _digestBuildArtifacts(buildOutput) {
@@ -773,29 +830,36 @@ var clean_default = clean;
 // src/api/shutdown.ts
 var _state2 = {
   closers: {
-    watcher: undefined,
+    watchers: undefined,
     server: undefined
   }
 };
-function _setWatcher(value) {
-  _state2.closers.watcher = value;
+function _setWatchers(value) {
+  _state2.closers.watchers = value;
 }
 function _setServer(value) {
   _state2.closers.server = value;
 }
-function _close() {
+async function _close() {
   const closers = _state2.closers;
-  if (closers.watcher)
-    closers.watcher.close();
-  if (closers.server)
-    closers.server.stop();
+  if (closers.watchers) {
+    closers.watchers.forEach((watcher) => {
+      watcher.close();
+    });
+  }
+  if (closers.server) {
+    await closers.server.stop(true).then(() => {
+      closers.server.unref();
+    });
+  }
+  io_default.closeEchoHoldTimeout();
 }
 var shutdown = {
-  close: () => {
-    _close();
+  close: async () => {
+    await _close();
   },
-  set watcher(value) {
-    _setWatcher(value);
+  set watchers(value) {
+    _setWatchers(value);
   },
   set server(value) {
     _setServer(value);
@@ -965,24 +1029,13 @@ var serve = {
 var serve_default = serve;
 
 // src/api/watch.ts
-import {
-  watch as fsWatch,
-  lstatSync as lstatSync2
-} from "fs";
+import { watch as fsWatch } from "fs";
 var _options = {
   timeout: data_default.options.watchTimeout
 };
 var _state3 = {
   pause: false
 };
-function _findFirstDir(input) {
-  const dir = input.find((src) => lstatSync2(src).isDirectory());
-  if (!dir) {
-    const err = `cannot find a directory to watch: ${input}`;
-    throw new Error(err);
-  }
-  return dir;
-}
 function _digestWatchEvent(eventType, file) {
   if (!_state3.pause) {
     console.log(eventType);
@@ -993,17 +1046,21 @@ function _digestWatchEvent(eventType, file) {
     }, _options.timeout);
   }
 }
-function _setCloser2(watcher) {
-  shutdown_default.watcher = watcher;
+function _setCloser2(watchers) {
+  shutdown_default.watchers = watchers;
 }
 function _start() {
   const config2 = buildConfig_default.state;
-  const dir = _findFirstDir(config2.options.input);
+  const input = config2.options.input;
   const options2 = { recursive: true, persistent: true, encoding: "utf-8" };
-  const watcher = fsWatch(dir, options2, (eventType, file) => {
-    _digestWatchEvent(eventType, file);
+  const watchers = [];
+  input.forEach((src) => {
+    const watcher = fsWatch(src, options2, (eventType, file) => {
+      _digestWatchEvent(eventType, file);
+    });
+    watchers.push(watcher);
   });
-  _setCloser2(watcher);
+  _setCloser2(watchers);
 }
 var watch = {
   start: () => {
@@ -1039,7 +1096,7 @@ function _takeActionServe() {
 function _takeActionWatch() {
   watch_default.start();
 }
-async function _processAction(action, files) {
+async function _digestAction(action, files) {
   switch (action) {
     case ACTION.build:
       await verbose_default.buildStart();
@@ -1062,9 +1119,9 @@ async function _processAction(action, files) {
       break;
   }
 }
-async function _processActions(actionPlan) {
+async function _digestActions(actionPlan) {
   for (const action in actionPlan.actions) {
-    await _processAction(action, actionPlan.files);
+    await _digestAction(action, actionPlan.files);
   }
 }
 function _filterVerbose(actionPlan) {
@@ -1075,7 +1132,7 @@ function _filterVerbose(actionPlan) {
 }
 async function _start2(actionPlan) {
   _filterVerbose(actionPlan);
-  await _processActions(actionPlan);
+  await _digestActions(actionPlan);
 }
 var action = {
   start: async (actionPlan) => {
@@ -1086,12 +1143,27 @@ var action_default = action;
 
 // src/api/osEvents.ts
 import process2 from "process";
-function _closer(code) {
-  console.log(code);
-  shutdown_default.close();
+async function _closer() {
+  await shutdown_default.close();
+}
+async function _handleSigint() {
+  verbose_default.sigint();
+  await _closer().then(() => {
+    process2.exitCode = 0;
+    process2.exit();
+  });
+}
+function _handleBeforeExit() {
+  verbose_default.beforeExit();
+  _closer();
+}
+function _handleExit() {
+  verbose_default.exit();
 }
 function _addEventListeners() {
-  process2.on("SIGINT", _closer);
+  process2.on("SIGINT", _handleSigint);
+  process2.on("beforeExit", _handleBeforeExit);
+  process2.on("exit", _handleExit);
 }
 function _handle() {
   _addEventListeners();
