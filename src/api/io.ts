@@ -174,12 +174,35 @@ async function _echo(str: string, options: ECHO_OPTIONS | undefined = undefined)
     await Bun.write(Bun.stdout, output.str)
 }
 
+/**
+ * synchronous echo
+ * 
+ * @param {string} str string to write
+ * @param {ECHO_OPTIONS} [options=undefined] echo options
+ */
+function _echoSync(str: string, options: ECHO_OPTIONS | undefined = undefined) {
+    // copy output string
+    const output = { str: str.valueOf() }
+    // process options
+    if (options) {
+        output.str = _addEchoOptions(str, options)
+    }
+    // write to stdout using stdout file sink
+    const writer: Bun.FileSink = Bun.stdout.writer()
+    writer.write(output.str)
+    writer.end()
+}
+
 // begin polling echo hold
 _pollEchoHold()
 
 const io = {
     echo: async (str: string, options: ECHO_OPTIONS | undefined = undefined) => {
         await _echo(str, options)
+    },
+
+    echoSync: (str: string, options: ECHO_OPTIONS | undefined = undefined) => {
+        _echoSync(str, options)
     },
 
     queueEcho: (str: string, options: ECHO_OPTIONS | undefined = undefined) => {
