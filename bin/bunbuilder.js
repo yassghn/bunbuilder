@@ -570,6 +570,27 @@ function _beforeExit() {
 function _exit() {
   io_default.echo("shutting down bunbuilder", newLine);
 }
+function _serverStart(port) {
+  io_default.echoSync("starting http server on ");
+  io_default.echoSync(`localhost:${port}`, highlight);
+  io_default.echoSync("", newLine);
+}
+function _serverShutdown() {
+  io_default.echoSync("shutting down http server", newLine);
+}
+function _watcherStart(input) {
+  io_default.echoSync("starting watcher on: ");
+  io_default.echoSync(input, highlight);
+  io_default.echoSync("", newLine);
+}
+function _watcherShutdown() {
+  io_default.echoSync("closing watchers", newLine);
+}
+function _watcherChange(file) {
+  io_default.echoSync("watcher detected change: ");
+  io_default.echoSync(file, highlight);
+  io_default.echoSync("", newLine);
+}
 var verbose = {
   buildStart: async () => {
     await _buildStart();
@@ -582,6 +603,21 @@ var verbose = {
   },
   copy: (file) => {
     _copy(file);
+  },
+  serverStart: (port) => {
+    _serverStart(port);
+  },
+  serverShutdown: () => {
+    _serverShutdown();
+  },
+  watcherStart: (input) => {
+    _watcherStart(input);
+  },
+  watcherShutdown: () => {
+    _watcherShutdown();
+  },
+  watcherChange: (file) => {
+    _watcherChange(file);
   },
   sigint: () => {
     _sigint();
@@ -843,11 +879,13 @@ function _setServer(value) {
 async function _close() {
   const closers = _state2.closers;
   if (closers.watchers) {
+    verbose_default.watcherShutdown();
     closers.watchers.forEach((watcher) => {
       watcher.close();
     });
   }
   if (closers.server) {
+    verbose_default.serverShutdown();
     await closers.server.stop(true).then(() => {
       closers.server.unref();
     });
@@ -1020,6 +1058,7 @@ function _startServe() {
     fetch: dist_default(config2.options.output)
   });
   _setCloser(server);
+  verbose_default.serverStart(port);
 }
 var serve = {
   start: () => {
@@ -1038,8 +1077,9 @@ var _state3 = {
 };
 function _digestWatchEvent(eventType, file) {
   if (!_state3.pause) {
-    console.log(eventType);
-    console.log(file);
+    if (eventType == "change") {
+      verbose_default.watcherChange(file);
+    }
     _state3.pause = true;
     setTimeout(() => {
       _state3.pause = false;
@@ -1055,6 +1095,7 @@ function _start() {
   const options2 = { recursive: true, persistent: true, encoding: "utf-8" };
   const watchers = [];
   input.forEach((src) => {
+    verbose_default.watcherStart(src);
     const watcher = fsWatch(src, options2, (eventType, file) => {
       _digestWatchEvent(eventType, file);
     });
