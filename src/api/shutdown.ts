@@ -37,7 +37,7 @@ function _setServer(value: Bun.Server) {
 /**
  * shutdown running processes
  */
-function _close() {
+async function _close() {
     const closers = _state.closers
     // close watcher
     if (closers.watchers) {
@@ -47,16 +47,17 @@ function _close() {
     }
     // stop server
     if (closers.server) {
-        closers.server.stop(true)
-        closers.server.unref()
+        await closers.server.stop(true).then(() => {
+            closers.server.unref()
+        })
     }
     // close io echo hold timeout
     io.closeEchoHoldTimeout()
 }
 
 const shutdown = {
-    close: () => {
-        _close()
+    close: async () => {
+        await _close()
     },
 
     set watchers(value: FSWatcher[]) {
