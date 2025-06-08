@@ -128,7 +128,7 @@ function _hewBuildArtifactFiles(buildOutput: Bun.BuildOutput): string[] {
  */
 function _prefixReplace(fileContents: string): string {
     const prefix = data.options.noBundleHackImportPrefix
-    const regexStr = `\\"\\${prefix}`
+    const regexStr = `"${prefix}`
     const regex = new RegExp(regexStr, 'gim')
     const newContents = fileContents.replaceAll(regex, '"./')
     return newContents
@@ -176,7 +176,7 @@ function _digestBuildArtifacts(buildOutput: Bun.BuildOutput) {
 
 /**
  * post process bun build output
- * 
+ *
  * @param {Bun.BuildOutput} buildOutput bun build output
  */
 function _digestBuildOutput(buildOutput: Bun.BuildOutput) {
