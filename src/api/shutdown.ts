@@ -10,18 +10,18 @@ import { type FSWatcher } from 'node:fs'
 
 const _state = {
     closers: {
-        watcher: undefined as unknown as FSWatcher,
+        watchers: undefined as unknown as FSWatcher[],
         server: undefined as unknown as Bun.Server
     }
 }
 
 /**
- * add watcher to closers
+ * add watchers to closers
  *
- * @param {FSWatcher} value node file watcher
+ * @param {FSWatcher[]} value node file watcher
  */
-function _setWatcher(value: FSWatcher) {
-    _state.closers.watcher = value
+function _setWatchers(value: FSWatcher[]) {
+    _state.closers.watchers = value
 }
 
 /**
@@ -39,8 +39,11 @@ function _setServer(value: Bun.Server) {
 function _close() {
     const closers = _state.closers
     // close watcher
-    if (closers.watcher)
-        closers.watcher.close()
+    if (closers.watchers) {
+        closers.watchers.forEach((watcher: FSWatcher) => {
+            watcher.close()
+        })
+    }
     // stop server
     if (closers.server)
         closers.server.stop()
@@ -51,8 +54,8 @@ const shutdown = {
         _close()
     },
 
-    set watcher(value: FSWatcher) {
-        _setWatcher(value)
+    set watchers(value: FSWatcher[]) {
+        _setWatchers(value)
     },
 
     set server(value: Bun.Server) {
