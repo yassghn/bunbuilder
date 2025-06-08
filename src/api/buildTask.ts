@@ -90,7 +90,7 @@ function _compileTargetBrowser(dir: string, files: string[], dest: string) {
     return Bun.build(buildConfig)
 }
 
-function _digestBuildArtifacts(buildOutput: Bun.BuildOutput) {
+function _correctImports(buildOutput: Bun.BuildOutput) {
     const files = [] as unknown as string[]
     const dir = cwd().split(sep).pop() as unknown as string
     buildOutput.outputs.forEach((artifact) => {
@@ -98,6 +98,13 @@ function _digestBuildArtifacts(buildOutput: Bun.BuildOutput) {
         const relPath = artifact.path.substring(index, artifact.path.length)
         files.push(relPath)
     })
+}
+
+function _digestBuildArtifacts(buildOutput: Bun.BuildOutput) {
+    const config = buildConfig.state
+    if (config.options.noBundleHack) {
+        _correctImports(buildOutput)
+    }
 }
 
 function _digestBuildOutput(buildOutput: Bun.BuildOutput) {
