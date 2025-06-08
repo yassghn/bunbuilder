@@ -45,8 +45,10 @@ function _close() {
         })
     }
     // stop server
-    if (closers.server)
-        closers.server.stop()
+    if (closers.server) {
+        closers.server.stop(true)
+        closers.server.unref()
+    }
 }
 
 const shutdown = {
