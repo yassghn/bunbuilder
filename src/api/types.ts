@@ -103,6 +103,7 @@ type BUILD_OP_MAP = BROWSER_BUILD_OP_MAP | OTHER_UNCONFIGURED_BUILD_OP_MAP
  * @property {string} output output directory
  */
 interface TARGET_OPTIONS {
+    noBundleHack: boolean
     input: string[]
     output: string
 }
