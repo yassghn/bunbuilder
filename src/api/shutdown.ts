@@ -7,6 +7,7 @@
  */
 
 import io from './io'
+import verbose from './verbose'
 import { type FSWatcher } from 'node:fs'
 
 const _state = {
@@ -47,6 +48,7 @@ async function _close() {
     }
     // stop server
     if (closers.server) {
+        verbose.serverShutdown()
         await closers.server.stop(true).then(() => {
             closers.server.unref()
         })

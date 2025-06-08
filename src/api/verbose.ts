@@ -105,6 +105,16 @@ function _exit() {
     io.echo('shutting down bunbuilder', newLine)
 }
 
+function _serverStart(port: number) {
+    io.echoSync('starting http server on ')
+    io.echoSync(`localhost:${port}`, highlight)
+    io.echoSync('', newLine)
+}
+
+function _serverShutdown() {
+    io.echoSync('shutting down http server', newLine)
+}
+
 const verbose = {
     buildStart: async () => {
         await _buildStart()
@@ -120,6 +130,14 @@ const verbose = {
 
     copy: (file: string) => {
         _copy(file)
+    },
+
+    serverStart: (port: number) => {
+        _serverStart(port)
+    },
+
+    serverShutdown: () => {
+        _serverShutdown()
     },
 
     sigint: () => {

@@ -8,6 +8,7 @@
 
 import buildConfig from './buildConfig'
 import shutdown from './shutdown'
+import verbose from './verbose'
 import data from '../../data/data.json' assert { type: 'json' }
 import serveStatic from 'serve-static-bun'
 
@@ -31,6 +32,7 @@ function _startServe() {
         fetch: serveStatic(config.options.output)
     })
     _setCloser(server)
+    verbose.serverStart(port)
 }
 
 const serve = {
