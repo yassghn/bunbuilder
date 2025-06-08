@@ -9,13 +9,7 @@
 import buildConfig from './buildConfig'
 import shutdown from './shutdown'
 import data from '../../data/data.json' assert { type: 'json' }
-import {
-    watch as fsWatch,
-    lstatSync,
-    type FSWatcher,
-    type WatchEventType,
-    type WatchOptions
-} from 'node:fs'
+import { watch as fsWatch, type FSWatcher, type WatchEventType, type WatchOptions } from 'node:fs'
 
 const _options = {
     timeout: data.options.watchTimeout
@@ -23,21 +17,6 @@ const _options = {
 
 const _state = {
     pause: false
-}
-
-/**
- * return first directory in input list
- *
- * @param {string[]} input bunconfiguration input sources
- * @returns {string} first directory in input list
- */
-function _findFirstDir(input: string[]): string {
-    const dir = input.find((src: string) => lstatSync(src).isDirectory())
-    if (!dir) {
-        const err = `cannot find a directory to watch: ${input}`
-        throw new Error(err)
-    }
-    return dir
 }
 
 /**
@@ -63,12 +42,12 @@ function _digestWatchEvent(eventType: WatchEventType, file: string | null) {
 }
 
 /**
- * add watcher to shutdown
+ * add watchers to shutdown
  *
- * @param {FSWatcher} watcher
+ * @param {FSWatcher[]} watchers
  */
-function _setCloser(watcher: FSWatcher) {
-    shutdown.watcher = watcher
+function _setCloser(watchers: FSWatcher[]) {
+    shutdown.watchers = watchers
 }
 
 /**
@@ -76,12 +55,16 @@ function _setCloser(watcher: FSWatcher) {
  */
 function _start() {
     const config = buildConfig.state
-    const dir = _findFirstDir(config.options.input)
+    const input = config.options.input
     const options: WatchOptions = { recursive: true, persistent: true, encoding: 'utf-8' }
-    const watcher = fsWatch(dir, options, (eventType, file) => {
-        _digestWatchEvent(eventType, file)
+    const watchers = [] as unknown as FSWatcher[]
+    input.forEach((src: string) => {
+        const watcher = fsWatch(src, options, (eventType, file) => {
+            _digestWatchEvent(eventType, file)
+        })
+        watchers.push(watcher)
     })
-    _setCloser(watcher)
+    _setCloser(watchers)
 }
 
 const watch = {
