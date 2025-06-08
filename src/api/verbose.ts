@@ -73,6 +73,18 @@ function _compile(file: string, dest: string) {
     }
 }
 
+function _sigint() {
+    io.echo('sigint exit cleanup', newLine)
+}
+
+function _beforeExit() {
+    io.echoSync('cleanup', newLine)
+}
+
+function _exit() {
+    io.echo('shutting down bunbuilder', newLine)
+}
+
 const verbose = {
     buildStart: async () => {
         await _buildStart()
@@ -88,6 +100,18 @@ const verbose = {
 
     copy: (file: string) => {
         _copy(file)
+    },
+
+    sigint: () => {
+        _sigint()
+    },
+
+    beforeExit: () => {
+        _beforeExit()
+    },
+
+    exit: () => {
+        _exit()
     }
 }
 
