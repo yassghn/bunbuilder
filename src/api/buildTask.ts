@@ -141,7 +141,7 @@ function _prefixReplace(fileContents: string): string {
  * @returns {string} file contents with added js extensions
  */
 function _addJsExtension(fileContents: string): string {
-    const regex = /(?<=from\s"\.\/[\S].*)"/gim
+    const regex = /(?<=from\s"\.\/[\S].*)(?<!\.js)"/gim
     const newContents = fileContents.replaceAll(regex, '.js"')
     return newContents
 }
