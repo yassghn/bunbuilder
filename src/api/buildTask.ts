@@ -39,6 +39,12 @@ function _makeDestDir(dest: string) {
     }
 }
 
+/**
+ * hew a bun build plugin which produces verbose build output
+ *
+ * @param {string} dest build destination
+ * @returns {Bun.BunPlugin} verbose build output plugin
+ */
 function _hewVerboseBuildPlugin(dest: string): Bun.BunPlugin {
     const plugin: Bun.BunPlugin = {
         name: 'verbose build output plugin',
@@ -58,6 +64,13 @@ function _hewVerboseBuildPlugin(dest: string): Bun.BunPlugin {
     return plugin
 }
 
+/**
+ * hew a bun build configuration object
+ *
+ * @param {string[]} files source files
+ * @param {string} dest build destination directory
+ * @returns {Bun.BuildConfig} bun build configuration object
+ */
 function _hewBrowserBuildConfig(files: string[], dest: string): Bun.BuildConfig {
     const bundleImports = data.buildTargets.browser.buildOptions.bundleImports
     const packages = bundleImports ? 'bundle' : 'external'
@@ -90,6 +103,12 @@ function _compileTargetBrowser(dir: string, files: string[], dest: string) {
     return Bun.build(buildConfig)
 }
 
+/**
+ * hew array of files from bun build output artifacts
+ *
+ * @param {Bun.BuildOutput} buildOutput bun build output
+ * @returns {string[]} bun build artifact paths
+ */
 function _hewBuildArtifactFiles(buildOutput: Bun.BuildOutput): string[] {
     const files = [] as unknown as string[]
     const dir = cwd().split(sep).pop() as unknown as string
@@ -101,6 +120,12 @@ function _hewBuildArtifactFiles(buildOutput: Bun.BuildOutput): string[] {
     return files
 }
 
+/**
+ * bun no bundle hack: replace preconfigured prefix with relative path prefix
+ *
+ * @param {string} fileContents build artifact file contents
+ * @returns {string} file contents with relative path import prefix
+ */
 function _prefixReplace(fileContents: string): string {
     const prefix = data.options.noBundleHackImportPrefix
     const regexStr = `\\"\\${prefix}`
@@ -109,12 +134,23 @@ function _prefixReplace(fileContents: string): string {
     return newContents
 }
 
+/**
+ * bun no bundle hack: add missing js extensions
+ *
+ * @param {string} fileContents build artifact file contents
+ * @returns {string} file contents with added js extensions
+ */
 function _addJsExtension(fileContents: string): string {
     const regex = /(?<=from\s"[\S].*)"/gim
     const newContents = fileContents.replaceAll(regex, '.js"')
     return newContents
 }
 
+/**
+ * bun no bundle hack: correct import statements for browser target
+ *
+ * @param {Bun.BuildOutput} buildOutput bun build output
+ */
 function _correctImports(buildOutput: Bun.BuildOutput) {
     const files = _hewBuildArtifactFiles(buildOutput)
     files.forEach(async (file: string) => {
@@ -126,6 +162,11 @@ function _correctImports(buildOutput: Bun.BuildOutput) {
     })
 }
 
+/**
+ * post process bun build artifacts
+ *
+ * @param {Bun.BuildOutput} buildOutput bun build output
+ */
 function _digestBuildArtifacts(buildOutput: Bun.BuildOutput) {
     const config = buildConfig.state
     if (config.options.noBundleHack) {
@@ -133,6 +174,11 @@ function _digestBuildArtifacts(buildOutput: Bun.BuildOutput) {
     }
 }
 
+/**
+ * post process bun build output
+ * 
+ * @param {Bun.BuildOutput} buildOutput bun build output
+ */
 function _digestBuildOutput(buildOutput: Bun.BuildOutput) {
     verbose.buildResult(buildOutput.success)
     _digestBuildArtifacts(buildOutput)
