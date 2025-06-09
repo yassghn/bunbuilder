@@ -87,14 +87,14 @@ function _applyBrowserBuildOp(dir: string, input: string | string[], buildOp: st
  */
 function _browserOpMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
     const buildOps = data.buildTargets.browser.buildOps
-    buildOpMaps.forEach(async (opMap: BROWSER_BUILD_OP_MAP) => {
+    buildOpMaps.forEach((opMap: BROWSER_BUILD_OP_MAP) => {
         // filter files current operation map target
         const targets = files.filter((file: string) => extname(file) == opMap.ext)
         if (opMap.op == buildOps.compile) {
             _applyBrowserBuildOp(dir, targets, opMap.op)
         } else {
             // iterate targets and apply build operation
-            targets.forEach(async (target: string) => {
+            targets.forEach((target: string) => {
                 _applyBrowserBuildOp(dir, target, opMap.op)
             })
         }
