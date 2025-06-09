@@ -778,6 +778,9 @@ function _compile2(dir, files, dest) {
     case targets.browser.name:
       _compileTargetBrowser(dir, files, dest).then((buildOutput) => {
         _digestBuildOutput(buildOutput);
+      }).catch((reason) => {
+        verbose_default.buildResult(false);
+        console.error(reason);
       });
       break;
   }
