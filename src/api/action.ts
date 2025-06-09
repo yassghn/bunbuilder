@@ -64,7 +64,7 @@ function _takeActionWatch() {
 async function _digestAction(action: string, files: string[] | undefined) {
     switch (action) {
         case ACTION.build:
-            await verbose.buildStart()
+            verbose.buildStart()
             _takeActionBuild(files)
             break
         case ACTION.clean:
