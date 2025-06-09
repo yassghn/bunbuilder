@@ -1134,23 +1134,29 @@ function _isDirectory(src) {
     return true;
   return false;
 }
+function _pause() {
+  _state3.pause = true;
+  setTimeout(() => {
+    _state3.pause = false;
+  }, _options.timeout);
+}
+function _digestFile(file, src) {
+  verbose_default.watcherChange(file);
+  if (_isDirectory(src)) {
+    const path2 = src + sep4 + file;
+    if (!_isDirectory(path2)) {
+      build_default.single(src, file);
+    }
+  } else {
+    build_default.single(null, file);
+  }
+}
 function _digestWatchEvent(eventType, file, src) {
   if (!_state3.pause) {
     if (eventType == "change" && file !== null) {
-      verbose_default.watcherChange(file);
-      if (_isDirectory(src)) {
-        const path2 = src + sep4 + file;
-        if (!_isDirectory(path2)) {
-          build_default.single(src, file);
-        }
-      } else {
-        build_default.single(null, file);
-      }
+      _digestFile(file, src);
     }
-    _state3.pause = true;
-    setTimeout(() => {
-      _state3.pause = false;
-    }, _options.timeout);
+    _pause();
   }
 }
 function _setCloser2(watchers) {
