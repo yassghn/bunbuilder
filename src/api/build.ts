@@ -160,9 +160,43 @@ function _buildAll() {
     _digestInput(config.options.input)
 }
 
+/**
+ * infer root directory of file
+ *
+ * @param {string|null} src user bunbuilder configuration input source
+ * @param {string} file source file to build
+ * @returns {string} inferred root directory
+ */
+function _inferRootDir(src: string | null, file: string): string {
+    if (src !== null) {
+        const path = src + sep + file
+        const stat = lstatSync(path)
+        if (stat.isFile()) {
+            return src
+        }
+    }
+    throw new Error('cannot infer root directory')
+}
+
+/**
+ * build single file
+ *
+ * @param {string|null} src user bunbuilder configuration input source
+ * @param {string} file source file to build
+ */
+function _buildSingle(src: string | null, file: string) {
+    const dir = _inferRootDir(src, file)
+    const files = [file]
+    _digestFiles(dir, files)
+}
+
 const build = {
     all: () => {
         _buildAll()
+    },
+
+    single: (src: string | null, file: string) => {
+        _buildSingle(src, file)
     }
 }
 
