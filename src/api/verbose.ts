@@ -131,6 +131,13 @@ function _watcherChange(file: string) {
     io.echoSync('', newLine)
 }
 
+function _clean() {
+    const config = buildConfig.state
+    io.echoSync('cleaning ')
+    io.echoSync(config.options.output, highlight)
+    io.echoSync('', newLine)
+}
+
 const verbose = {
     buildStart: () => {
         _buildStart()
@@ -166,6 +173,10 @@ const verbose = {
 
     watcherChange: (file: string) => {
         _watcherChange(file)
+    },
+
+    clean: () => {
+        _clean()
     },
 
     sigint: () => {

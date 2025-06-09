@@ -7,6 +7,7 @@
  */
 
 import buildConfig from './buildConfig'
+import verbose from './verbose'
 import { rmSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
@@ -14,6 +15,7 @@ import path from 'node:path'
  * delete everything inside of bunbuilder configuration output directory
  */
 function _cleanOutdir() {
+    verbose.clean()
     const config = buildConfig.state
     const outdir = config.options.output
     const options = { force: true, recursive: true }
