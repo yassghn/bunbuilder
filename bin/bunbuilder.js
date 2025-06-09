@@ -591,6 +591,12 @@ function _watcherChange(file) {
   io_default.echoSync(file, highlight);
   io_default.echoSync("", newLine);
 }
+function _clean() {
+  const config2 = buildConfig_default.state;
+  io_default.echoSync("cleaning ");
+  io_default.echoSync(config2.options.output, highlight);
+  io_default.echoSync("", newLine);
+}
 var verbose = {
   buildStart: () => {
     _buildStart();
@@ -618,6 +624,9 @@ var verbose = {
   },
   watcherChange: (file) => {
     _watcherChange(file);
+  },
+  clean: () => {
+    _clean();
   },
   sigint: () => {
     _sigint();
@@ -867,6 +876,7 @@ var build_default = build;
 import { rmSync, readdirSync as readdirSync2 } from "fs";
 import path from "path";
 function _cleanOutdir() {
+  verbose_default.clean();
   const config2 = buildConfig_default.state;
   const outdir = config2.options.output;
   const options2 = { force: true, recursive: true };
