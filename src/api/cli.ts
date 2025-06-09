@@ -116,12 +116,12 @@ function _hasArgs(parsed: PARSED_ARGS): boolean {
  */
 function _processParsed(parsed: PARSED_ARGS): ACTION_PLAN {
     if (!_hasArgs(parsed)) {
-        // when no args are passed default to cbswv
+        // when no args are passed default to swcbv
         Object.assign(parsed.values, {
-            clean: true,
-            build: true,
             serve: true,
             watch: true,
+            clean: true,
+            build: true,
             verbose: true
         })
     }
