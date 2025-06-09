@@ -63,7 +63,7 @@ var data_default = {
   },
   options: {
     servePort: 3000,
-    watchTimeout: 3000,
+    watchTimeout: 107,
     echoHoldTimeout: 50,
     limitTimeoutMultiplier: 4,
     verboseHighlightColor: "cyan",
