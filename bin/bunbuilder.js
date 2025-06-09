@@ -1117,18 +1117,35 @@ var serve = {
 var serve_default = serve;
 
 // src/api/watch.ts
-import { watch as fsWatch } from "fs";
+import {
+  lstatSync as lstatSync2,
+  watch as fsWatch
+} from "fs";
+import { sep as sep4 } from "path";
 var _options = {
   timeout: data_default.options.watchTimeout
 };
 var _state3 = {
   pause: false
 };
+function _isDirectory(src) {
+  const stat = lstatSync2(src);
+  if (stat.isDirectory())
+    return true;
+  return false;
+}
 function _digestWatchEvent(eventType, file, src) {
   if (!_state3.pause) {
     if (eventType == "change" && file !== null) {
       verbose_default.watcherChange(file);
-      build_default.single(src, file);
+      if (_isDirectory(src)) {
+        const path2 = src + sep4 + file;
+        if (!_isDirectory(path2)) {
+          build_default.single(src, file);
+        }
+      } else {
+        build_default.single(null, file);
+      }
     }
     _state3.pause = true;
     setTimeout(() => {

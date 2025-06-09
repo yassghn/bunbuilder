@@ -40,6 +40,16 @@ function _isDirectory(src: string): boolean {
     return false
 }
 
+function _pause() {
+    // set pause flag
+    _state.pause = true
+    // set timeout
+    setTimeout(() => {
+        // unpause
+        _state.pause = false
+    }, _options.timeout)
+}
+
 /**
  * process watch event
  *
@@ -62,13 +72,7 @@ function _digestWatchEvent(eventType: WatchEventType, file: string | null, src: 
                 build.single(null, file)
             }
         }
-        // set pause flag
-        _state.pause = true
-        // set timeout
-        setTimeout(() => {
-            // unpause
-            _state.pause = false
-        }, _options.timeout)
+        _pause()
     }
 }
 
