@@ -93,8 +93,13 @@ function _hewBrowserBuildConfig(files: string[], dest: string): Bun.BuildConfig 
  * @param {string} dir root source file directory
  * @param {string[]} files source files
  * @param {string} dest build destination directory
+ * @return {Promise<Bun.BuildOutput>} bun.build return promise
  */
-function _compileTargetBrowser(dir: string, files: string[], dest: string) {
+function _compileTargetBrowser(
+    dir: string,
+    files: string[],
+    dest: string
+): Promise<Bun.BuildOutput> {
     const src = { files: [] as string[] }
     files.forEach((file: string) => {
         src.files.push(dir + sep + file)
