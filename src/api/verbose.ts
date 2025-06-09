@@ -105,32 +105,56 @@ function _exit() {
     io.echoSync('shutting down bunbuilder', newLine)
 }
 
+/**
+ * verbose server start
+ *
+ * @param {number} port http server port
+ */
 function _serverStart(port: number) {
     io.echoSync('starting http server on ')
     io.echoSync(`localhost:${port}`, highlight)
     io.echoSync('', newLine)
 }
 
+/**
+ * verbose server shutdown
+ */
 function _serverShutdown() {
     io.echoSync('shutting down http server', newLine)
 }
 
+/**
+ * verbose watcher start
+ *
+ * @param {string} input user bunbuilder configuration input source
+ */
 function _watcherStart(input: string) {
     io.echoSync('starting watcher on: ')
     io.echoSync(input, highlight)
     io.echoSync('', newLine)
 }
 
+/**
+ * verbose watchers close
+ */
 function _watcherShutdown() {
     io.echoSync('closing watchers', newLine)
 }
 
+/**
+ * verbose watcher change event
+ *
+ * @param {string} file watcher change event file
+ */
 function _watcherChange(file: string) {
     io.echoSync('watcher detected change: ')
     io.echoSync(file, highlight)
     io.echoSync('', newLine)
 }
 
+/**
+ * verbose clean
+ */
 function _clean() {
     const config = buildConfig.state
     io.echoSync('cleaning ')
