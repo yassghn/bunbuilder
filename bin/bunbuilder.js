@@ -830,12 +830,12 @@ function _applyBrowserBuildOp(dir, input, buildOp2) {
 }
 function _browserOpMapBuild(dir, files, buildOpMaps) {
   const buildOps = data_default.buildTargets.browser.buildOps;
-  buildOpMaps.forEach(async (opMap) => {
+  buildOpMaps.forEach((opMap) => {
     const targets = files.filter((file) => extname2(file) == opMap.ext);
     if (opMap.op == buildOps.compile) {
       _applyBrowserBuildOp(dir, targets, opMap.op);
     } else {
-      targets.forEach(async (target) => {
+      targets.forEach((target) => {
         _applyBrowserBuildOp(dir, target, opMap.op);
       });
     }
@@ -1172,6 +1172,7 @@ function _start() {
     const watcher = fsWatch(input, options2, (eventType, file) => {
       _digestWatchEvent(eventType, file, input);
     });
+    _pause();
     watchers.push(watcher);
   });
   _setCloser2(watchers);
@@ -1213,7 +1214,7 @@ function _takeActionWatch() {
 async function _digestAction(action, files) {
   switch (action) {
     case ACTION.build:
-      await verbose_default.buildStart();
+      verbose_default.buildStart();
       _takeActionBuild(files);
       break;
     case ACTION.clean:
