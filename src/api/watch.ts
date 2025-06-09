@@ -11,7 +11,14 @@ import shutdown from './shutdown'
 import verbose from './verbose'
 import build from './build'
 import data from '../../data/data.json' assert { type: 'json' }
-import { watch as fsWatch, type FSWatcher, type WatchEventType, type WatchOptions } from 'node:fs'
+import {
+    lstatSync,
+    watch as fsWatch,
+    type FSWatcher,
+    type WatchEventType,
+    type WatchOptions
+} from 'node:fs'
+import { sep } from 'node:path'
 
 const _options = {
     timeout: data.options.watchTimeout
@@ -19,6 +26,18 @@ const _options = {
 
 const _state = {
     pause: false
+}
+
+/**
+ * check if src is a directory
+ *
+ * @param {string} src user bunbuilder configuration input source
+ * @returns {boolean} flag indicating if src is a directory
+ */
+function _isDirectory(src: string): boolean {
+    const stat = lstatSync(src)
+    if (stat.isDirectory()) return true
+    return false
 }
 
 /**
@@ -34,7 +53,14 @@ function _digestWatchEvent(eventType: WatchEventType, file: string | null, src: 
         // process event
         if (eventType == 'change' && file !== null) {
             verbose.watcherChange(file)
-            build.single(src, file)
+            if (_isDirectory(src)) {
+                const path = src + sep + file
+                if (!_isDirectory(path)) {
+                    build.single(src, file)
+                }
+            } else {
+                build.single(null, file)
+            }
         }
         // set pause flag
         _state.pause = true
