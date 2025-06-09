@@ -40,6 +40,9 @@ function _isDirectory(src: string): boolean {
     return false
 }
 
+/**
+ * watcher timeout & pause
+ */
 function _pause() {
     // set pause flag
     _state.pause = true
