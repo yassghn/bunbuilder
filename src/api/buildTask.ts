@@ -218,9 +218,14 @@ function _compile(dir: string, files: string[], dest: string) {
     const targets = data.buildTargets
     switch (config.target) {
         case targets.browser.name:
-            _compileTargetBrowser(dir, files, dest).then((buildOutput) => {
-                _digestBuildOutput(buildOutput)
-            })
+            _compileTargetBrowser(dir, files, dest)
+                .then((buildOutput) => {
+                    _digestBuildOutput(buildOutput)
+                })
+                .catch((reason: any) => {
+                    verbose.buildResult(false)
+                    console.error(reason)
+                })
             break
     }
 }
