@@ -27,7 +27,7 @@ function _applyVerbose(): boolean {
  */
 function _buildStart() {
     if (_applyVerbose()) {
-        const config = buildConfig.state
+        const config = buildConfig.obj
         io.echoSync('starting build...', newLine)
         io.echoSync('target: ')
         io.echoSync(config.target, highlight)
@@ -42,7 +42,7 @@ function _buildStart() {
  */
 function _copy(file: string) {
     if (_applyVerbose()) {
-        const config = buildConfig.state
+        const config = buildConfig.obj
         io.echoSync('copying file ')
         io.echoSync(file, highlight)
         io.echoSync(' to ')
@@ -173,7 +173,7 @@ function _watcherChange(file: string) {
  */
 function _clean() {
     if (_applyVerbose()) {
-        const config = buildConfig.state
+        const config = buildConfig.obj
         io.echoSync('cleaning ')
         io.echoSync(config.options.output, highlight)
         io.echoSync('', newLine)

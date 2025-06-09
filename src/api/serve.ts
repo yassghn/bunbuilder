@@ -25,7 +25,7 @@ function _setCloser(server: Bun.Server) {
  * start http server
  */
 function _startServe() {
-    const config = buildConfig.state
+    const config = buildConfig.obj
     const port = data.options.servePort
     const server: Bun.Server = Bun.serve({
         port: port,

@@ -190,7 +190,7 @@ function _correctImports(buildOutput: Bun.BuildOutput) {
  * @param {Bun.BuildOutput} buildOutput bun build output
  */
 function _digestBuildArtifacts(buildOutput: Bun.BuildOutput) {
-    const config = buildConfig.state
+    const config = buildConfig.obj
     if (config.options.noBundleHack) {
         _correctImports(buildOutput)
     }
@@ -214,7 +214,7 @@ function _digestBuildOutput(buildOutput: Bun.BuildOutput) {
  * @param {string} dest build destination directory
  */
 function _compile(dir: string, files: string[], dest: string) {
-    const config = buildConfig.state
+    const config = buildConfig.obj
     const targets = data.buildTargets
     switch (config.target) {
         case targets.browser.name:

@@ -60,7 +60,7 @@ function _applyBrowserBuildOp(dir: string, files: string[], buildOp: string): vo
  * @param {string} buildOp build operation
  */
 function _applyBrowserBuildOp(dir: string, input: string | string[], buildOp: string) {
-    const config = buildConfig.state
+    const config = buildConfig.obj
     const buildOps = data.buildTargets.browser.buildOps
     if (typeof input === 'string') {
         switch (buildOp) {
@@ -109,7 +109,7 @@ function _browserOpMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_
  * @param {BUILD_OP_MAP} buildOpMaps build operations map
  */
 function _opMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) {
-    const config = buildConfig.state
+    const config = buildConfig.obj
     const targets = data.buildTargets
     switch (config.target) {
         case targets.browser.name: {
@@ -155,7 +155,7 @@ function _digestInput(input: string[]) {
  */
 function _buildAll() {
     // get config
-    const config = buildConfig.state
+    const config = buildConfig.obj
     // digest all input sources
     _digestInput(config.options.input)
 }

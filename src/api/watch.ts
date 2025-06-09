@@ -59,7 +59,7 @@ function _setCloser(watchers: FSWatcher[]) {
  * begin watching bunbuilder configuration inputs
  */
 function _start() {
-    const config = buildConfig.state
+    const config = buildConfig.obj
     const input = config.options.input
     const options: WatchOptions = { recursive: true, persistent: true, encoding: 'utf-8' }
     const watchers = [] as unknown as FSWatcher[]

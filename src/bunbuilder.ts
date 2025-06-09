@@ -17,7 +17,7 @@ import type { ACTION_PLAN, BUNBUILDER_CONFIG } from 'api/types'
      */
     function _parseConfig() {
         const conf: BUNBUILDER_CONFIG = config.parse()
-        buildConfig.state = conf
+        buildConfig.obj = conf
     }
 
     /**

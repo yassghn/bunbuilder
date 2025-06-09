@@ -47,7 +47,7 @@ function _hewBrowserOpMap(ext: string): BROWSER_BUILD_OP_MAP {
  * @returns {BUILD_OP_MAP} inferred build operation for given extension
  */
 function _inferBuildOpMap(ext: string): BUILD_OP_MAP {
-    const config = buildConfig.state
+    const config = buildConfig.obj
     const buildTargets = data.buildTargets
     const retVal = { opMap: {} as BUILD_OP_MAP }
     switch (config.target) {

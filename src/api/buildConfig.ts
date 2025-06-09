@@ -28,7 +28,7 @@ const _state: BUNBUILDER_CONFIG_STATE = {
  *
  * @param {BUNBUILDER_CONFIG} config bunbuilder configuration
  */
-function _setState(config: BUNBUILDER_CONFIG) {
+function _setConfig(config: BUNBUILDER_CONFIG) {
     _state.config = { ...config }
 }
 
@@ -37,7 +37,7 @@ function _setState(config: BUNBUILDER_CONFIG) {
  *
  * @returns {BUNBUILDER_CONFIG} bunbuilder configuration object
  */
-function _getState(): BUNBUILDER_CONFIG {
+function _getConfig(): BUNBUILDER_CONFIG {
     if (_state.config == null) {
         throw new Error('bunbuilder config state was not set')
     } else {
@@ -64,12 +64,12 @@ function _getVerbose(): boolean {
 }
 
 const buildConfig = {
-    set state(config: BUNBUILDER_CONFIG) {
-        _setState(config)
+    set obj(config: BUNBUILDER_CONFIG) {
+        _setConfig(config)
     },
 
-    get state(): BUNBUILDER_CONFIG {
-        return _getState()
+    get obj(): BUNBUILDER_CONFIG {
+        return _getConfig()
     },
 
     set verbose(value: boolean) {
