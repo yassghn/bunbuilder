@@ -8,9 +8,10 @@
 
 import buildConfig from './buildConfig'
 import shutdown from './shutdown'
+import verbose from './verbose'
+import build from './build'
 import data from '../../data/data.json' assert { type: 'json' }
 import { watch as fsWatch, type FSWatcher, type WatchEventType, type WatchOptions } from 'node:fs'
-import verbose from './verbose'
 
 const _options = {
     timeout: data.options.watchTimeout
@@ -25,13 +26,15 @@ const _state = {
  *
  * @param {WatchEventType} eventType watch event
  * @param {string|null} file file triggering event
+ * @param {string} src user bunbuilder configuration input source
  */
-function _digestWatchEvent(eventType: WatchEventType, file: string | null) {
+function _digestWatchEvent(eventType: WatchEventType, file: string | null, src: string) {
     // prevent watch misfires using a timeout & pause flag
     if (!_state.pause) {
         // process event
-        if (eventType == 'change') {
-            verbose.watcherChange(file as string)
+        if (eventType == 'change' && file !== null) {
+            verbose.watcherChange(file)
+            build.single(src, file)
         }
         // set pause flag
         _state.pause = true
@@ -63,7 +66,7 @@ function _start() {
     input.forEach((src: string) => {
         verbose.watcherStart(src)
         const watcher = fsWatch(src, options, (eventType, file) => {
-            _digestWatchEvent(eventType, file)
+            _digestWatchEvent(eventType, file, src)
         })
         watchers.push(watcher)
     })
