@@ -66,13 +66,13 @@ function _applyBrowserBuildOp(dir: string, input: string | string[], buildOp: st
         switch (buildOp) {
             case buildOps.copy:
                 verbose.copy(input)
-                buildTask.copyFile(dir, input, config.options.output)
+                buildTask.copyFile(dir, input, config.options.outdir)
                 break
         }
     } else {
         switch (buildOp) {
             case buildOps.compile:
-                buildTask.compile(dir, input, config.options.output)
+                buildTask.compile(dir, input, config.options.outdir)
                 break
         }
     }
@@ -113,7 +113,7 @@ function _opMapBuild(dir: string, files: string[], buildOpMaps: BUILD_OP_MAP[]) 
     const targets = data.buildTargets
     switch (config.target) {
         case targets.browser.name: {
-            buildTask.makeDestDir(config.options.output)
+            buildTask.makeDestDir(config.options.outdir)
             _browserOpMapBuild(dir, files, buildOpMaps)
         }
     }
@@ -157,7 +157,7 @@ function _buildAll() {
     // get config
     const config = buildConfig.obj
     // digest all input sources
-    _digestInput(config.options.input)
+    _digestInput(config.options.inputs)
 }
 
 /**

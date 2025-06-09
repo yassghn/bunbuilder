@@ -17,7 +17,7 @@ import path from 'node:path'
 function _cleanOutdir() {
     verbose.clean()
     const config = buildConfig.obj
-    const outdir = config.options.output
+    const outdir = config.options.outdir
     const options = { force: true, recursive: true }
     readdirSync(outdir).forEach((item: string) => {
         rmSync(path.join(outdir, item), options)

@@ -29,7 +29,7 @@ function _startServe() {
     const port = data.options.servePort
     const server: Bun.Server = Bun.serve({
         port: port,
-        fetch: serveStatic(config.options.output)
+        fetch: serveStatic(config.options.outdir)
     })
     _setCloser(server)
     verbose.serverStart(port)

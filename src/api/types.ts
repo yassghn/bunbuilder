@@ -99,13 +99,13 @@ type BUILD_OP_MAP = BROWSER_BUILD_OP_MAP | OTHER_UNCONFIGURED_BUILD_OP_MAP
 /**
  * @typedef {object} TARGET_OPTIONS
  * @type {TARGET_OPTIONS} generic bunbuilder target options
- * @property {string[]} input input files/folders for build
- * @property {string} output output directory
+ * @property {string[]} inputs input files/folders for build
+ * @property {string} outdir output directory
  */
 interface TARGET_OPTIONS {
     noBundleHack: boolean
-    input: string[]
-    output: string
+    inputs: string[]
+    outdir: string
 }
 
 /**

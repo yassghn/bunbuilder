@@ -46,7 +46,7 @@ function _copy(file: string) {
         io.echoSync('copying file ')
         io.echoSync(file, highlight)
         io.echoSync(' to ')
-        io.echoSync(config.options.output, highlight)
+        io.echoSync(config.options.outdir, highlight)
         io.echoSync('', newLine)
     }
 }
@@ -175,7 +175,7 @@ function _clean() {
     if (_applyVerbose()) {
         const config = buildConfig.obj
         io.echoSync('cleaning ')
-        io.echoSync(config.options.output, highlight)
+        io.echoSync(config.options.outdir, highlight)
         io.echoSync('', newLine)
     }
 }

@@ -60,13 +60,13 @@ function _setCloser(watchers: FSWatcher[]) {
  */
 function _start() {
     const config = buildConfig.obj
-    const input = config.options.input
+    const inputs = config.options.inputs
     const options: WatchOptions = { recursive: true, persistent: true, encoding: 'utf-8' }
     const watchers = [] as unknown as FSWatcher[]
-    input.forEach((src: string) => {
-        verbose.watcherStart(src)
-        const watcher = fsWatch(src, options, (eventType, file) => {
-            _digestWatchEvent(eventType, file, src)
+    inputs.forEach((input: string) => {
+        verbose.watcherStart(input)
+        const watcher = fsWatch(input, options, (eventType, file) => {
+            _digestWatchEvent(eventType, file, input)
         })
         watchers.push(watcher)
     })
