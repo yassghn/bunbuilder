@@ -51,6 +51,24 @@ function _pause() {
 }
 
 /**
+ * process watch event file
+ *
+ * @param {string} file file triggering event
+ * @param {string} src user bunbuilder configuration input source
+ */
+function _digestFile(file: string, src: string) {
+    verbose.watcherChange(file)
+    if (_isDirectory(src)) {
+        const path = src + sep + file
+        if (!_isDirectory(path)) {
+            build.single(src, file)
+        }
+    } else {
+        build.single(null, file)
+    }
+}
+
+/**
  * process watch event
  *
  * @param {WatchEventType} eventType watch event
@@ -62,15 +80,7 @@ function _digestWatchEvent(eventType: WatchEventType, file: string | null, src: 
     if (!_state.pause) {
         // process event
         if (eventType == 'change' && file !== null) {
-            verbose.watcherChange(file)
-            if (_isDirectory(src)) {
-                const path = src + sep + file
-                if (!_isDirectory(path)) {
-                    build.single(src, file)
-                }
-            } else {
-                build.single(null, file)
-            }
+            _digestFile(file, src)
         }
         _pause()
     }
