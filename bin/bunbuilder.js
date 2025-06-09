@@ -562,40 +562,58 @@ function _compile(file, dest) {
   }
 }
 function _sigint() {
-  io_default.echoSync("sigint exit cleanup", newLine);
+  if (_applyVerbose()) {
+    io_default.echoSync("sigint exit cleanup", newLine);
+  }
 }
 function _beforeExit() {
-  io_default.echoSync("cleanup", newLine);
+  if (_applyVerbose()) {
+    io_default.echoSync("cleanup", newLine);
+  }
 }
 function _exit() {
-  io_default.echoSync("shutting down bunbuilder", newLine);
+  if (_applyVerbose()) {
+    io_default.echoSync("shutting down bunbuilder", newLine);
+  }
 }
 function _serverStart(port) {
-  io_default.echoSync("starting http server on ");
-  io_default.echoSync(`localhost:${port}`, highlight);
-  io_default.echoSync("", newLine);
+  if (_applyVerbose()) {
+    io_default.echoSync("starting http server on ");
+    io_default.echoSync(`localhost:${port}`, highlight);
+    io_default.echoSync("", newLine);
+  }
 }
 function _serverShutdown() {
-  io_default.echoSync("shutting down http server", newLine);
+  if (_applyVerbose()) {
+    io_default.echoSync("shutting down http server", newLine);
+  }
 }
 function _watcherStart(input) {
-  io_default.echoSync("starting watcher on: ");
-  io_default.echoSync(input, highlight);
-  io_default.echoSync("", newLine);
+  if (_applyVerbose()) {
+    io_default.echoSync("starting watcher on: ");
+    io_default.echoSync(input, highlight);
+    io_default.echoSync("", newLine);
+  }
 }
 function _watcherShutdown() {
-  io_default.echoSync("closing watchers", newLine);
+  if (_applyVerbose()) {
+    io_default.echoSync("closing watchers", newLine);
+  }
 }
 function _watcherChange(file) {
-  io_default.echoSync("watcher detected change: ");
-  io_default.echoSync(file, highlight);
-  io_default.echoSync("", newLine);
+  if (_applyVerbose()) {
+    io_default.echoSync("watcher detected change: ");
+    io_default.echoSync(file, highlight);
+    io_default.echoSync("", newLine);
+  }
 }
 function _clean() {
-  const config2 = buildConfig_default.state;
-  io_default.echoSync("cleaning ");
-  io_default.echoSync(config2.options.output, highlight);
-  io_default.echoSync("", newLine);
+  if (_applyVerbose()) {
+    const config2 = buildConfig_default.state;
+    io_default.echoSync("cleaning ");
+    io_default.echoSync(config2.options.output, highlight);
+    io_default.echoSync("", newLine);
+  }
 }
 var verbose = {
   buildStart: () => {
