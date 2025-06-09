@@ -25,13 +25,13 @@ function _applyVerbose(): boolean {
 /**
  * verbose build start output
  */
-async function _buildStart() {
+function _buildStart() {
     if (_applyVerbose()) {
         const config = buildConfig.state
-        await io.echo('starting build...', newLine)
-        await io.echo('target: ')
-        await io.echo(config.target, highlight)
-        await io.echo('', newLine)
+        io.echoSync('starting build...', newLine)
+        io.echoSync('target: ')
+        io.echoSync(config.target, highlight)
+        io.echoSync('', newLine)
     }
 }
 
@@ -43,11 +43,11 @@ async function _buildStart() {
 function _copy(file: string) {
     if (_applyVerbose()) {
         const config = buildConfig.state
-        io.queueEcho('copying file ')
-        io.queueEcho(file, highlight)
-        io.queueEcho(' to ')
-        io.queueEcho(config.options.output, highlight)
-        io.queueEcho('', newLine)
+        io.echoSync('copying file ')
+        io.echoSync(file, highlight)
+        io.echoSync(' to ')
+        io.echoSync(config.options.output, highlight)
+        io.echoSync('', newLine)
     }
 }
 
@@ -60,10 +60,10 @@ function _buildResult(success: boolean) {
     if (_applyVerbose()) {
         if (success) {
             const options = { newLine: true, color: 'green' }
-            io.queueEcho('build successful', options)
+            io.echoSync('build successful', options)
         } else {
             const options = { newLine: true, color: 'red' }
-            io.queueEcho('build failed', options)
+            io.echoSync('build failed', options)
         }
     }
 }
@@ -76,11 +76,11 @@ function _buildResult(success: boolean) {
  */
 function _compile(file: string, dest: string) {
     if (_applyVerbose()) {
-        io.queueEcho('compiling file ')
-        io.queueEcho(file, highlight)
-        io.queueEcho(' to ')
-        io.queueEcho(dest, highlight)
-        io.queueEcho('', newLine)
+        io.echoSync('compiling file ')
+        io.echoSync(file, highlight)
+        io.echoSync(' to ')
+        io.echoSync(dest, highlight)
+        io.echoSync('', newLine)
     }
 }
 
@@ -88,7 +88,7 @@ function _compile(file: string, dest: string) {
  * verbose sigint event
  */
 function _sigint() {
-    io.echo('sigint exit cleanup', newLine)
+    io.echoSync('sigint exit cleanup', newLine)
 }
 
 /**
@@ -102,7 +102,7 @@ function _beforeExit() {
  * verbose exit
  */
 function _exit() {
-    io.echo('shutting down bunbuilder', newLine)
+    io.echoSync('shutting down bunbuilder', newLine)
 }
 
 function _serverStart(port: number) {
@@ -132,8 +132,8 @@ function _watcherChange(file: string) {
 }
 
 const verbose = {
-    buildStart: async () => {
-        await _buildStart()
+    buildStart: () => {
+        _buildStart()
     },
 
     buildResult: (success: boolean) => {
