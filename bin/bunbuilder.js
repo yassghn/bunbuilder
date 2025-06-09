@@ -426,10 +426,10 @@ var _state = {
   config: null,
   verbose: false
 };
-function _setState(config2) {
+function _setConfig(config2) {
   _state.config = { ...config2 };
 }
-function _getState() {
+function _getConfig() {
   if (_state.config == null) {
     throw new Error("bunbuilder config state was not set");
   } else {
@@ -443,11 +443,11 @@ function _getVerbose() {
   return _state.verbose;
 }
 var buildConfig = {
-  set state(config2) {
-    _setState(config2);
+  set obj(config2) {
+    _setConfig(config2);
   },
-  get state() {
-    return _getState();
+  get obj() {
+    return _getConfig();
   },
   set verbose(value) {
     _setVerbose(value);
@@ -477,7 +477,7 @@ function _hewBrowserOpMap(ext) {
   return opMap;
 }
 function _inferBuildOpMap(ext) {
-  const config2 = buildConfig_default.state;
+  const config2 = buildConfig_default.obj;
   const buildTargets = data_default.buildTargets;
   const retVal = { opMap: {} };
   switch (config2.target) {
@@ -524,7 +524,7 @@ function _applyVerbose() {
 }
 function _buildStart() {
   if (_applyVerbose()) {
-    const config2 = buildConfig_default.state;
+    const config2 = buildConfig_default.obj;
     io_default.echoSync("starting build...", newLine);
     io_default.echoSync("target: ");
     io_default.echoSync(config2.target, highlight);
@@ -533,11 +533,11 @@ function _buildStart() {
 }
 function _copy(file) {
   if (_applyVerbose()) {
-    const config2 = buildConfig_default.state;
+    const config2 = buildConfig_default.obj;
     io_default.echoSync("copying file ");
     io_default.echoSync(file, highlight);
     io_default.echoSync(" to ");
-    io_default.echoSync(config2.options.output, highlight);
+    io_default.echoSync(config2.options.outdir, highlight);
     io_default.echoSync("", newLine);
   }
 }
@@ -609,9 +609,9 @@ function _watcherChange(file) {
 }
 function _clean() {
   if (_applyVerbose()) {
-    const config2 = buildConfig_default.state;
+    const config2 = buildConfig_default.obj;
     io_default.echoSync("cleaning ");
-    io_default.echoSync(config2.options.output, highlight);
+    io_default.echoSync(config2.options.outdir, highlight);
     io_default.echoSync("", newLine);
   }
 }
@@ -762,7 +762,7 @@ function _correctImports(buildOutput) {
   });
 }
 function _digestBuildArtifacts(buildOutput) {
-  const config2 = buildConfig_default.state;
+  const config2 = buildConfig_default.obj;
   if (config2.options.noBundleHack) {
     _correctImports(buildOutput);
   }
@@ -772,7 +772,7 @@ function _digestBuildOutput(buildOutput) {
   _digestBuildArtifacts(buildOutput);
 }
 function _compile2(dir, files, dest) {
-  const config2 = buildConfig_default.state;
+  const config2 = buildConfig_default.obj;
   const targets = data_default.buildTargets;
   switch (config2.target) {
     case targets.browser.name:
@@ -811,19 +811,19 @@ function _getFiles(dir) {
   return retVal.files;
 }
 function _applyBrowserBuildOp(dir, input, buildOp2) {
-  const config2 = buildConfig_default.state;
+  const config2 = buildConfig_default.obj;
   const buildOps = data_default.buildTargets.browser.buildOps;
   if (typeof input === "string") {
     switch (buildOp2) {
       case buildOps.copy:
         verbose_default.copy(input);
-        buildTask_default.copyFile(dir, input, config2.options.output);
+        buildTask_default.copyFile(dir, input, config2.options.outdir);
         break;
     }
   } else {
     switch (buildOp2) {
       case buildOps.compile:
-        buildTask_default.compile(dir, input, config2.options.output);
+        buildTask_default.compile(dir, input, config2.options.outdir);
         break;
     }
   }
@@ -842,11 +842,11 @@ function _browserOpMapBuild(dir, files, buildOpMaps) {
   });
 }
 function _opMapBuild(dir, files, buildOpMaps) {
-  const config2 = buildConfig_default.state;
+  const config2 = buildConfig_default.obj;
   const targets = data_default.buildTargets;
   switch (config2.target) {
     case targets.browser.name: {
-      buildTask_default.makeDestDir(config2.options.output);
+      buildTask_default.makeDestDir(config2.options.outdir);
       _browserOpMapBuild(dir, files, buildOpMaps);
     }
   }
@@ -865,8 +865,8 @@ function _digestInput(input) {
   }
 }
 function _buildAll() {
-  const config2 = buildConfig_default.state;
-  _digestInput(config2.options.input);
+  const config2 = buildConfig_default.obj;
+  _digestInput(config2.options.inputs);
 }
 function _inferRootDir(src, file) {
   if (src !== null) {
@@ -898,8 +898,8 @@ import { rmSync, readdirSync as readdirSync2 } from "fs";
 import path from "path";
 function _cleanOutdir() {
   verbose_default.clean();
-  const config2 = buildConfig_default.state;
-  const outdir = config2.options.output;
+  const config2 = buildConfig_default.obj;
+  const outdir = config2.options.outdir;
   const options2 = { force: true, recursive: true };
   readdirSync2(outdir).forEach((item) => {
     rmSync(path.join(outdir, item), options2);
@@ -1100,11 +1100,11 @@ function _setCloser(server) {
   shutdown_default.server = server;
 }
 function _startServe() {
-  const config2 = buildConfig_default.state;
+  const config2 = buildConfig_default.obj;
   const port = data_default.options.servePort;
   const server = Bun.serve({
     port,
-    fetch: dist_default(config2.options.output)
+    fetch: dist_default(config2.options.outdir)
   });
   _setCloser(server);
   verbose_default.serverStart(port);
@@ -1140,14 +1140,14 @@ function _setCloser2(watchers) {
   shutdown_default.watchers = watchers;
 }
 function _start() {
-  const config2 = buildConfig_default.state;
-  const input = config2.options.input;
+  const config2 = buildConfig_default.obj;
+  const inputs = config2.options.inputs;
   const options2 = { recursive: true, persistent: true, encoding: "utf-8" };
   const watchers = [];
-  input.forEach((src) => {
-    verbose_default.watcherStart(src);
-    const watcher = fsWatch(src, options2, (eventType, file) => {
-      _digestWatchEvent(eventType, file, src);
+  inputs.forEach((input) => {
+    verbose_default.watcherStart(input);
+    const watcher = fsWatch(input, options2, (eventType, file) => {
+      _digestWatchEvent(eventType, file, input);
     });
     watchers.push(watcher);
   });
@@ -1270,7 +1270,7 @@ var osEvents_default = osEvents;
 (async function() {
   function _parseConfig() {
     const conf = config_default.parse();
-    buildConfig_default.state = conf;
+    buildConfig_default.obj = conf;
   }
   async function _startActionPlan() {
     const actionPlan = cli_default.argsParse();
