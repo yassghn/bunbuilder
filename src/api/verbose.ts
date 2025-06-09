@@ -88,21 +88,27 @@ function _compile(file: string, dest: string) {
  * verbose sigint event
  */
 function _sigint() {
-    io.echoSync('sigint exit cleanup', newLine)
+    if (_applyVerbose()) {
+        io.echoSync('sigint exit cleanup', newLine)
+    }
 }
 
 /**
  * verbose before exit event
  */
 function _beforeExit() {
-    io.echoSync('cleanup', newLine)
+    if (_applyVerbose()) {
+        io.echoSync('cleanup', newLine)
+    }
 }
 
 /**
  * verbose exit
  */
 function _exit() {
-    io.echoSync('shutting down bunbuilder', newLine)
+    if (_applyVerbose()) {
+        io.echoSync('shutting down bunbuilder', newLine)
+    }
 }
 
 /**
@@ -111,16 +117,20 @@ function _exit() {
  * @param {number} port http server port
  */
 function _serverStart(port: number) {
-    io.echoSync('starting http server on ')
-    io.echoSync(`localhost:${port}`, highlight)
-    io.echoSync('', newLine)
+    if (_applyVerbose()) {
+        io.echoSync('starting http server on ')
+        io.echoSync(`localhost:${port}`, highlight)
+        io.echoSync('', newLine)
+    }
 }
 
 /**
  * verbose server shutdown
  */
 function _serverShutdown() {
-    io.echoSync('shutting down http server', newLine)
+    if (_applyVerbose()) {
+        io.echoSync('shutting down http server', newLine)
+    }
 }
 
 /**
@@ -129,16 +139,20 @@ function _serverShutdown() {
  * @param {string} input user bunbuilder configuration input source
  */
 function _watcherStart(input: string) {
-    io.echoSync('starting watcher on: ')
-    io.echoSync(input, highlight)
-    io.echoSync('', newLine)
+    if (_applyVerbose()) {
+        io.echoSync('starting watcher on: ')
+        io.echoSync(input, highlight)
+        io.echoSync('', newLine)
+    }
 }
 
 /**
  * verbose watchers close
  */
 function _watcherShutdown() {
-    io.echoSync('closing watchers', newLine)
+    if (_applyVerbose()) {
+        io.echoSync('closing watchers', newLine)
+    }
 }
 
 /**
@@ -147,19 +161,23 @@ function _watcherShutdown() {
  * @param {string} file watcher change event file
  */
 function _watcherChange(file: string) {
-    io.echoSync('watcher detected change: ')
-    io.echoSync(file, highlight)
-    io.echoSync('', newLine)
+    if (_applyVerbose()) {
+        io.echoSync('watcher detected change: ')
+        io.echoSync(file, highlight)
+        io.echoSync('', newLine)
+    }
 }
 
 /**
  * verbose clean
  */
 function _clean() {
-    const config = buildConfig.state
-    io.echoSync('cleaning ')
-    io.echoSync(config.options.output, highlight)
-    io.echoSync('', newLine)
+    if (_applyVerbose()) {
+        const config = buildConfig.state
+        io.echoSync('cleaning ')
+        io.echoSync(config.options.output, highlight)
+        io.echoSync('', newLine)
+    }
 }
 
 const verbose = {
