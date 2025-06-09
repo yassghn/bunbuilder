@@ -396,10 +396,10 @@ function _hasArgs(parsed) {
 function _processParsed(parsed) {
   if (!_hasArgs(parsed)) {
     Object.assign(parsed.values, {
-      clean: true,
-      build: true,
       serve: true,
       watch: true,
+      clean: true,
+      build: true,
       verbose: true
     });
   }
@@ -522,53 +522,53 @@ var highlight = { color: data_default.options.verboseHighlightColor };
 function _applyVerbose() {
   return buildConfig_default.verbose;
 }
-async function _buildStart() {
+function _buildStart() {
   if (_applyVerbose()) {
     const config2 = buildConfig_default.state;
-    await io_default.echo("starting build...", newLine);
-    await io_default.echo("target: ");
-    await io_default.echo(config2.target, highlight);
-    await io_default.echo("", newLine);
+    io_default.echoSync("starting build...", newLine);
+    io_default.echoSync("target: ");
+    io_default.echoSync(config2.target, highlight);
+    io_default.echoSync("", newLine);
   }
 }
 function _copy(file) {
   if (_applyVerbose()) {
     const config2 = buildConfig_default.state;
-    io_default.queueEcho("copying file ");
-    io_default.queueEcho(file, highlight);
-    io_default.queueEcho(" to ");
-    io_default.queueEcho(config2.options.output, highlight);
-    io_default.queueEcho("", newLine);
+    io_default.echoSync("copying file ");
+    io_default.echoSync(file, highlight);
+    io_default.echoSync(" to ");
+    io_default.echoSync(config2.options.output, highlight);
+    io_default.echoSync("", newLine);
   }
 }
 function _buildResult(success) {
   if (_applyVerbose()) {
     if (success) {
       const options2 = { newLine: true, color: "green" };
-      io_default.queueEcho("build successful", options2);
+      io_default.echoSync("build successful", options2);
     } else {
       const options2 = { newLine: true, color: "red" };
-      io_default.queueEcho("build failed", options2);
+      io_default.echoSync("build failed", options2);
     }
   }
 }
 function _compile(file, dest) {
   if (_applyVerbose()) {
-    io_default.queueEcho("compiling file ");
-    io_default.queueEcho(file, highlight);
-    io_default.queueEcho(" to ");
-    io_default.queueEcho(dest, highlight);
-    io_default.queueEcho("", newLine);
+    io_default.echoSync("compiling file ");
+    io_default.echoSync(file, highlight);
+    io_default.echoSync(" to ");
+    io_default.echoSync(dest, highlight);
+    io_default.echoSync("", newLine);
   }
 }
 function _sigint() {
-  io_default.echo("sigint exit cleanup", newLine);
+  io_default.echoSync("sigint exit cleanup", newLine);
 }
 function _beforeExit() {
   io_default.echoSync("cleanup", newLine);
 }
 function _exit() {
-  io_default.echo("shutting down bunbuilder", newLine);
+  io_default.echoSync("shutting down bunbuilder", newLine);
 }
 function _serverStart(port) {
   io_default.echoSync("starting http server on ");
@@ -592,8 +592,8 @@ function _watcherChange(file) {
   io_default.echoSync("", newLine);
 }
 var verbose = {
-  buildStart: async () => {
-    await _buildStart();
+  buildStart: () => {
+    _buildStart();
   },
   buildResult: (success) => {
     _buildResult(success);
@@ -838,9 +838,27 @@ function _buildAll() {
   const config2 = buildConfig_default.state;
   _digestInput(config2.options.input);
 }
+function _inferRootDir(src, file) {
+  if (src !== null) {
+    const path = src + sep3 + file;
+    const stat = lstatSync(path);
+    if (stat.isFile()) {
+      return src;
+    }
+  }
+  throw new Error("cannot infer root directory");
+}
+function _buildSingle(src, file) {
+  const dir = _inferRootDir(src, file);
+  const files = [file];
+  _digestFiles(dir, files);
+}
 var build = {
   all: () => {
     _buildAll();
+  },
+  single: (src, file) => {
+    _buildSingle(src, file);
   }
 };
 var build_default = build;
@@ -1075,10 +1093,11 @@ var _options = {
 var _state3 = {
   pause: false
 };
-function _digestWatchEvent(eventType, file) {
+function _digestWatchEvent(eventType, file, src) {
   if (!_state3.pause) {
-    if (eventType == "change") {
+    if (eventType == "change" && file !== null) {
       verbose_default.watcherChange(file);
+      build_default.single(src, file);
     }
     _state3.pause = true;
     setTimeout(() => {
@@ -1097,7 +1116,7 @@ function _start() {
   input.forEach((src) => {
     verbose_default.watcherStart(src);
     const watcher = fsWatch(src, options2, (eventType, file) => {
-      _digestWatchEvent(eventType, file);
+      _digestWatchEvent(eventType, file, src);
     });
     watchers.push(watcher);
   });
