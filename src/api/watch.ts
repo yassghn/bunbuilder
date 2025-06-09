@@ -111,6 +111,8 @@ function _start() {
         const watcher = fsWatch(input, options, (eventType, file) => {
             _digestWatchEvent(eventType, file, input)
         })
+        // pause watchers after creating them
+        _pause()
         watchers.push(watcher)
     })
     _setCloser(watchers)
