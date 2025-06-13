@@ -19,7 +19,9 @@
     "jsdoc": "^4.0.4",
     "prettier": "^3.5.3",
     "prettier-eslint": "^16.4.2",
-    "serve-static-bun": "^0.5.3",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "serve-static-bun": "^0.5.3"
   }
 }
