@@ -38,6 +38,7 @@
         "echoHoldTimeout": 50,
         "limitTimeoutMultiplier": 4,
         "verboseHighlightColor": "cyan",
-        "noBundleHackImportPrefix": "@"
+        "noBundleHackImportPrefix": "@",
+        "tsconfigName": "tsconfig.json"
     }
 }
