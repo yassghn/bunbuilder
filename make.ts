@@ -2,24 +2,8 @@
  * make.ts
  */
 
-import type { Target } from 'bun'
 import { styleText } from 'node:util'
 import { stdout } from 'node:process'
-
-/**
- * @typedef BUILD_OPTIONS
- * @type {BUILD_OPTIONS} object
- * @param entry main module
- * @param outdir output directory
- * @param target intended execution environment
- * @param name customized generated file name
- */
-interface BUILD_OPTIONS {
-    entry: string
-    outdir: string
-    target: Target
-    name: string
-}
 
 /**
  * @typedef {object} ECHO_OPTIONS
@@ -73,16 +57,17 @@ interface ECHO_OPTIONS {
     }
 
     /**
-     * build options
+     * hew bun build config
      *
-     * @returns {BUILD_OPTIONS} build options
+     * @returns {Bun.BuildConfig} bun build configuration object
      */
-    function hewOptions() {
-        const options: BUILD_OPTIONS = {
-            entry: './src/bunbuilder.ts',
+    function _hewBuildConfig(): Bun.BuildConfig {
+        const options: Bun.BuildConfig = {
+            entrypoints: ['./src/bunbuilder.ts'],
             outdir: './bin',
             target: 'bun',
-            name: '[dir]/bunbuilder.[ext]'
+            naming: '[dir]/bunbuilder.[ext]',
+            packages: 'external'
         }
         return options
     }
@@ -93,15 +78,10 @@ interface ECHO_OPTIONS {
      * @returns {Promise<Bun.BuildOutput>} bun build output
      */
     async function _build(): Promise<Bun.BuildOutput> {
-        // get build options
-        const options = hewOptions()
+        // get build config
+        const config = _hewBuildConfig()
         // build
-        const output = await Bun.build({
-            entrypoints: [options.entry],
-            outdir: options.outdir,
-            target: options.target,
-            naming: options.name
-        })
+        const output = await Bun.build(config)
 
         return output
     }
