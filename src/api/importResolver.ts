@@ -44,7 +44,7 @@ function _hewTsConfigPath(): string {
  */
 function _filterComments(data: string): string {
     const regex = /\\"|"(?:\\"|[^"])*"|(\/\/.*)/g
-    const filteredData = data.replace(regex, (m, g) => g ? '' : m)
+    const filteredData = data.replace(regex, (m, g) => (g ? '' : m))
     return filteredData
 }
 
@@ -123,19 +123,22 @@ function _addJsExtension(importString: string): string {
  * @param {string} prefix no bundle hack prefix
  */
 async function _digestImports(transpiler: Bun.Transpiler, file: string, prefix: string) {
-    const contents = await Bun.file(file).text()
-    const newContents = { str: null as unknown as string }
-    const newImportLine = { str: '' }
-    const imports = transpiler.scanImports(contents)
+    const contents = {
+        str: await Bun.file(file).text(),
+        importsAltered: false
+    }
+    const imports = transpiler.scanImports(contents.str)
     imports.forEach((bunImport: Bun.Import) => {
         if (bunImport.kind == 'import-statement' && bunImport.path.startsWith(prefix)) {
+            const newImportLine = { str: '' }
             newImportLine.str = _prefixReplace(bunImport.path)
             newImportLine.str = _addJsExtension(newImportLine.str)
-            newContents.str = contents.replace(bunImport.path, newImportLine.str)
+            contents.str = contents.str.replace(bunImport.path, newImportLine.str)
+            contents.importsAltered = true
         }
     })
-    if (newContents.str !== null) {
-        await Bun.write(file, newContents.str)
+    if (contents.importsAltered) {
+        await Bun.write(file, contents.str)
     }
 }
 
