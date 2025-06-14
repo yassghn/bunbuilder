@@ -7,8 +7,8 @@
  */
 
 import shutdown from './shutdown'
-import process from 'node:process'
 import verbose from './verbose'
+import process from 'node:process'
 
 /**
  * generic shutdown function

@@ -7,7 +7,7 @@
  */
 
 import data from '../../data/data.json' assert { type: 'json' }
-import type { BUNBUILDER_CONFIG } from 'api/types'
+import type { BUNBUILDER_CONFIG } from './types'
 import { readFileSync } from 'node:fs'
 import { cwd } from 'node:process'
 import { sep } from 'node:path'
