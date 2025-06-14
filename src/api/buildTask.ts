@@ -73,12 +73,13 @@ function _hewVerboseBuildPlugin(dest: string): Bun.BunPlugin {
  * @returns {Bun.BuildConfig} bun build configuration object
  */
 function _hewBrowserBuildConfig(files: string[], dest: string): Bun.BuildConfig {
-    const bundleImports = data.buildTargets.browser.buildOptions.bundleImports
-    const packages = bundleImports ? 'bundle' : 'external'
+    const buildOptions = data.buildTargets.browser.buildOptions
+    const jsOutDir = buildOptions.jsOutDir
+    const packages = buildOptions.bundleImports ? 'bundle' : 'external'
     const verbosePlugin = _hewVerboseBuildPlugin(dest)
     const config: Bun.BuildConfig = {
         entrypoints: [...files],
-        outdir: dest + sep + 'js',
+        outdir: dest + sep + jsOutDir,
         target: 'browser',
         format: 'esm',
         packages: packages,

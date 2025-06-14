@@ -28,7 +28,8 @@
                 "compile": "compile"
             },
             "buildOptions": {
-                "bundleImports": false
+                "bundleImports": false,
+                "jsOutDir": "js"
             }
         }
     },
