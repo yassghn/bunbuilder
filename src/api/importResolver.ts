@@ -2,6 +2,7 @@
  * importResolver.ts
  */
 
+import obj from './obj'
 import data from '../../data/data.json' assert { type: 'json' }
 import { readFileSync } from 'node:fs'
 import { sep } from 'node:path'
@@ -90,14 +91,13 @@ function _hewBuildArtifactFiles(buildOutput: Bun.BuildOutput): string[] {
 }
 
 /**
- * bun no bundle hack: replace preconfigured prefix with relative path prefix
+ * bun no bundle hack: add relative path prefix
  *
  * @param {string} importString build artifact import string
  * @returns {string} import string with relative path import prefix
  */
-function _prefixReplace(importString: string): string {
-    const prefix = data.options.noBundleHackImportPrefix
-    const newImportString = importString.replace(prefix, './')
+function _addPrefix(importString: string): string {
+    const newImportString = './' + importString
     return newImportString
 }
 
@@ -116,6 +116,18 @@ function _addJsExtension(importString: string): string {
 }
 
 /**
+ * resolve prefixed import from tsconfig
+ *
+ * @param {string} importLine build artifact import string
+ * @returns {string} import resolved from tsconfig paths
+ */
+function _resolveFromTsConfigPaths(importLine: string): string {
+    const tsConfigPaths = _hewTsConfigPaths()
+    const val = obj.map.value.fromName(tsConfigPaths, importLine)
+    return val
+}
+
+/**
  * process import statements for a given build artifact
  *
  * @param {Bun.Transpiler} transpiler bun transpiler
@@ -131,7 +143,8 @@ async function _digestImports(transpiler: Bun.Transpiler, file: string, prefix: 
     imports.forEach((bunImport: Bun.Import) => {
         if (bunImport.kind == 'import-statement' && bunImport.path.startsWith(prefix)) {
             const newImportLine = { str: '' }
-            newImportLine.str = _prefixReplace(bunImport.path)
+            newImportLine.str = _resolveFromTsConfigPaths(bunImport.path)
+            newImportLine.str = _addPrefix(newImportLine.str)
             newImportLine.str = _addJsExtension(newImportLine.str)
             contents.str = contents.str.replace(bunImport.path, newImportLine.str)
             contents.importsAltered = true
@@ -151,8 +164,6 @@ function _correctImports(buildOutput: Bun.BuildOutput) {
     const files = _hewBuildArtifactFiles(buildOutput)
     const transpiler = new Bun.Transpiler()
     const prefix = data.options.noBundleHackImportPrefix
-    const paths = _hewTsConfigPaths()
-    console.dir(paths)
     files.forEach(async (file: string) => {
         await _digestImports(transpiler, file, prefix)
     })
