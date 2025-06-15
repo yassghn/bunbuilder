@@ -7,6 +7,7 @@ import data from '../../data/data.json' assert { type: 'json' }
 import { readFileSync } from 'node:fs'
 import { sep } from 'node:path'
 import { cwd } from 'node:process'
+import buildConfig from './buildConfig'
 
 /**
  * @typedef {object} TSCONFIG_COMP_OPS
@@ -128,6 +129,52 @@ function _resolveFromTsConfigPaths(importLine: string): string {
 }
 
 /**
+ * infer if build artifact is top level directory source file
+ *
+ * @param {string} file build artifact path
+ * @returns {boolean} top level source file flag
+ */
+function _isTopLevel(file: string): boolean {
+    const config = buildConfig.obj
+    const jsOutDir = data.buildTargets.browser.buildOptions.jsOutDir
+    const outDir = config.options.outdir.slice(2, config.options.outdir.length)
+    const path = outDir + sep + jsOutDir
+    const arr = file.split(path) as string[]
+    if (arr[1]) {
+        const spliced = arr[1].slice(2, arr[1].length)
+        if (spliced && spliced.indexOf(sep) < 0) return true
+    }
+    return false
+}
+
+/**
+ * normalize relative path import string
+ *
+ * @param {string } importLine build artifact import string
+ * @param {string} file build artifact path
+ * @returns {string} normalized relative path import string
+ */
+function _normalizePath(importLine: string, file: string): string {
+    const newImportLine = { str: importLine.valueOf() }
+    const arr = importLine.split('/')
+    const dir = sep + arr[1] + sep
+    const pathHasDir = file.indexOf(dir) > 0 ? true : false
+    if (_isTopLevel(file)) {
+        newImportLine.str = arr.join('/')
+    } else {
+        if (pathHasDir) {
+            const newArr = arr.filter((val: string) => val != arr[1])
+            console.dir(newArr)
+            newImportLine.str = newArr.join('/')
+        } else {
+            arr[0] = '..'
+            newImportLine.str = arr.join('/')
+        }
+    }
+    return newImportLine.str
+}
+
+/**
  * process import statements for a given build artifact
  *
  * @param {Bun.Transpiler} transpiler bun transpiler
@@ -145,6 +192,7 @@ async function _digestImports(transpiler: Bun.Transpiler, file: string, prefix: 
             const newImportLine = { str: '' }
             newImportLine.str = _resolveFromTsConfigPaths(bunImport.path)
             newImportLine.str = _addPrefix(newImportLine.str)
+            newImportLine.str = _normalizePath(newImportLine.str, file)
             newImportLine.str = _addJsExtension(newImportLine.str)
             contents.str = contents.str.replace(bunImport.path, newImportLine.str)
             contents.importsAltered = true
