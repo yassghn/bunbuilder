@@ -9,9 +9,11 @@ import { sep } from 'node:path'
 /**
  * @typedef {object} TSCONFIG_COMP_OPS
  * @type {TSCONFIG_COMP_OPS} tsconfig.json compilerOptions
+ * @property {string} baseUrl tsconfig.json compilerOptions baseUrl
  * @property {object} paths tsconfig.json compilerOptions paths
  */
 interface TSCONFIG_COMP_OPS {
+    baseUrl: string
     paths: object
 }
 
@@ -61,6 +63,17 @@ function _hewTsConfig(): TSCONFIG {
 }
 
 /**
+ * hew baseUrl from tsconfig.json
+ *
+ * @returns {string} string containing tsconfig.json compilerOptions.baseUrl
+ */
+function _hewBaseUrl(): string {
+    const tsconfig = _hewTsConfig() as TSCONFIG
+    const baseUrl = tsconfig.compilerOptions.baseUrl
+    return baseUrl
+}
+
+/**
  * hew paths from tsconfig.json
  *
  * @returns {object} object containing tsconfig.json compierOptions.paths
@@ -75,4 +88,8 @@ function hewTsConfigPaths(): object {
     return _hewTsConfigPaths()
 }
 
-export { hewTsConfigPaths }
+function hewBaseUrl(): string {
+    return _hewBaseUrl()
+}
+
+export { hewBaseUrl, hewTsConfigPaths }
