@@ -635,9 +635,46 @@ var verbose = {
 };
 var verbose_default = verbose;
 
+// src/api/tsconfig.ts
+import { readFileSync as readFileSync2 } from "fs";
+import { sep as sep2 } from "path";
+function _hewTsConfigPath() {
+  const name = data_default.options.tsconfigName;
+  const path = "." + sep2 + name;
+  return path;
+}
+function _filterComments(data) {
+  const regex = /\\"|"(?:\\"|[^"])*"|(\/\/.*)/g;
+  const filteredData = data.replace(regex, (m, g) => g ? "" : m);
+  return filteredData;
+}
+function _hewTsConfig() {
+  const path = _hewTsConfigPath();
+  const data = readFileSync2(path, "utf-8");
+  const filteredData = _filterComments(data);
+  const tsConfig = JSON.parse(filteredData);
+  return tsConfig;
+}
+function _hewBaseUrl() {
+  const tsconfig = _hewTsConfig();
+  const baseUrl = tsconfig.compilerOptions.baseUrl;
+  return baseUrl;
+}
+function _hewTsConfigPaths() {
+  const tsconfig = _hewTsConfig();
+  const paths = tsconfig.compilerOptions.paths;
+  return paths;
+}
+function hewTsConfigPaths() {
+  return _hewTsConfigPaths();
+}
+function hewBaseUrl() {
+  return _hewBaseUrl();
+}
+
 // src/api/buildTask.ts
 import { cp, existsSync, mkdirSync } from "fs";
-import { sep as sep3 } from "path";
+import { sep as sep4 } from "path";
 import { cwd as cwd3 } from "process";
 
 // src/api/obj.ts
@@ -658,34 +695,11 @@ var obj = {
 var obj_default = obj;
 
 // src/api/importResolver.ts
-import { readFileSync as readFileSync2 } from "fs";
-import { sep as sep2 } from "path";
+import { sep as sep3 } from "path";
 import { cwd as cwd2 } from "process";
-function _hewTsConfigPath() {
-  const name = data_default.options.tsconfigName;
-  const path = "." + sep2 + name;
-  return path;
-}
-function _filterComments(data) {
-  const regex = /\\"|"(?:\\"|[^"])*"|(\/\/.*)/g;
-  const filteredData = data.replace(regex, (m, g) => g ? "" : m);
-  return filteredData;
-}
-function _hewTsConfig() {
-  const path = _hewTsConfigPath();
-  const data = readFileSync2(path, "utf-8");
-  const filteredData = _filterComments(data);
-  const tsConfig = JSON.parse(filteredData);
-  return tsConfig;
-}
-function _hewTsConfigPaths() {
-  const tsconfig = _hewTsConfig();
-  const paths = tsconfig.compilerOptions.paths;
-  return paths;
-}
 function _hewBuildArtifactFiles(buildOutput) {
   const files = [];
-  const dir = cwd2().split(sep2).pop();
+  const dir = cwd2().split(sep3).pop();
   buildOutput.outputs.forEach((artifact) => {
     const index = artifact.path.indexOf(dir);
     const relPath = artifact.path.substring(index, artifact.path.length).replace(dir, ".");
@@ -705,7 +719,7 @@ function _addJsExtension(importString) {
   return importString;
 }
 function _resolveFromTsConfigPaths(importLine) {
-  const tsConfigPaths = _hewTsConfigPaths();
+  const tsConfigPaths = hewTsConfigPaths();
   const val = obj_default.map.value.fromName(tsConfigPaths, importLine);
   return val;
 }
@@ -713,11 +727,11 @@ function _isTopLevel(file) {
   const config2 = buildConfig_default.obj;
   const jsOutDir = data_default.buildTargets.browser.buildOptions.jsOutDir;
   const outDir = config2.options.outdir.slice(2, config2.options.outdir.length);
-  const path = outDir + sep2 + jsOutDir;
+  const path = outDir + sep3 + jsOutDir;
   const arr = file.split(path);
   if (arr[1]) {
     const spliced = arr[1].slice(2, arr[1].length);
-    if (spliced && spliced.indexOf(sep2) < 0)
+    if (spliced && spliced.indexOf(sep3) < 0)
       return true;
   }
   return false;
@@ -725,14 +739,13 @@ function _isTopLevel(file) {
 function _normalizePath(importLine, file) {
   const newImportLine = { str: importLine.valueOf() };
   const arr = importLine.split("/");
-  const dir = sep2 + arr[1] + sep2;
+  const dir = sep3 + arr[1] + sep3;
   const pathHasDir = file.indexOf(dir) > 0 ? true : false;
   if (_isTopLevel(file)) {
     newImportLine.str = arr.join("/");
   } else {
     if (pathHasDir) {
       const newArr = arr.filter((val) => val != arr[1]);
-      console.dir(newArr);
       newImportLine.str = newArr.join("/");
     } else {
       arr[0] = "..";
@@ -777,8 +790,8 @@ var importResolver_default = resolveImports;
 
 // src/api/buildTask.ts
 function _copyFile(dir, file, dest) {
-  const out = dest + sep3 + file;
-  const src = dir + sep3 + file;
+  const out = dest + sep4 + file;
+  const src = dir + sep4 + file;
   const options2 = { recursive: true };
   cp(src, out, options2, (err) => {
     if (err)
@@ -794,7 +807,7 @@ function _hewVerboseBuildPlugin(dest) {
   const plugin = {
     name: "verbose build output plugin",
     setup(build) {
-      const dir = cwd3().split(sep3).pop();
+      const dir = cwd3().split(sep4).pop();
       build.onLoad({ filter: /\.ts/, namespace: "file" }, (args) => {
         const path = args.path;
         const index = path.indexOf(dir);
@@ -806,14 +819,38 @@ function _hewVerboseBuildPlugin(dest) {
   };
   return plugin;
 }
+function _hewJsOutDir(files, jsOutDirOpt) {
+  const jsOutDir = { str: "" };
+  if (files.length > 1) {
+    jsOutDir.str = jsOutDirOpt;
+  } else {
+    if (files[0]) {
+      const fileArr = files[0].split(sep4);
+      const fileName = fileArr[fileArr.length - 1];
+      const baseUrl = hewBaseUrl();
+      const baseArr = baseUrl.split("/");
+      const lastBase = baseArr[baseArr.length - 1];
+      const index = fileArr.indexOf(lastBase) + 1;
+      const dirs = [];
+      for (let i = index;i < fileArr.length; i++) {
+        const p = fileArr[i];
+        if (p && p !== fileName) {
+          dirs.push(p);
+        }
+      }
+      jsOutDir.str = jsOutDirOpt + sep4 + dirs.join(sep4);
+    }
+  }
+  return jsOutDir.str;
+}
 function _hewBrowserBuildConfig(files, dest) {
   const buildOptions = data_default.buildTargets.browser.buildOptions;
-  const jsOutDir = buildOptions.jsOutDir;
+  const jsOutDir = _hewJsOutDir(files, buildOptions.jsOutDir);
   const packages = buildOptions.bundleImports ? "bundle" : "external";
   const verbosePlugin = _hewVerboseBuildPlugin(dest);
   const config2 = {
     entrypoints: [...files],
-    outdir: dest + sep3 + jsOutDir,
+    outdir: dest + sep4 + jsOutDir,
     target: "browser",
     format: "esm",
     packages,
@@ -825,7 +862,7 @@ function _hewBrowserBuildConfig(files, dest) {
 function _compileTargetBrowser(dir, files, dest) {
   const src = { files: [] };
   files.forEach((file) => {
-    src.files.push(dir + sep3 + file);
+    src.files.push(dir + sep4 + file);
   });
   const buildConfig2 = _hewBrowserBuildConfig(src.files, dest);
   return Bun.build(buildConfig2);
@@ -869,12 +906,12 @@ var buildTask_default = buildTask;
 
 // src/api/build.ts
 import { readdirSync, lstatSync } from "fs";
-import { extname as extname2, sep as sep4 } from "path";
+import { extname as extname2, sep as sep5 } from "path";
 function _getFiles(dir) {
   const retVal = { files: [] };
   const files = readdirSync(dir, { encoding: "utf-8", recursive: true });
   files.filter((item) => {
-    const relativePath = dir + sep4 + item;
+    const relativePath = dir + sep5 + item;
     return lstatSync(relativePath).isFile();
   }).forEach((file) => retVal.files.push(file));
   return retVal.files;
@@ -939,7 +976,7 @@ function _buildAll() {
 }
 function _inferRootDir(src, file) {
   if (src !== null) {
-    const path = src + sep4 + file;
+    const path = src + sep5 + file;
     const stat = lstatSync(path);
     if (stat.isFile()) {
       return src;
@@ -1050,7 +1087,7 @@ import {
   lstatSync as lstatSync2,
   watch as fsWatch
 } from "fs";
-import { sep as sep5 } from "path";
+import { sep as sep6 } from "path";
 var _options = {
   timeout: data_default.options.watchTimeout
 };
@@ -1072,7 +1109,7 @@ function _pause() {
 function _digestFile(file, src) {
   verbose_default.watcherChange(file);
   if (_isDirectory(src)) {
-    const path2 = src + sep5 + file;
+    const path2 = src + sep6 + file;
     if (!_isDirectory(path2)) {
       build_default.single(src, file);
     }
