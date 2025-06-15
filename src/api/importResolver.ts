@@ -164,7 +164,6 @@ function _normalizePath(importLine: string, file: string): string {
     } else {
         if (pathHasDir) {
             const newArr = arr.filter((val: string) => val != arr[1])
-            console.dir(newArr)
             newImportLine.str = newArr.join('/')
         } else {
             arr[0] = '..'
