@@ -8,6 +8,7 @@
 
 import buildConfig from './buildConfig'
 import verbose from './verbose'
+import { hewBaseUrl } from './tsconfig'
 import data from '../../data/data.json' assert { type: 'json' }
 import { cp, existsSync, mkdirSync } from 'node:fs'
 import { sep } from 'node:path'
@@ -66,6 +67,40 @@ function _hewVerboseBuildPlugin(dest: string): Bun.BunPlugin {
 }
 
 /**
+ * bun.Build handles an array containing a single file differently. for some reason
+ * it truncates the path. need to correct the path here.
+ *
+ * @param {string[]} files source files
+ * @param {string} jsOutDirOpt preconfigured js output directory
+ * @returns {string} corrected js output directory
+ */
+function _hewJsOutDir(files: string[], jsOutDirOpt: string): string {
+    const jsOutDir = { str: '' }
+    if (files.length > 1) {
+        jsOutDir.str = jsOutDirOpt
+    } else {
+        if (files[0]) {
+            // get subdirectories between file and preconfigured baseurl
+            const fileArr = files[0].split(sep)
+            const fileName = fileArr[fileArr.length - 1] as string
+            const baseUrl = hewBaseUrl()
+            const baseArr = baseUrl.split('/')
+            const lastBase = baseArr[baseArr.length - 1] as string
+            const index = fileArr.indexOf(lastBase) + 1
+            const dirs = [] as string[]
+            for (let i = index; i < fileArr.length; i++) {
+                const p = fileArr[i]
+                if (p && p !== fileName) {
+                    dirs.push(p)
+                }
+            }
+            jsOutDir.str = jsOutDirOpt + sep + dirs.join(sep)
+        }
+    }
+    return jsOutDir.str
+}
+
+/**
  * hew a bun build configuration object
  *
  * @param {string[]} files source files
@@ -74,7 +109,7 @@ function _hewVerboseBuildPlugin(dest: string): Bun.BunPlugin {
  */
 function _hewBrowserBuildConfig(files: string[], dest: string): Bun.BuildConfig {
     const buildOptions = data.buildTargets.browser.buildOptions
-    const jsOutDir = buildOptions.jsOutDir
+    const jsOutDir = _hewJsOutDir(files, buildOptions.jsOutDir)
     const packages = buildOptions.bundleImports ? 'bundle' : 'external'
     const verbosePlugin = _hewVerboseBuildPlugin(dest)
     const config: Bun.BuildConfig = {
