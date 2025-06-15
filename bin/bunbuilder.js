@@ -30,7 +30,8 @@ var data_default = {
         compile: "compile"
       },
       buildOptions: {
-        bundleImports: false
+        bundleImports: false,
+        jsOutDir: "js"
       }
     }
   },
@@ -708,6 +709,38 @@ function _resolveFromTsConfigPaths(importLine) {
   const val = obj_default.map.value.fromName(tsConfigPaths, importLine);
   return val;
 }
+function _isTopLevel(file) {
+  const config2 = buildConfig_default.obj;
+  const jsOutDir = data_default.buildTargets.browser.buildOptions.jsOutDir;
+  const outDir = config2.options.outdir.slice(2, config2.options.outdir.length);
+  const path = outDir + sep2 + jsOutDir;
+  const arr = file.split(path);
+  if (arr[1]) {
+    const spliced = arr[1].slice(2, arr[1].length);
+    if (spliced && spliced.indexOf(sep2) < 0)
+      return true;
+  }
+  return false;
+}
+function _normalizePath(importLine, file) {
+  const newImportLine = { str: importLine.valueOf() };
+  const arr = importLine.split("/");
+  const dir = sep2 + arr[1] + sep2;
+  const pathHasDir = file.indexOf(dir) > 0 ? true : false;
+  if (_isTopLevel(file)) {
+    newImportLine.str = arr.join("/");
+  } else {
+    if (pathHasDir) {
+      const newArr = arr.filter((val) => val != arr[1]);
+      console.dir(newArr);
+      newImportLine.str = newArr.join("/");
+    } else {
+      arr[0] = "..";
+      newImportLine.str = arr.join("/");
+    }
+  }
+  return newImportLine.str;
+}
 async function _digestImports(transpiler, file, prefix) {
   const contents = {
     str: await Bun.file(file).text(),
@@ -719,6 +752,7 @@ async function _digestImports(transpiler, file, prefix) {
       const newImportLine = { str: "" };
       newImportLine.str = _resolveFromTsConfigPaths(bunImport.path);
       newImportLine.str = _addPrefix(newImportLine.str);
+      newImportLine.str = _normalizePath(newImportLine.str, file);
       newImportLine.str = _addJsExtension(newImportLine.str);
       contents.str = contents.str.replace(bunImport.path, newImportLine.str);
       contents.importsAltered = true;
@@ -773,12 +807,13 @@ function _hewVerboseBuildPlugin(dest) {
   return plugin;
 }
 function _hewBrowserBuildConfig(files, dest) {
-  const bundleImports = data_default.buildTargets.browser.buildOptions.bundleImports;
-  const packages = bundleImports ? "bundle" : "external";
+  const buildOptions = data_default.buildTargets.browser.buildOptions;
+  const jsOutDir = buildOptions.jsOutDir;
+  const packages = buildOptions.bundleImports ? "bundle" : "external";
   const verbosePlugin = _hewVerboseBuildPlugin(dest);
   const config2 = {
     entrypoints: [...files],
-    outdir: dest + sep3 + "js",
+    outdir: dest + sep3 + jsOutDir,
     target: "browser",
     format: "esm",
     packages,
