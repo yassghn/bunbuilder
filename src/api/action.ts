@@ -25,13 +25,9 @@ async function _takeActionHelp() {
 
 /**
  * invoke build action
- *
- * @param {string[]} [files] individual files to build
  */
-function _takeActionBuild(files: string[] | undefined) {
-    if (!files) {
-        build.all()
-    }
+function _takeActionBuild() {
+    build.all()
 }
 
 /**
@@ -59,13 +55,12 @@ function _takeActionWatch() {
  * process action type
  *
  * @param {string} action action to invoke
- * @param {string[]} [files] individual files to build
  */
-async function _digestAction(action: string, files: string[] | undefined) {
+async function _digestAction(action: string) {
     switch (action) {
         case ACTION.build:
             verbose.buildStart()
-            _takeActionBuild(files)
+            _takeActionBuild()
             break
         case ACTION.clean:
             _takeActionClean()
@@ -92,7 +87,7 @@ async function _digestAction(action: string, files: string[] | undefined) {
  */
 async function _digestActions(actionPlan: ACTION_PLAN) {
     for (const action in actionPlan.actions) {
-        await _digestAction(action, actionPlan.files)
+        await _digestAction(action)
     }
 }
 

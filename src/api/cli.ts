@@ -66,33 +66,15 @@ function _hewParseArgsConfig(): object {
 }
 
 /**
- * hew files array by checking parsed positional arguments for individual files
- *
- * @param {PARSED_ARGS} parsed parsed cli arguments
- * @returns {string[]|null} array of individual files
- */
-function _hewParsedFiles(parsed: PARSED_ARGS): string[] | null {
-    // check for individual files
-    if (parsed.positionals.length > 2) {
-        const length = parsed.positionals.length
-        const files = parsed.positionals.slice(2, length)
-        return files
-    }
-    return null
-}
-
-/**
  * hew bunbuilder action plan given parsed cli arguments and positionals
  *
  * @param {PARSED_ARGS} parsed parsed cli arguments
- * @param {string[]|null} files array of individual files
  * @returns {ACTION_PLAN} bunbuilder action plan
  */
-function _hewActionPlan(parsed: PARSED_ARGS, files: string[] | null): ACTION_PLAN {
-    const actions = { ...parsed.values }
+function _hewActionPlan(args: PARSED_ARGS): ACTION_PLAN {
+    const actions = { ...args }
     const actionPlan: ACTION_PLAN = {
-        actions: { ...actions },
-        files: files == null ? undefined : [...files]
+        actions: { ...actions }
     }
     return actionPlan
 }
@@ -103,8 +85,8 @@ function _hewActionPlan(parsed: PARSED_ARGS, files: string[] | null): ACTION_PLA
  * @param parsed
  * @returns {boolean} flag indicating if any arguments were parsed
  */
-function _hasArgs(parsed: PARSED_ARGS): boolean {
-    if (Object.keys(parsed.values).length > 0) return true
+function _hasArgs(args: PARSED_ARGS): boolean {
+    if (Object.keys(args).length > 0) return true
     return false
 }
 
@@ -114,10 +96,10 @@ function _hasArgs(parsed: PARSED_ARGS): boolean {
  * @param {PARSED_ARGS} parsed parsed cli arguments
  * @returns {ACTION_PLAN} bunbuilder action plan
  */
-function _processParsed(parsed: PARSED_ARGS): ACTION_PLAN {
-    if (!_hasArgs(parsed)) {
+function _processParsed(args: PARSED_ARGS): ACTION_PLAN {
+    if (!_hasArgs(args)) {
         // when no args are passed default to swcbv
-        Object.assign(parsed.values, {
+        Object.assign(args, {
             serve: true,
             watch: true,
             clean: true,
@@ -125,10 +107,8 @@ function _processParsed(parsed: PARSED_ARGS): ACTION_PLAN {
             verbose: true
         })
     }
-    // get files
-    const files = _hewParsedFiles(parsed)
     // action plan
-    const actionPlan = _hewActionPlan(parsed, files)
+    const actionPlan = _hewActionPlan(args)
     // solo help checkup
     util.soloHelpCheckup(actionPlan)
     return actionPlan
@@ -141,8 +121,8 @@ function _processParsed(parsed: PARSED_ARGS): ACTION_PLAN {
  */
 function _argsParse(): ACTION_PLAN {
     const config = _hewParseArgsConfig()
-    const parsed = parseArgs(config)
-    const actionPlan = _processParsed(parsed)
+    const args = parseArgs(config).values
+    const actionPlan = _processParsed(args)
     return actionPlan
 }
 
