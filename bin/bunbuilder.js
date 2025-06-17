@@ -4,7 +4,7 @@ var data_default = {
   configFileName: "bunbuilder.config.json",
   help: {
     description: "bunbuilder help",
-    usage: "$ bunx bunbuilder [OPTIONS] [[FILES][DIRECTORIES]]",
+    usage: "$ bunx bunbuilder [OPTIONS]",
     options: {
       build: "-b, --build     build bun app",
       watch: "-w, --watch     watch source directory for changes",
@@ -14,7 +14,7 @@ var data_default = {
       help: "-h, --help      print this help"
     },
     examples: {
-      build: "$ bunx bunbuilder -b .\\src\\ts\\index.ts",
+      build: "$ bunx bunbuilder -b",
       watch: "$ bunx bunbuilder -w",
       serve: "$ bunx bunbuilder -s",
       clean: "$ bunx bunbuilder -c",
@@ -349,30 +349,21 @@ function _hewParseArgsConfig() {
   };
   return config2;
 }
-function _hewParsedFiles(parsed) {
-  if (parsed.positionals.length > 2) {
-    const length = parsed.positionals.length;
-    const files = parsed.positionals.slice(2, length);
-    return files;
-  }
-  return null;
-}
-function _hewActionPlan(parsed, files) {
-  const actions = { ...parsed.values };
+function _hewActionPlan(args) {
+  const actions = { ...args };
   const actionPlan = {
-    actions: { ...actions },
-    files: files == null ? undefined : [...files]
+    actions: { ...actions }
   };
   return actionPlan;
 }
-function _hasArgs(parsed) {
-  if (Object.keys(parsed.values).length > 0)
+function _hasArgs(args) {
+  if (Object.keys(args).length > 0)
     return true;
   return false;
 }
-function _processParsed(parsed) {
-  if (!_hasArgs(parsed)) {
-    Object.assign(parsed.values, {
+function _processParsed(args) {
+  if (!_hasArgs(args)) {
+    Object.assign(args, {
       serve: true,
       watch: true,
       clean: true,
@@ -380,15 +371,14 @@ function _processParsed(parsed) {
       verbose: true
     });
   }
-  const files = _hewParsedFiles(parsed);
-  const actionPlan = _hewActionPlan(parsed, files);
+  const actionPlan = _hewActionPlan(args);
   util_default.soloHelpCheckup(actionPlan);
   return actionPlan;
 }
 function _argsParse() {
   const config2 = _hewParseArgsConfig();
-  const parsed = parseArgs(config2);
-  const actionPlan = _processParsed(parsed);
+  const args = parseArgs(config2).values;
+  const actionPlan = _processParsed(args);
   return actionPlan;
 }
 var cli = {
@@ -1163,10 +1153,8 @@ var ACTION = {
 async function _takeActionHelp() {
   await util_default.printHelp();
 }
-function _takeActionBuild(files) {
-  if (!files) {
-    build_default.all();
-  }
+function _takeActionBuild() {
+  build_default.all();
 }
 function _takeActionClean() {
   clean_default.outdir();
@@ -1177,11 +1165,11 @@ function _takeActionServe() {
 function _takeActionWatch() {
   watch_default.start();
 }
-async function _digestAction(action, files) {
+async function _digestAction(action) {
   switch (action) {
     case ACTION.build:
       verbose_default.buildStart();
-      _takeActionBuild(files);
+      _takeActionBuild();
       break;
     case ACTION.clean:
       _takeActionClean();
@@ -1202,7 +1190,7 @@ async function _digestAction(action, files) {
 }
 async function _digestActions(actionPlan) {
   for (const action in actionPlan.actions) {
-    await _digestAction(action, actionPlan.files);
+    await _digestAction(action);
   }
 }
 function _filterVerbose(actionPlan) {
