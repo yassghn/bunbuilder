@@ -2,7 +2,7 @@
     "configFileName": "bunbuilder.config.json",
     "help": {
         "description": "bunbuilder help",
-        "usage": "$ bunx bunbuilder [OPTIONS] [[FILES][DIRECTORIES]]",
+        "usage": "$ bunx bunbuilder [OPTIONS]",
         "options": {
             "build":   "-b, --build     build bun app",
             "watch":   "-w, --watch     watch source directory for changes",
@@ -12,7 +12,7 @@
             "help" :   "-h, --help      print this help"
         },
         "examples": {
-            "build": "$ bunx bunbuilder -b .\\src\\ts\\index.ts",
+            "build": "$ bunx bunbuilder -b",
             "watch": "$ bunx bunbuilder -w",
             "serve": "$ bunx bunbuilder -s",
             "clean": "$ bunx bunbuilder -c",
