@@ -5,17 +5,6 @@
 /**
  * @typedef {object} PARSED_ARGS
  * @type {PARSED_ARGS} parsed cli arguments
- * @property {object} values cli arguments
- * @property {string[]} positionals positional cli aruments
- */
-interface PARSED_ARGS {
-    values: object
-    positionals: string[]
-}
-
-/**
- * @typedef {object} ACTIONS
- * @type {ACTIONS} action plan actions
  * @property {boolean} [build] build flag
  * @property {boolean} [watch] watch flag
  * @property {boolean} [serve] serve flag
@@ -23,7 +12,7 @@ interface PARSED_ARGS {
  * @property {boolean} [verbose] verbose flag
  * @property {boolean} [help] help flag
  */
-type ACTIONS = {
+interface PARSED_ARGS {
     build?: boolean
     watch?: boolean
     serve?: boolean
@@ -33,14 +22,18 @@ type ACTIONS = {
 }
 
 /**
+ * @typedef {PARSED_ARGS} ACTIONS
+ * @type {ACTIONS} action plan actions
+ */
+interface ACTIONS extends PARSED_ARGS {}
+
+/**
  * @typedef {object} ACTION_PLAN
  * @type {ACTION_PLAN} bunbuilder action plan
  * @property {object} actions bunbuilder actions
- * @property {string[]} [files] individual files for actions
  */
 interface ACTION_PLAN {
     actions: ACTIONS
-    files: string[] | undefined
 }
 
 const ACTION = {
