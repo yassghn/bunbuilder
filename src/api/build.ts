@@ -177,21 +177,26 @@ function _buildAll() {
     const config = buildConfig.obj
     // digest all input sources
     _digestInput(config.options.inputs)
+    // digest all resources
+    _digestResources(config.options.resources)
 }
 
 /**
  * infer root directory of file
  *
- * @param {string|null} src user bunbuilder configuration input source
+ * @param {string} src user bunbuilder configuration input source
  * @param {string} file source file to build
  * @returns {string} inferred root directory
  */
-function _inferRootDir(src: string | null, file: string): string {
-    if (src !== null) {
-        const path = src + sep + file
-        const stat = lstatSync(path)
+function _inferRootDir(file: string): string {
+    const exists = existsSync(file)
+    if (exists) {
+        const stat = lstatSync(file)
         if (stat.isFile()) {
-            return src
+            const firstDir = file.split(sep)[0]
+            if (firstDir) {
+                return firstDir
+            }
         }
     }
     throw new Error('cannot infer root directory')
@@ -214,7 +219,7 @@ const build = {
         _buildAll()
     },
 
-    single: (src: string | null, file: string) => {
+    single: (src: string, file: string) => {
         _buildSingle(src, file)
     }
 }
