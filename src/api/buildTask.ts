@@ -23,7 +23,7 @@ import resolveImports from './importResolver'
  */
 function _copyFile(dir: string, file: string, dest: string) {
     const out = dest + sep + file
-    const src = dir + sep + file
+    const src = file.includes(dir) ? file : dir + sep + file
     const options = { recursive: true }
     cp(src, out, options, (err: any) => {
         if (err) throw err
