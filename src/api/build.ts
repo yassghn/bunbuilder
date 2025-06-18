@@ -146,6 +146,25 @@ function _digestInput(input: string[]) {
             const files = _getFiles(src)
             _digestFiles(src, files)
         } else {
+            throw new Error('unimplemented')
+        }
+    }
+}
+
+function _digestResources(resources: string[]) {
+    // iterate resources array
+    for (const src of resources) {
+        // lstat resource
+        const stat = lstatSync(src)
+        // check for directory
+        if (stat.isDirectory()) {
+            // recursively get all files
+            const files = _getFiles(src)
+            // append src dir
+            const newFiles = files.map((file: string) => src + sep + file)
+            _digestFiles(src, newFiles)
+        } else {
+            throw new Error('unimplemented')
         }
     }
 }
