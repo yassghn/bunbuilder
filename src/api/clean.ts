@@ -24,9 +24,21 @@ function _cleanOutdir() {
     })
 }
 
+function _cleanSingleFile(src: string) {
+    verbose.cleanSingle(src)
+    const config = buildConfig.obj
+    const outdir = config.options.outdir
+    const options = { force: true }
+    rmSync(path.join(outdir, src), options)
+}
+
 const clean = {
     outdir: () => {
         _cleanOutdir()
+    },
+
+    singleFile: (path: string) => {
+        _cleanSingleFile(path)
     }
 }
 
