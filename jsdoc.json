@@ -3,6 +3,7 @@
 		"include": [
 			"src/",
 			"package.json",
+			"make.ts",
 			"readme.md"
 		],
 		"includePattern": "\\.(ts)$",
@@ -23,7 +24,7 @@
 			],
 			"sections": [
 				"Modules",
-				"Namespaces",
+				"Interfaces",
 				"Global"
 			],
 			"create_style": "code:not([class]) { padding-left: .5em };"
@@ -33,6 +34,7 @@
 		"allowUnknownTags": true
 	},
 	"plugins": [
+		"node_modules/better-docs/typescript",
 		"plugins/markdown"
 	],
 	"markdown": {

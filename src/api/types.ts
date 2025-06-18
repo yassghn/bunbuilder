@@ -1,10 +1,15 @@
 /**
  * types.ts
+ *
+ * @memberof bunbuilder/api
+ * @module bunbuilder/api/types
+ * @property {bunbuilder.module:bunbuilder/api/types} types typescript types
  */
 
 /**
- * @typedef {object} PARSED_ARGS
- * @type {PARSED_ARGS} parsed cli arguments
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {PARSED_ARGS}
+ * @typedef {object} PARSED_ARGS parsed cli arguments
  * @property {boolean} [build] build flag
  * @property {boolean} [watch] watch flag
  * @property {boolean} [serve] serve flag
@@ -22,14 +27,16 @@ interface PARSED_ARGS {
 }
 
 /**
- * @typedef {PARSED_ARGS} ACTIONS
- * @type {ACTIONS} action plan actions
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {ACTIONS}
+ * @typedef {PARSED_ARGS} ACTIONS action plan actions
  */
 interface ACTIONS extends PARSED_ARGS {}
 
 /**
- * @typedef {object} ACTION_PLAN
- * @type {ACTION_PLAN} bunbuilder action plan
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {ACTION_PLAN}
+ * @typedef {object} ACTION_PLAN bunbuilder action plan
  * @property {object} actions bunbuilder actions
  */
 interface ACTION_PLAN {
@@ -45,28 +52,32 @@ const ACTION = {
 }
 
 /**
- * @typedef {string} BUILD_TARGET
- * @type {BUILD_TARGET} bunbuilder build target
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {BUILD_TARGET}
+ * @typedef {string} BUILD_TARGET bunbuilder build target
  */
 type BUILD_TARGET = 'browser' | 'OTHER_UNCONFIGURED_TARGETS'
 
 /**
- * @typedef {string} BROWSER_BUILD_OPS
- * @type {BROWSER_BUILD_OPS} browser target build operations
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {BROWSER_BUILD_OPS}
+ * @typedef {string} BROWSER_BUILD_OPS browser target build operations
  */
 type BROWSER_BUILD_OPS = 'copy' | 'compile'
 
 type OTHER_UNCONFIGURED_BUILD_OPS = ''
 
 /**
- * @typedef {string} BUILD_OPS
- * @type {BUILD_OPS} build operations aggregate
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {BUILD_OPS}
+ * @typedef {string} BUILD_OPS build operations aggregate
  */
 type BUILD_OPS = BROWSER_BUILD_OPS | OTHER_UNCONFIGURED_BUILD_OPS
 
 /**
- * @typedef {object} OP_MAP
- * @type {OP_MAP} map build operations to extensions
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {OP_MAP}
+ * @typedef {object} OP_MAP map build operations to extensions
  * @property {string} ext file extension
  * @property {BUILD_OPS} op build operation
  */
@@ -76,22 +87,25 @@ interface OP_MAP {
 }
 
 /**
- * @typedef {OP_MAP} BROWSER_BUILD_OP_MAP
- * @type {BROWSER_BUILD_OP_MAP} browser target build operation per extension
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {BROWSER_BUILD_OP_MAP}
+ * @typedef {OP_MAP} BROWSER_BUILD_OP_MAP browser target build operation per extension
  */
 interface BROWSER_BUILD_OP_MAP extends OP_MAP {}
 
 interface OTHER_UNCONFIGURED_BUILD_OP_MAP extends OP_MAP {}
 
 /**
- * @typedef {OP_MAP} BUILD_OP_MAP
- * @type {BUILD_OP_MAP} build operations map aggregate
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {BUILD_OP_MAP}
+ * @typedef {OP_MAP} BUILD_OP_MAP build operations map aggregate
  */
 type BUILD_OP_MAP = BROWSER_BUILD_OP_MAP | OTHER_UNCONFIGURED_BUILD_OP_MAP
 
 /**
- * @typedef {object} TARGET_OPTIONS
- * @type {TARGET_OPTIONS} generic bunbuilder target options
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {TARGET_OPTIONS}
+ * @typedef {object} TARGET_OPTIONS generic bunbuilder target options
  * @property {string[]} inputs input files/folders for build
  * @property {string} outdir output directory
  * @property {string[]} resources application resources
@@ -104,8 +118,9 @@ interface TARGET_OPTIONS {
 }
 
 /**
- * @typedef {object} BROWSER_TARGET_OPTIONS
- * @type {BROWSER_TARGET_OPTIONS} browser specific build options
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {BROWSER_TARGET_OPTIONS}
+ * @typedef {object} BROWSER_TARGET_OPTIONS browser specific build options
  * @property {boolean} singlePage single page web application flag
  */
 interface BROWSER_TARGET_OPTIONS extends TARGET_OPTIONS {
@@ -115,14 +130,16 @@ interface BROWSER_TARGET_OPTIONS extends TARGET_OPTIONS {
 interface OTHER_UNCONFIGURED_TARGET_OPTIONS extends TARGET_OPTIONS {}
 
 /**
- * @typedef {object} BUILD_TARGET_OPTIONS
- * @type {BUILD_TARGET_OPTIONS} build target specific options
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {BUILD_TARGET_OPTIONS}
+ * @typedef {object} BUILD_TARGET_OPTIONS build target specific options
  */
 type BUILD_TARGET_OPTIONS = BROWSER_TARGET_OPTIONS | OTHER_UNCONFIGURED_TARGET_OPTIONS
 
 /**
- * @typedef {object} BUNBUILDER_CONFIG
- * @type {BUNBUILDER_CONFIG} bunbuilder configuration
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {BUNBUILDER_CONFIG}
+ * @typedef {object} BUNBUILDER_CONFIG bunbuilder configuration
  * @property {BUILD_TARGET} target build target
  * @property {BUILD_TARGET_OPTIONS} options build target options
  */
@@ -132,8 +149,9 @@ interface BUNBUILDER_CONFIG {
 }
 
 /**
- * @typedef {object} HELP_STRING
- * @type {HELP_STRING} help output string
+ * @memberof bunbuilder/api.module:bunbuilder/api/types
+ * @type {HELP_STRING}
+ * @typedef {object} HELP_STRING help output string
  * @property {string} label help output section label
  * @property {string} str help output section
  */

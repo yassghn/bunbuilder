@@ -1,5 +1,9 @@
 /**
  * obj.ts
+ *
+ * @memberof bunbuilder/api
+ * @module bunbuilder/api/obj
+ * @property {bunbuilder.module:bunbuilder/api/obj} obj js api object toolkit
  */
 
 /**

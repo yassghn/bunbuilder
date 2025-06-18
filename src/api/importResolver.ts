@@ -1,5 +1,9 @@
 /**
  * importResolver.ts
+ *
+ * @memberof bunbuilder/api
+ * @module bunbuilder/api/importResolver
+ * @property {bunbuilder.module:bunbuilder/api/importResolver} importResolver post processing build artifacts for bun no bundle hack
  */
 
 import obj from './obj'

@@ -9,8 +9,9 @@
 import type { BUNBUILDER_CONFIG } from './types'
 
 /**
- * @typedef {object} BUNBUILDER_CONFIG_STATE
- * @type {BUNBUILDER_CONFIG_STATE} bunbuilder configuration storage
+ * @memberof bunbuilder/api.module:bunbuilder/api/buildConfig
+ * @type {BUNBUILDER_CONFIG_STATE}
+ * @typedef {object} BUNBUILDER_CONFIG_STATE bunbuilder configuration storage
  * @property {BUNBUILDER_CONFIG|null} config bunbuilder configuration
  */
 interface BUNBUILDER_CONFIG_STATE {

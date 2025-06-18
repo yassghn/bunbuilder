@@ -3,7 +3,7 @@
  *
  * @memberof bunbuilder/api
  * @module bunbuilder/api/cli
- * @property {bunbuilder.module:bunbuilder/api/cli}
+ * @property {bunbuilder.module:bunbuilder/api/cli} cli parse cli args
  */
 
 import util from './util'

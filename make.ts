@@ -1,13 +1,17 @@
 /**
  * make.ts
+ *
+ * @module make.module:make
+ * @property {make.module:make} make build bunbuilder
  */
 
 import { styleText } from 'node:util'
 import { stdout } from 'node:process'
 
 /**
- * @typedef {object} ECHO_OPTIONS
- * @type {ECHO_OPTIONS} options for echo
+ * @memberof make.module:make
+ * @type {ECHO_OPTIONS}
+ * @typedef {object} ECHO_OPTIONS options for echo
  * @property {boolean} newLine add new line flag
  * @property {string} color color
  */
@@ -17,9 +21,11 @@ interface ECHO_OPTIONS {
 }
 
 (async function () {
+
     /**
      * add echo options to string
      *
+     * @memberof make.module:make
      * @param {string} str string to add echo options to
      * @param {ECHO_OPTIONS} [options=undefined] echo options
      * @returns {string} optionated string
@@ -42,6 +48,7 @@ interface ECHO_OPTIONS {
     /**
      * write str to stdout
      *
+     * @memberof make.module:make
      * @param {string} str string to write
      * @param {ECHO_OPTIONS} [options=undefined] echo options
      */
@@ -59,6 +66,7 @@ interface ECHO_OPTIONS {
     /**
      * hew bun build config
      *
+     * @memberof make.module:make
      * @returns {Bun.BuildConfig} bun build configuration object
      */
     function _hewBuildConfig(): Bun.BuildConfig {
@@ -75,6 +83,7 @@ interface ECHO_OPTIONS {
     /**
      * build bunbuilder
      *
+     * @memberof make.module:make
      * @returns {Promise<Bun.BuildOutput>} bun build output
      */
     async function _build(): Promise<Bun.BuildOutput> {
@@ -89,6 +98,7 @@ interface ECHO_OPTIONS {
     /**
      * process build result
      *
+     * @memberof make.module:make
      * @param {Bun.BuildOutput} output
      */
     function _processBuildResult(output: Bun.BuildOutput) {
@@ -105,6 +115,8 @@ interface ECHO_OPTIONS {
 
     /**
      * start build and process output
+     *
+     * @memberof make.module:make
      */
     async function _startBuild() {
         const output = await _build()

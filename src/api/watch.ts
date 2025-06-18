@@ -3,7 +3,7 @@
  *
  * @memberof bunbuilder/api
  * @module bunbuilder/api/watch
- * @property {bunbuilder.module:bunbuilder/api/watch}
+ * @property {bunbuilder.module:bunbuilder/api/watch} watch watch bunbuilder configuration inputs/resources
  */
 
 import buildConfig from './buildConfig'

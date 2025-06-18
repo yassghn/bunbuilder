@@ -3,7 +3,7 @@
  *
  * @memberof bunbuilder/api
  * @module bunbuilder/api/serve
- * @property {bunbuilder.module:bunbuilder/api/serve}
+ * @property {bunbuilder.module:bunbuilder/api/serve} serve bun http server to serve bun builder configuration outdir
  */
 
 import buildConfig from './buildConfig'

@@ -3,7 +3,7 @@
  *
  * @memberof bunbuilder/api
  * @module bunbuilder/api/clean
- * @property {bunbuilder.module:bunbuilder/api/clean}
+ * @property {bunbuilder.module:bunbuilder/api/clean} clean bunbuilder configuration outdir cleaning
  */
 
 import buildConfig from './buildConfig'

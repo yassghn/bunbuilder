@@ -1,5 +1,9 @@
 /**
  * tsconfig.js
+ *
+ * @memberof bunbuilder/api
+ * @module bunbuilder/api/tsconfig
+ * @property {bunbuilder.module:bunbuilder/api/tsconfig} tsconfig hew tsconfig json as object
  */
 
 import data from '../../data/data.json' assert { type: 'json' }
@@ -7,8 +11,9 @@ import { readFileSync } from 'node:fs'
 import { sep } from 'node:path'
 
 /**
- * @typedef {object} TSCONFIG_COMP_OPS
- * @type {TSCONFIG_COMP_OPS} tsconfig.json compilerOptions
+ * @memberof bunbuilder/api.module:bunbuilder/api/tsconfig
+ * @type {TSCONFIG_COMP_OPS}
+ * @typedef {object} TSCONFIG_COMP_OPS tsconfig.json compilerOptions
  * @property {string} baseUrl tsconfig.json compilerOptions baseUrl
  * @property {object} paths tsconfig.json compilerOptions paths
  */
@@ -18,8 +23,9 @@ interface TSCONFIG_COMP_OPS {
 }
 
 /**
- * @typedef {object} TSCONFIG
- * @type {TSCONFIG} tsconfig.json js object
+ * @memberof bunbuilder/api.module:bunbuilder/api/tsconfig
+ * @type {TSCONFIG}
+ * @typedef {object} TSCONFIG tsconfig.json js object
  * @property {TSCONFIG_COMP_OPS} compilerOptions tsconfig.json compilerOptions
  */
 interface TSCONFIG {

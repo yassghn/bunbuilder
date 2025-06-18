@@ -1,5 +1,8 @@
 /**
  * bunbuilder.ts
+ *
+ * @module bunbuilder.module:bunbuilder
+ * @property {bunbuilder.module:bunbuilder} bunbuilder main
  */
 
 import util from './api/util'
@@ -14,6 +17,8 @@ import type { ACTION_PLAN, BUNBUILDER_CONFIG } from './api/types'
 
     /**
      * parse user's bunbuilder config json
+     *
+     * @memberof bunbuilder.module:bunbuilder
      */
     function _parseConfig() {
         const conf: BUNBUILDER_CONFIG = config.parse()
@@ -22,6 +27,8 @@ import type { ACTION_PLAN, BUNBUILDER_CONFIG } from './api/types'
 
     /**
      * parse cli args and start action plan
+     *
+     * @memberof bunbuilder.module:bunbuilder
      */
     async function _startActionPlan() {
         const actionPlan: ACTION_PLAN = cli.argsParse()
@@ -30,6 +37,8 @@ import type { ACTION_PLAN, BUNBUILDER_CONFIG } from './api/types'
 
     /**
      * bun.sh is not to be trusted. they are being sunsetted.
+     *
+     * @memberof bunbuilder.module:bunbuilder
      */
     async function _bunbuilder() {
         osEvents.handle()

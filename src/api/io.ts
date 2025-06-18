@@ -16,8 +16,9 @@ const options = {
 }
 
 /**
- * @typedef {object} ECHO_OPTIONS
- * @type {ECHO_OPTIONS} options for echo
+ * @memberof bunbuilder/api.module:bunbuilder/api/io
+ * @type {ECHO_OPTIONS}
+ * @typedef {object} ECHO_OPTIONS options for echo
  * @property {boolean} newLine add new line flag
  * @property {string} color color
  */
@@ -27,8 +28,8 @@ interface ECHO_OPTIONS {
 }
 
 /**
- * @typedef {object} ECHO_STR_OPTS
- * @type {ECHO_STR_OPTS} echo string and options
+ * @type {ECHO_STR_OPTS}
+ * @typedef {object} ECHO_STR_OPTS echo string and options
  * @property {string} str echo string
  * @property {ECHO_OPTIONS} options echo options
  */
@@ -176,7 +177,7 @@ async function _echo(str: string, options: ECHO_OPTIONS | undefined = undefined)
 
 /**
  * synchronous echo
- * 
+ *
  * @param {string} str string to write
  * @param {ECHO_OPTIONS} [options=undefined] echo options
  */
