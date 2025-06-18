@@ -82,7 +82,7 @@ function _hewActionPlan(args: PARSED_ARGS): ACTION_PLAN {
 /**
  * check if any arguments were parsed from cli
  *
- * @param parsed
+ * @param {PARSED_ARGS} parsed parsed cli arguments
  * @returns {boolean} flag indicating if any arguments were parsed
  */
 function _hasArgs(args: PARSED_ARGS): boolean {

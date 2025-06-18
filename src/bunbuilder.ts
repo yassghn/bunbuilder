@@ -13,7 +13,7 @@ import type { ACTION_PLAN, BUNBUILDER_CONFIG } from './api/types'
 (async function () {
 
     /**
-     * parse config and add to buildConfig state
+     * parse user's bunbuilder config json
      */
     function _parseConfig() {
         const conf: BUNBUILDER_CONFIG = config.parse()

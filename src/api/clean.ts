@@ -12,7 +12,7 @@ import { rmSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
 /**
- * delete everything inside of bunbuilder configuration output directory
+ * delete everything inside of bunbuilder configuration outdir
  */
 function _cleanOutdir() {
     verbose.clean()
@@ -24,6 +24,11 @@ function _cleanOutdir() {
     })
 }
 
+/**
+ * clean single file from bunbuilder configuration outdir
+ *
+ * @param {string} src relative path of file to be cleaned
+ */
 function _cleanSingleFile(src: string) {
     verbose.cleanSingle(src)
     const config = buildConfig.obj

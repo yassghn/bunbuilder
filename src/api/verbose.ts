@@ -168,6 +168,11 @@ function _watcherChange(file: string) {
     }
 }
 
+/**
+ * verbose new file
+ *
+ * @param {string} file file triggering watch event
+ */
 function _watcherNewFile(file: string) {
     if (_applyVerbose()) {
         io.echoSync('watcher detected new file: ')
@@ -176,6 +181,11 @@ function _watcherNewFile(file: string) {
     }
 }
 
+/**
+ * verbose file removed
+ *
+ * @param {string} file file triggering watch event
+ */
 function _watcherFileRemoved(file: string) {
     if (_applyVerbose()) {
         io.echoSync('watcher detected removed file: ')
@@ -196,6 +206,11 @@ function _clean() {
     }
 }
 
+/**
+ * verbose clean single file
+ *
+ * @param {string} path relative path of file being cleaned
+ */
 function _cleanSingle(path: string) {
     if (_applyVerbose()) {
         const config = buildConfig.obj

@@ -45,6 +45,12 @@ function _isDirectory(src: string): boolean {
     return false
 }
 
+/**
+ * check if src is a bunbuilder configuration inputs directory
+ *
+ * @param {string} src user bunbuilder configuration input source
+ * @returns {boolean} flag indicating if src is a preconfigured input directory
+ */
 function _isInputDirectory(src: string): boolean {
     const config = buildConfig.obj
     const inputs = config.options.inputs
@@ -54,6 +60,13 @@ function _isInputDirectory(src: string): boolean {
     return false
 }
 
+/**
+ * check if a file was removed from the source tree
+ *
+ * @param {string} file file triggering event
+ * @param {string} src user bunbuilder configuration input source
+ * @returns {boolean} flag indicating if file was removed
+ */
 function _fileWasRemoved(file: string, src: string): boolean {
     const path = src + sep + file
     const exists = existsSync(path)
@@ -61,6 +74,13 @@ function _fileWasRemoved(file: string, src: string): boolean {
     return true
 }
 
+/**
+ * check if file is new
+ *
+ * @param {string} file file triggering event
+ * @param {string} src user bunbuilder configuration input source
+ * @returns {boolean} flag indicating if file was just added to source tree
+ */
 function _isNewFile(file: string, src: string): boolean {
     const config = buildConfig.obj
     const outdir = config.options.outdir
@@ -142,6 +162,13 @@ function _setCloser(watchers: FSWatcher[]) {
     shutdown.watchers = watchers
 }
 
+/**
+ * watch provided sources. apply watch options.
+ *
+ * @param {string[]} sources array of sources to watch
+ * @param {WatchOptions} options watch options
+ * @returns {FSWatcher[]} array of created watchers
+ */
 function _watchSources(sources: string[], options: WatchOptions): FSWatcher[] {
     const watchers = [] as unknown as FSWatcher[]
     sources.forEach((input: string) => {
@@ -157,7 +184,7 @@ function _watchSources(sources: string[], options: WatchOptions): FSWatcher[] {
 }
 
 /**
- * begin watching bunbuilder configuration inputs
+ * begin watching bunbuilder configuration inputs and resources
  */
 function _start() {
     const config = buildConfig.obj

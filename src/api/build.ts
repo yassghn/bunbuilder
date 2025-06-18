@@ -131,9 +131,9 @@ function _digestFiles(dir: string, files: string[]) {
 }
 
 /**
- * process source input
+ * process bunbuilder configuration source inputs
  *
- * @param {string} input bunbuilder configuration input source
+ * @param {string[]} input bunbuilder configuration input source
  */
 function _digestInput(input: string[]) {
     // iterate all input array
@@ -151,6 +151,11 @@ function _digestInput(input: string[]) {
     }
 }
 
+/**
+ * process bunbuilder configuration resources
+ *
+ * @param {string[]} resources bunbuilder configuration resources
+ */
 function _digestResources(resources: string[]) {
     // iterate resources array
     for (const src of resources) {
@@ -184,7 +189,6 @@ function _buildAll() {
 /**
  * infer root directory of file
  *
- * @param {string} src user bunbuilder configuration input source
  * @param {string} file source file to build
  * @returns {string} inferred root directory
  */
