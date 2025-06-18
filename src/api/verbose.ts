@@ -168,6 +168,22 @@ function _watcherChange(file: string) {
     }
 }
 
+function _watcherNewFile(file: string) {
+    if (_applyVerbose()) {
+        io.echoSync('watcher detected new file: ')
+        io.echoSync(file, highlight)
+        io.echoSync('', newLine)
+    }
+}
+
+function _watcherFileRemoved(file: string) {
+    if (_applyVerbose()) {
+        io.echoSync('watcher detected removed file: ')
+        io.echoSync(file, highlight)
+        io.echoSync('', newLine)
+    }
+}
+
 /**
  * verbose clean
  */
@@ -175,6 +191,17 @@ function _clean() {
     if (_applyVerbose()) {
         const config = buildConfig.obj
         io.echoSync('cleaning ')
+        io.echoSync(config.options.outdir, highlight)
+        io.echoSync('', newLine)
+    }
+}
+
+function _cleanSingle(path: string) {
+    if (_applyVerbose()) {
+        const config = buildConfig.obj
+        io.echoSync('cleaning ')
+        io.echoSync(path, highlight)
+        io.echoSync(' from ')
         io.echoSync(config.options.outdir, highlight)
         io.echoSync('', newLine)
     }
@@ -217,8 +244,20 @@ const verbose = {
         _watcherChange(file)
     },
 
+    watcherNewFile: (file: string) => {
+        _watcherNewFile(file)
+    },
+
+    watcherFileRemoved: (file: string) => {
+        _watcherFileRemoved(file)
+    },
+
     clean: () => {
         _clean()
+    },
+
+    cleanSingle: (path: string) => {
+        _cleanSingle(path)
     },
 
     sigint: () => {
