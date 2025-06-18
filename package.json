@@ -14,6 +14,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@typescript-eslint/parser": "^8.34.1",
+    "better-docs": "^2.7.3",
     "clean-jsdoc-theme": "^4.3.0",
     "eslint": "^9.29.0",
     "jsdoc": "^4.0.4",
