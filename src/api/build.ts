@@ -205,13 +205,19 @@ function _inferRootDir(file: string): string {
 /**
  * build single file
  *
- * @param {string|null} src user bunbuilder configuration input source
+ * @param {string} src user bunbuilder configuration input source
  * @param {string} file source file to build
  */
-function _buildSingle(src: string | null, file: string) {
-    const dir = _inferRootDir(src, file)
-    const files = [file]
-    _digestFiles(dir, files)
+function _buildSingle(src: string, file: string) {
+    console.log(src, file)
+    if (src !== '') {
+        const files = [file]
+        _digestFiles(src, files)
+    } else {
+        const dir = _inferRootDir(file)
+        const resources = [file]
+        _digestFiles(dir, resources)
+    }
 }
 
 const build = {
