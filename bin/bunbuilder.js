@@ -574,10 +574,34 @@ function _watcherChange(file) {
     io_default.echoSync("", newLine);
   }
 }
+function _watcherNewFile(file) {
+  if (_applyVerbose()) {
+    io_default.echoSync("watcher detected new file: ");
+    io_default.echoSync(file, highlight);
+    io_default.echoSync("", newLine);
+  }
+}
+function _watcherFileRemoved(file) {
+  if (_applyVerbose()) {
+    io_default.echoSync("watcher detected removed file: ");
+    io_default.echoSync(file, highlight);
+    io_default.echoSync("", newLine);
+  }
+}
 function _clean() {
   if (_applyVerbose()) {
     const config2 = buildConfig_default.obj;
     io_default.echoSync("cleaning ");
+    io_default.echoSync(config2.options.outdir, highlight);
+    io_default.echoSync("", newLine);
+  }
+}
+function _cleanSingle(path) {
+  if (_applyVerbose()) {
+    const config2 = buildConfig_default.obj;
+    io_default.echoSync("cleaning ");
+    io_default.echoSync(path, highlight);
+    io_default.echoSync(" from ");
     io_default.echoSync(config2.options.outdir, highlight);
     io_default.echoSync("", newLine);
   }
@@ -610,8 +634,17 @@ var verbose = {
   watcherChange: (file) => {
     _watcherChange(file);
   },
+  watcherNewFile: (file) => {
+    _watcherNewFile(file);
+  },
+  watcherFileRemoved: (file) => {
+    _watcherFileRemoved(file);
+  },
   clean: () => {
     _clean();
+  },
+  cleanSingle: (path) => {
+    _cleanSingle(path);
   },
   sigint: () => {
     _sigint();
@@ -781,7 +814,7 @@ var importResolver_default = resolveImports;
 // src/api/buildTask.ts
 function _copyFile(dir, file, dest) {
   const out = dest + sep4 + file;
-  const src = dir + sep4 + file;
+  const src = file.includes(dir) ? file : dir + sep4 + file;
   const options2 = { recursive: true };
   cp(src, out, options2, (err) => {
     if (err)
@@ -895,7 +928,7 @@ var buildTask = {
 var buildTask_default = buildTask;
 
 // src/api/build.ts
-import { readdirSync, lstatSync } from "fs";
+import { readdirSync, lstatSync, existsSync as existsSync2 } from "fs";
 import { extname as extname2, sep as sep5 } from "path";
 function _getFiles(dir) {
   const retVal = { files: [] };
@@ -957,27 +990,51 @@ function _digestInput(input) {
     if (stat.isDirectory()) {
       const files = _getFiles(src);
       _digestFiles(src, files);
-    } else {}
+    } else {
+      throw new Error("unimplemented");
+    }
+  }
+}
+function _digestResources(resources) {
+  for (const src of resources) {
+    const stat = lstatSync(src);
+    if (stat.isDirectory()) {
+      const files = _getFiles(src);
+      const newFiles = files.map((file) => src + sep5 + file);
+      _digestFiles(src, newFiles);
+    } else {
+      throw new Error("unimplemented");
+    }
   }
 }
 function _buildAll() {
   const config2 = buildConfig_default.obj;
   _digestInput(config2.options.inputs);
+  _digestResources(config2.options.resources);
 }
-function _inferRootDir(src, file) {
-  if (src !== null) {
-    const path = src + sep5 + file;
-    const stat = lstatSync(path);
+function _inferRootDir(file) {
+  const exists = existsSync2(file);
+  if (exists) {
+    const stat = lstatSync(file);
     if (stat.isFile()) {
-      return src;
+      const firstDir = file.split(sep5)[0];
+      if (firstDir) {
+        return firstDir;
+      }
     }
   }
   throw new Error("cannot infer root directory");
 }
 function _buildSingle(src, file) {
-  const dir = _inferRootDir(src, file);
-  const files = [file];
-  _digestFiles(dir, files);
+  console.log(src, file);
+  if (src !== "") {
+    const files = [file];
+    _digestFiles(src, files);
+  } else {
+    const dir = _inferRootDir(file);
+    const resources = [file];
+    _digestFiles(dir, resources);
+  }
 }
 var build = {
   all: () => {
@@ -1001,9 +1058,19 @@ function _cleanOutdir() {
     rmSync(path.join(outdir, item), options2);
   });
 }
+function _cleanSingleFile(src) {
+  verbose_default.cleanSingle(src);
+  const config2 = buildConfig_default.obj;
+  const outdir = config2.options.outdir;
+  const options2 = { force: true };
+  rmSync(path.join(outdir, src), options2);
+}
 var clean = {
   outdir: () => {
     _cleanOutdir();
+  },
+  singleFile: (path2) => {
+    _cleanSingleFile(path2);
   }
 };
 var clean_default = clean;
@@ -1074,6 +1141,7 @@ var serve_default = serve;
 
 // src/api/watch.ts
 import {
+  existsSync as existsSync3,
   lstatSync as lstatSync2,
   watch as fsWatch
 } from "fs";
@@ -1085,8 +1153,38 @@ var _state3 = {
   pause: false
 };
 function _isDirectory(src) {
-  const stat = lstatSync2(src);
-  if (stat.isDirectory())
+  const exists = existsSync3(src);
+  if (exists) {
+    const stat = lstatSync2(src);
+    if (stat.isDirectory())
+      return true;
+  }
+  return false;
+}
+function _isInputDirectory(src) {
+  const config2 = buildConfig_default.obj;
+  const inputs = config2.options.inputs;
+  for (const input of inputs) {
+    if (input == src)
+      return true;
+  }
+  return false;
+}
+function _fileWasRemoved(file, src) {
+  const path2 = src + sep6 + file;
+  const exists = existsSync3(path2);
+  if (exists)
+    return false;
+  return true;
+}
+function _isNewFile(file, src) {
+  const config2 = buildConfig_default.obj;
+  const outdir = config2.options.outdir;
+  const nSrc = src.startsWith(".") ? src.slice(2, src.length) : src;
+  const path2 = nSrc + sep6 + file;
+  const outPath = outdir + sep6 + path2;
+  const exists = existsSync3(outPath);
+  if (!exists && !_isDirectory(path2))
     return true;
   return false;
 }
@@ -1098,19 +1196,29 @@ function _pause() {
 }
 function _digestFile(file, src) {
   verbose_default.watcherChange(file);
-  if (_isDirectory(src)) {
+  if (_isDirectory(src) && _isInputDirectory(src)) {
     const path2 = src + sep6 + file;
     if (!_isDirectory(path2)) {
       build_default.single(src, file);
     }
   } else {
-    build_default.single(null, file);
+    const path2 = src + sep6 + file;
+    build_default.single("", path2);
   }
 }
 function _digestWatchEvent(eventType, file, src) {
   if (!_state3.pause) {
-    if (eventType == "change" && file !== null) {
-      _digestFile(file, src);
+    if ((eventType == "change" || eventType == "rename") && file !== null) {
+      if (_isNewFile(file, src)) {
+        verbose_default.watcherNewFile(src + sep6 + file);
+        _digestFile(file, src);
+      } else if (_fileWasRemoved(file, src)) {
+        const path2 = src + sep6 + file;
+        verbose_default.watcherFileRemoved(path2);
+        clean_default.singleFile(path2);
+      } else {
+        _digestFile(file, src);
+      }
     }
     _pause();
   }
@@ -1118,12 +1226,9 @@ function _digestWatchEvent(eventType, file, src) {
 function _setCloser2(watchers) {
   shutdown_default.watchers = watchers;
 }
-function _start() {
-  const config2 = buildConfig_default.obj;
-  const inputs = config2.options.inputs;
-  const options2 = { recursive: true, persistent: true, encoding: "utf-8" };
+function _watchSources(sources, options2) {
   const watchers = [];
-  inputs.forEach((input) => {
+  sources.forEach((input) => {
     verbose_default.watcherStart(input);
     const watcher = fsWatch(input, options2, (eventType, file) => {
       _digestWatchEvent(eventType, file, input);
@@ -1131,6 +1236,18 @@ function _start() {
     _pause();
     watchers.push(watcher);
   });
+  return watchers;
+}
+function _start() {
+  const config2 = buildConfig_default.obj;
+  const inputs = config2.options.inputs;
+  const resources = config2.options.resources;
+  const options2 = { recursive: true, persistent: true, encoding: "utf-8" };
+  const watchers = [];
+  const inputWatchers = _watchSources(inputs, options2);
+  const resourceWatchers = _watchSources(resources, options2);
+  inputWatchers.forEach((watcher) => watchers.push(watcher));
+  resourceWatchers.forEach((watcher) => watchers.push(watcher));
   _setCloser2(watchers);
 }
 var watch = {
