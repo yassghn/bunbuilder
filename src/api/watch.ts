@@ -10,8 +10,10 @@ import buildConfig from './buildConfig'
 import shutdown from './shutdown'
 import verbose from './verbose'
 import build from './build'
+import clean from './clean'
 import data from '../../data/data.json' assert { type: 'json' }
 import {
+    existsSync,
     lstatSync,
     watch as fsWatch,
     type FSWatcher,
@@ -35,8 +37,38 @@ const _state = {
  * @returns {boolean} flag indicating if src is a directory
  */
 function _isDirectory(src: string): boolean {
-    const stat = lstatSync(src)
-    if (stat.isDirectory()) return true
+    const exists = existsSync(src)
+    if (exists) {
+        const stat = lstatSync(src)
+        if (stat.isDirectory()) return true
+    }
+    return false
+}
+
+function _isInputDirectory(src: string): boolean {
+    const config = buildConfig.obj
+    const inputs = config.options.inputs
+    for (const input of inputs) {
+        if (input == src) return true
+    }
+    return false
+}
+
+function _fileWasRemoved(file: string, src: string): boolean {
+    const path = src + sep + file
+    const exists = existsSync(path)
+    if (exists) return false
+    return true
+}
+
+function _isNewFile(file: string, src: string): boolean {
+    const config = buildConfig.obj
+    const outdir = config.options.outdir
+    const nSrc = src.startsWith('.') ? src.slice(2, src.length) : src
+    const path = nSrc + sep + file
+    const outPath = outdir + sep + path
+    const exists = existsSync(outPath)
+    if (!exists && !_isDirectory(path)) return true
     return false
 }
 
@@ -61,13 +93,14 @@ function _pause() {
  */
 function _digestFile(file: string, src: string) {
     verbose.watcherChange(file)
-    if (_isDirectory(src)) {
+    if (_isDirectory(src) && _isInputDirectory(src)) {
         const path = src + sep + file
         if (!_isDirectory(path)) {
             build.single(src, file)
         }
     } else {
-        build.single(null, file)
+        const path = src + sep + file
+        build.single('', path)
     }
 }
 
@@ -82,8 +115,19 @@ function _digestWatchEvent(eventType: WatchEventType, file: string | null, src: 
     // prevent watch misfires using a timeout & pause flag
     if (!_state.pause) {
         // process event
-        if (eventType == 'change' && file !== null) {
-            _digestFile(file, src)
+        if ((eventType == 'change' || eventType == 'rename') && file !== null) {
+            if (_isNewFile(file, src)) {
+                // new file verbose output
+                verbose.watcherNewFile(src + sep + file)
+                _digestFile(file, src)
+            } else if (_fileWasRemoved(file, src)) {
+                // clean removed file
+                const path = src + sep + file
+                verbose.watcherFileRemoved(path)
+                clean.singleFile(path)
+            } else {
+                _digestFile(file, src)
+            }
         }
         _pause()
     }
@@ -98,15 +142,9 @@ function _setCloser(watchers: FSWatcher[]) {
     shutdown.watchers = watchers
 }
 
-/**
- * begin watching bunbuilder configuration inputs
- */
-function _start() {
-    const config = buildConfig.obj
-    const inputs = config.options.inputs
-    const options: WatchOptions = { recursive: true, persistent: true, encoding: 'utf-8' }
+function _watchSources(sources: string[], options: WatchOptions): FSWatcher[] {
     const watchers = [] as unknown as FSWatcher[]
-    inputs.forEach((input: string) => {
+    sources.forEach((input: string) => {
         verbose.watcherStart(input)
         const watcher = fsWatch(input, options, (eventType, file) => {
             _digestWatchEvent(eventType, file, input)
@@ -115,6 +153,22 @@ function _start() {
         _pause()
         watchers.push(watcher)
     })
+    return watchers
+}
+
+/**
+ * begin watching bunbuilder configuration inputs
+ */
+function _start() {
+    const config = buildConfig.obj
+    const inputs = config.options.inputs
+    const resources = config.options.resources
+    const options: WatchOptions = { recursive: true, persistent: true, encoding: 'utf-8' }
+    const watchers = [] as unknown as FSWatcher[]
+    const inputWatchers = _watchSources(inputs, options)
+    const resourceWatchers = _watchSources(resources, options)
+    inputWatchers.forEach((watcher: FSWatcher) => watchers.push(watcher))
+    resourceWatchers.forEach((watcher: FSWatcher) => watchers.push(watcher))
     _setCloser(watchers)
 }
 
