@@ -13,9 +13,9 @@
   "bin": "bin/bunbuilder.js",
   "devDependencies": {
     "@types/bun": "latest",
-    "@typescript-eslint/parser": "^8.33.1",
+    "@typescript-eslint/parser": "^8.34.1",
     "clean-jsdoc-theme": "^4.3.0",
-    "eslint": "^9.28.0",
+    "eslint": "^9.29.0",
     "jsdoc": "^4.0.4",
     "prettier": "^3.5.3",
     "prettier-eslint": "^16.4.2",
