@@ -697,8 +697,8 @@ function hewBaseUrl() {
 }
 
 // src/api/buildTask.ts
-import { cp, existsSync, mkdirSync } from "fs";
-import { sep as sep4 } from "path";
+import { cp, existsSync as existsSync2, mkdirSync as mkdirSync2 } from "fs";
+import { sep as sep5 } from "path";
 import { cwd as cwd3 } from "process";
 
 // src/api/obj.ts
@@ -799,7 +799,7 @@ async function _digestImports(transpiler, file, prefix) {
     await Bun.write(file, contents.str);
   }
 }
-function _correctImports(buildOutput) {
+async function _correctImports(buildOutput) {
   const files = _hewBuildArtifactFiles(buildOutput);
   const transpiler = new Bun.Transpiler;
   const prefix = data_default.options.noBundleHackImportPrefix;
@@ -807,15 +807,103 @@ function _correctImports(buildOutput) {
     await _digestImports(transpiler, file, prefix);
   });
 }
-function resolveImports(buildOutput) {
-  _correctImports(buildOutput);
+async function resolveImports(buildOutput) {
+  await _correctImports(buildOutput);
 }
 var importResolver_default = resolveImports;
 
+// src/api/postProcess.ts
+import { join as pathJoin, sep as sep4 } from "path";
+import { existsSync, renameSync, readdirSync, lstatSync, mkdirSync, rmSync } from "fs";
+function _hewPath() {
+  const baseUrl = hewBaseUrl();
+  const base = baseUrl.startsWith(".") ? baseUrl.slice(2, baseUrl.length) : baseUrl.valueOf();
+  const dest = buildConfig_default.obj.options.outdir;
+  const jsOutDir = data_default.buildTargets.browser.buildOptions.jsOutDir;
+  const path = pathJoin(...[dest, jsOutDir, base]);
+  return path;
+}
+function _needMoveFiles(path) {
+  const exists = existsSync(path);
+  return exists;
+}
+function _moveFiles(path, dp = undefined) {
+  const dest = buildConfig_default.obj.options.outdir;
+  const jsOutDir = data_default.buildTargets.browser.buildOptions.jsOutDir;
+  const srcPath = pathJoin(".", path);
+  const destPath = dp ? dp.valueOf() : pathJoin(...[".", dest, jsOutDir]);
+  const files = readdirSync(path, { encoding: "utf-8" });
+  files.forEach((file) => {
+    const _srcPath = { str: pathJoin(srcPath, file) };
+    const _destPath = { str: pathJoin(destPath, file) };
+    const stat = lstatSync(_srcPath.str);
+    if (stat.isDirectory()) {
+      mkdirSync(_destPath.str);
+      _moveFiles(_srcPath.str, _destPath.str);
+    } else {
+      renameSync(_srcPath.str, _destPath.str);
+    }
+  });
+}
+function _deleteError(path) {
+  const dest = buildConfig_default.obj.options.outdir;
+  const jsOutDir = data_default.buildTargets.browser.buildOptions.jsOutDir;
+  const keep = pathJoin(dest, jsOutDir).split(sep4);
+  const split = path.split(sep4);
+  for (let i = split.length - 1;i > 0; i--) {
+    const item = split[i];
+    if (item && !keep.includes(item)) {
+      const delPath = split.join(sep4);
+      rmSync(delPath, { recursive: true, force: true });
+      split.pop();
+    } else {
+      break;
+    }
+  }
+}
+function _hewMockBunBuildArtifacts(buildOutput) {
+  const artifacts = [];
+  const baseUrl = hewBaseUrl();
+  const base = baseUrl.startsWith(".") ? baseUrl.slice(2, baseUrl.length) : baseUrl;
+  for (let i = 0;i < buildOutput.outputs.length; i++) {
+    if (buildOutput.outputs[i]) {
+      const artifact = buildOutput.outputs[i];
+      if (artifact) {
+        const p = pathJoin(sep4, base);
+        const path = artifact.path.replace(p, "");
+        const item = { path: path.valueOf() };
+        artifacts.push(item);
+      }
+    }
+  }
+  return artifacts;
+}
+async function _postProcess(buildOutput) {
+  const config2 = buildConfig_default.obj;
+  const path = _hewPath();
+  const artifacts = { outputs: [] };
+  if (_needMoveFiles(path)) {
+    _moveFiles(path);
+    _deleteError(path);
+    artifacts.outputs = _hewMockBunBuildArtifacts(buildOutput);
+  }
+  if (config2.options.noBundleHack) {
+    if (artifacts.outputs.length > 0) {
+      importResolver_default(artifacts);
+    } else {
+      importResolver_default(buildOutput);
+    }
+  }
+}
+function postProcess(buildOutput) {
+  _postProcess(buildOutput);
+}
+var postProcess_default = postProcess;
+
 // src/api/buildTask.ts
 function _copyFile(dir, file, dest) {
-  const out = dest + sep4 + file;
-  const src = file.includes(dir) ? file : dir + sep4 + file;
+  const out = dest + sep5 + file;
+  const src = file.includes(dir) ? file : dir + sep5 + file;
   const options2 = { recursive: true };
   cp(src, out, options2, (err) => {
     if (err)
@@ -823,15 +911,15 @@ function _copyFile(dir, file, dest) {
   });
 }
 function _makeDestDir(dest) {
-  if (!existsSync(dest)) {
-    mkdirSync(dest);
+  if (!existsSync2(dest)) {
+    mkdirSync2(dest);
   }
 }
 function _hewVerboseBuildPlugin(dest) {
   const plugin = {
     name: "verbose build output plugin",
     setup(build) {
-      const dir = cwd3().split(sep4).pop();
+      const dir = cwd3().split(sep5).pop();
       build.onLoad({ filter: /\.ts/, namespace: "file" }, (args) => {
         const path = args.path;
         const index = path.indexOf(dir);
@@ -849,7 +937,7 @@ function _hewJsOutDir(files, jsOutDirOpt) {
     jsOutDir.str = jsOutDirOpt;
   } else {
     if (files[0]) {
-      const fileArr = files[0].split(sep4);
+      const fileArr = files[0].split(sep5);
       const fileName = fileArr[fileArr.length - 1];
       const baseUrl = hewBaseUrl();
       const baseArr = baseUrl.split("/");
@@ -862,7 +950,7 @@ function _hewJsOutDir(files, jsOutDirOpt) {
           dirs.push(p);
         }
       }
-      jsOutDir.str = jsOutDirOpt + sep4 + dirs.join(sep4);
+      jsOutDir.str = jsOutDirOpt + sep5 + dirs.join(sep5);
     }
   }
   return jsOutDir.str;
@@ -874,7 +962,7 @@ function _hewBrowserBuildConfig(files, dest) {
   const verbosePlugin = _hewVerboseBuildPlugin(dest);
   const config2 = {
     entrypoints: [...files],
-    outdir: dest + sep4 + jsOutDir,
+    outdir: dest + sep5 + jsOutDir,
     target: "browser",
     format: "esm",
     packages,
@@ -886,16 +974,13 @@ function _hewBrowserBuildConfig(files, dest) {
 function _compileTargetBrowser(dir, files, dest) {
   const src = { files: [] };
   files.forEach((file) => {
-    src.files.push(dir + sep4 + file);
+    src.files.push(dir + sep5 + file);
   });
   const buildConfig2 = _hewBrowserBuildConfig(src.files, dest);
   return Bun.build(buildConfig2);
 }
 function _digestBuildArtifacts(buildOutput) {
-  const config2 = buildConfig_default.obj;
-  if (config2.options.noBundleHack) {
-    importResolver_default(buildOutput);
-  }
+  postProcess_default(buildOutput);
 }
 function _digestBuildOutput(buildOutput) {
   verbose_default.buildResult(buildOutput.success);
@@ -929,14 +1014,14 @@ var buildTask = {
 var buildTask_default = buildTask;
 
 // src/api/build.ts
-import { readdirSync, lstatSync, existsSync as existsSync2 } from "fs";
-import { extname as extname2, sep as sep5 } from "path";
+import { readdirSync as readdirSync2, lstatSync as lstatSync2, existsSync as existsSync3 } from "fs";
+import { extname as extname2, sep as sep6 } from "path";
 function _getFiles(dir) {
   const retVal = { files: [] };
-  const files = readdirSync(dir, { encoding: "utf-8", recursive: true });
+  const files = readdirSync2(dir, { encoding: "utf-8", recursive: true });
   files.filter((item) => {
-    const relativePath = dir + sep5 + item;
-    return lstatSync(relativePath).isFile();
+    const relativePath = dir + sep6 + item;
+    return lstatSync2(relativePath).isFile();
   }).forEach((file) => retVal.files.push(file));
   return retVal.files;
 }
@@ -987,7 +1072,7 @@ function _digestFiles(dir, files) {
 }
 function _digestInput(input) {
   for (const src of input) {
-    const stat = lstatSync(src);
+    const stat = lstatSync2(src);
     if (stat.isDirectory()) {
       const files = _getFiles(src);
       _digestFiles(src, files);
@@ -998,10 +1083,10 @@ function _digestInput(input) {
 }
 function _digestResources(resources) {
   for (const src of resources) {
-    const stat = lstatSync(src);
+    const stat = lstatSync2(src);
     if (stat.isDirectory()) {
       const files = _getFiles(src);
-      const newFiles = files.map((file) => src + sep5 + file);
+      const newFiles = files.map((file) => src + sep6 + file);
       _digestFiles(src, newFiles);
     } else {
       throw new Error("unimplemented");
@@ -1014,11 +1099,11 @@ function _buildAll() {
   _digestResources(config2.options.resources);
 }
 function _inferRootDir(file) {
-  const exists = existsSync2(file);
+  const exists = existsSync3(file);
   if (exists) {
-    const stat = lstatSync(file);
+    const stat = lstatSync2(file);
     if (stat.isFile()) {
-      const firstDir = file.split(sep5)[0];
+      const firstDir = file.split(sep6)[0];
       if (firstDir) {
         return firstDir;
       }
@@ -1048,15 +1133,15 @@ var build = {
 var build_default = build;
 
 // src/api/clean.ts
-import { rmSync, readdirSync as readdirSync2 } from "fs";
+import { rmSync as rmSync2, readdirSync as readdirSync3 } from "fs";
 import path from "path";
 function _cleanOutdir() {
   verbose_default.clean();
   const config2 = buildConfig_default.obj;
   const outdir = config2.options.outdir;
   const options2 = { force: true, recursive: true };
-  readdirSync2(outdir).forEach((item) => {
-    rmSync(path.join(outdir, item), options2);
+  readdirSync3(outdir).forEach((item) => {
+    rmSync2(path.join(outdir, item), options2);
   });
 }
 function _cleanSingleFile(src) {
@@ -1064,7 +1149,7 @@ function _cleanSingleFile(src) {
   const config2 = buildConfig_default.obj;
   const outdir = config2.options.outdir;
   const options2 = { force: true };
-  rmSync(path.join(outdir, src), options2);
+  rmSync2(path.join(outdir, src), options2);
 }
 var clean = {
   outdir: () => {
@@ -1142,11 +1227,11 @@ var serve_default = serve;
 
 // src/api/watch.ts
 import {
-  existsSync as existsSync3,
-  lstatSync as lstatSync2,
+  existsSync as existsSync4,
+  lstatSync as lstatSync3,
   watch as fsWatch
 } from "fs";
-import { sep as sep6 } from "path";
+import { sep as sep7 } from "path";
 var _options = {
   timeout: data_default.options.watchTimeout
 };
@@ -1154,9 +1239,9 @@ var _state3 = {
   pause: false
 };
 function _isDirectory(src) {
-  const exists = existsSync3(src);
+  const exists = existsSync4(src);
   if (exists) {
-    const stat = lstatSync2(src);
+    const stat = lstatSync3(src);
     if (stat.isDirectory())
       return true;
   }
@@ -1172,8 +1257,8 @@ function _isInputDirectory(src) {
   return false;
 }
 function _fileWasRemoved(file, src) {
-  const path2 = src + sep6 + file;
-  const exists = existsSync3(path2);
+  const path2 = src + sep7 + file;
+  const exists = existsSync4(path2);
   if (exists)
     return false;
   return true;
@@ -1182,9 +1267,9 @@ function _isNewFile(file, src) {
   const config2 = buildConfig_default.obj;
   const outdir = config2.options.outdir;
   const nSrc = src.startsWith(".") ? src.slice(2, src.length) : src;
-  const path2 = nSrc + sep6 + file;
-  const outPath = outdir + sep6 + path2;
-  const exists = existsSync3(outPath);
+  const path2 = nSrc + sep7 + file;
+  const outPath = outdir + sep7 + path2;
+  const exists = existsSync4(outPath);
   if (!exists && !_isDirectory(path2))
     return true;
   return false;
@@ -1198,12 +1283,12 @@ function _pause() {
 function _digestFile(file, src) {
   verbose_default.watcherChange(file);
   if (_isDirectory(src) && _isInputDirectory(src)) {
-    const path2 = src + sep6 + file;
+    const path2 = src + sep7 + file;
     if (!_isDirectory(path2)) {
       build_default.single(src, file);
     }
   } else {
-    const path2 = src + sep6 + file;
+    const path2 = src + sep7 + file;
     build_default.single("", path2);
   }
 }
@@ -1211,10 +1296,10 @@ function _digestWatchEvent(eventType, file, src) {
   if (!_state3.pause) {
     if ((eventType == "change" || eventType == "rename") && file !== null) {
       if (_isNewFile(file, src)) {
-        verbose_default.watcherNewFile(src + sep6 + file);
+        verbose_default.watcherNewFile(src + sep7 + file);
         _digestFile(file, src);
       } else if (_fileWasRemoved(file, src)) {
-        const path2 = src + sep6 + file;
+        const path2 = src + sep7 + file;
         verbose_default.watcherFileRemoved(path2);
         clean_default.singleFile(path2);
       } else {
