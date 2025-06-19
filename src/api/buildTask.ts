@@ -13,7 +13,7 @@ import data from '../../data/data.json' assert { type: 'json' }
 import { cp, existsSync, mkdirSync } from 'node:fs'
 import { sep } from 'node:path'
 import { cwd } from 'node:process'
-import resolveImports from './importResolver'
+import postProcess from './postProcess'
 
 /**
  * generic copy file
@@ -146,15 +146,12 @@ function _compileTargetBrowser(
 }
 
 /**
- * post process bun build artifacts
+ * process build artifacts
  *
  * @param {Bun.BuildOutput} buildOutput bun build output
  */
 function _digestBuildArtifacts(buildOutput: Bun.BuildOutput) {
-    const config = buildConfig.obj
-    if (config.options.noBundleHack) {
-        resolveImports(buildOutput)
-    }
+    postProcess(buildOutput)
 }
 
 /**

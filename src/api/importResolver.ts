@@ -3,12 +3,13 @@
  *
  * @memberof bunbuilder/api
  * @module bunbuilder/api/importResolver
- * @property {bunbuilder.module:bunbuilder/api/importResolver} importResolver post processing build artifacts for bun no bundle hack
+ * @property {bunbuilder.module:bunbuilder/api/importResolver} importResolver resolve imports for bun no bundle hack
  */
 
 import obj from './obj'
 import { hewTsConfigPaths } from './tsconfig'
 import data from '../../data/data.json' assert { type: 'json' }
+import type { BUN_BUILDOUTPUT } from './types'
 import { sep } from 'node:path'
 import { cwd } from 'node:process'
 import buildConfig from './buildConfig'
@@ -16,10 +17,10 @@ import buildConfig from './buildConfig'
 /**
  * hew array of files from bun build output artifacts
  *
- * @param {Bun.BuildOutput} buildOutput bun build output
+ * @param {Bun.BuildOutput|BUN_BUILDOUTPUT} buildOutput bun build output
  * @returns {string[]} bun build artifact paths
  */
-function _hewBuildArtifactFiles(buildOutput: Bun.BuildOutput): string[] {
+function _hewBuildArtifactFiles(buildOutput: Bun.BuildOutput | BUN_BUILDOUTPUT): string[] {
     const files = [] as unknown as string[]
     const dir = cwd().split(sep).pop() as unknown as string
     buildOutput.outputs.forEach((artifact) => {
@@ -144,9 +145,9 @@ async function _digestImports(transpiler: Bun.Transpiler, file: string, prefix: 
 /**
  * bun no bundle hack: correct import statements for browser target
  *
- * @param {Bun.BuildOutput} buildOutput bun build output
+ * @param {Bun.BuildOutput|BUN_BUILDOUTPUT} buildOutput bun build output
  */
-function _correctImports(buildOutput: Bun.BuildOutput) {
+async function _correctImports(buildOutput: Bun.BuildOutput | BUN_BUILDOUTPUT) {
     const files = _hewBuildArtifactFiles(buildOutput)
     const transpiler = new Bun.Transpiler()
     const prefix = data.options.noBundleHackImportPrefix
@@ -155,8 +156,8 @@ function _correctImports(buildOutput: Bun.BuildOutput) {
     })
 }
 
-function resolveImports(buildOutput: Bun.BuildOutput) {
-    _correctImports(buildOutput)
+async function resolveImports(buildOutput: Bun.BuildOutput | BUN_BUILDOUTPUT) {
+    await _correctImports(buildOutput)
 }
 
 export default resolveImports

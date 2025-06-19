@@ -7,6 +7,24 @@
  */
 
 /**
+ * @type {BUN_BUILD_ARTIFACT}
+ * @typedef {object} BUN_BUILD_ARTIFACT mock bun build artifact
+ * @property {string} path mock build artifact path
+ */
+interface BUN_BUILD_ARTIFACT {
+    path: string
+}
+
+/**
+ * @type {BUN_BUILDOUTPUT}
+ * @typedef {object} BUN_BUILDOUTPUT mock bun build output
+ * @property {BUN_BUILD_ARTIFACT[]} outputs mock bun build artifacts
+ */
+interface BUN_BUILDOUTPUT {
+    outputs: BUN_BUILD_ARTIFACT[]
+}
+
+/**
  * @memberof bunbuilder/api.module:bunbuilder/api/types
  * @type {PARSED_ARGS}
  * @typedef {object} PARSED_ARGS parsed cli arguments
@@ -161,6 +179,8 @@ interface HELP_STRING {
 }
 
 export type {
+    BUN_BUILD_ARTIFACT,
+    BUN_BUILDOUTPUT,
     PARSED_ARGS,
     ACTIONS,
     ACTION_PLAN,
