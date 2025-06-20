@@ -1288,7 +1288,9 @@ function _digestFile(file, src) {
     }
   } else {
     const path2 = src + sep7 + file;
-    build_default.single("", path2);
+    if (!_isDirectory(path2)) {
+      build_default.single("", path2);
+    }
   }
 }
 function _digestWatchEvent(eventType, file, src) {
