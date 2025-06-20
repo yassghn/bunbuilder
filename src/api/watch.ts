@@ -120,7 +120,9 @@ function _digestFile(file: string, src: string) {
         }
     } else {
         const path = src + sep + file
-        build.single('', path)
+        if (!_isDirectory(path)) {
+            build.single('', path)
+        }
     }
 }
 
