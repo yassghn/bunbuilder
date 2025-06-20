@@ -1112,7 +1112,6 @@ function _inferRootDir(file) {
   throw new Error("cannot infer root directory");
 }
 function _buildSingle(src, file) {
-  console.log(src, file);
   if (src !== "") {
     const files = [file];
     _digestFiles(src, files);
