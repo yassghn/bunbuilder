@@ -31,7 +31,7 @@ function _hewPath(): string {
 /**
  * check if moving files is necessary
  *
- * @param {path} path possibly erraneous outdir structure
+ * @param {string} path possibly erraneous outdir structure
  * @returns {boolean} flag indicating if move is necessary
  */
 function _needMoveFiles(path: string): boolean {
