@@ -213,7 +213,6 @@ function _inferRootDir(file: string): string {
  * @param {string} file source file to build
  */
 function _buildSingle(src: string, file: string) {
-    console.log(src, file)
     if (src !== '') {
         const files = [file]
         _digestFiles(src, files)
