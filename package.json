@@ -7,7 +7,7 @@
   "module": "make.ts",
   "type": "module",
   "scripts": {
-    "ship": "bun run make && npm pack",
+    "ship": "bun make && npm pack",
     "doc": "rm -rf docs/ && jsdoc -c jsdoc.json"
   },
   "bin": "bin/bunbuilder.js",
