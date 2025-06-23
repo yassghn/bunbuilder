@@ -97,14 +97,24 @@ function _isTopLevel(file: string): boolean {
 function _normalizePath(importLine: string, file: string): string {
     const newImportLine = { str: importLine.valueOf() }
     const arr = importLine.split('/')
-    const dir = sep + arr[1] + sep
+    const dir = arr[1] ?? ':'
+    const fileSplit = file.split(sep)
     const pathHasDir = file.indexOf(dir) > 0 ? true : false
     if (_isTopLevel(file)) {
         newImportLine.str = arr.join('/')
     } else {
         if (pathHasDir) {
-            const newArr = arr.filter((val: string) => val != arr[1])
-            newImportLine.str = newArr.join('/')
+            const numDirsFile = fileSplit.length - fileSplit.indexOf(dir)
+            const numDirsImport = arr.length - arr.indexOf(dir)
+            const pathHasMoreDirs = numDirsFile - numDirsImport > 0
+            if (pathHasMoreDirs) {
+                const newArr = arr.filter((val: string) => val != arr[1])
+                newArr[0] = '..'
+                newImportLine.str = newArr.join('/')
+            } else {
+                const newArr = arr.filter((val: string) => val != arr[1])
+                newImportLine.str = newArr.join('/')
+            }
         } else {
             arr[0] = '..'
             newImportLine.str = arr.join('/')

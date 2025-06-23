@@ -158,12 +158,12 @@ var package_default = {
   module: "make.ts",
   type: "module",
   scripts: {
-    ship: "bun run make && npm pack",
+    ship: "bun make && npm pack",
     doc: "rm -rf docs/ && jsdoc -c jsdoc.json"
   },
   bin: "bin/bunbuilder.js",
   devDependencies: {
-    "@types/bun": "latest",
+    "@types/bun": "1.2.16",
     "@typescript-eslint/parser": "^8.34.1",
     "better-docs": "^2.7.3",
     "clean-jsdoc-theme": "^4.3.0",
@@ -763,14 +763,24 @@ function _isTopLevel(file) {
 function _normalizePath(importLine, file) {
   const newImportLine = { str: importLine.valueOf() };
   const arr = importLine.split("/");
-  const dir = sep3 + arr[1] + sep3;
+  const dir = arr[1] ?? ":";
+  const fileSplit = file.split(sep3);
   const pathHasDir = file.indexOf(dir) > 0 ? true : false;
   if (_isTopLevel(file)) {
     newImportLine.str = arr.join("/");
   } else {
     if (pathHasDir) {
-      const newArr = arr.filter((val) => val != arr[1]);
-      newImportLine.str = newArr.join("/");
+      const numDirsFile = fileSplit.length - fileSplit.indexOf(dir);
+      const numDirsImport = arr.length - arr.indexOf(dir);
+      const pathHasMoreDirs = numDirsFile - numDirsImport > 0;
+      if (pathHasMoreDirs) {
+        const newArr = arr.filter((val) => val != arr[1]);
+        newArr[0] = "..";
+        newImportLine.str = newArr.join("/");
+      } else {
+        const newArr = arr.filter((val) => val != arr[1]);
+        newImportLine.str = newArr.join("/");
+      }
     } else {
       arr[0] = "..";
       newImportLine.str = arr.join("/");
