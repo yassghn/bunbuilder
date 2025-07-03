@@ -71,6 +71,7 @@ function _resolveFromTsConfigPaths(importLine: string): string {
 /**
  * infer if build artifact is top level directory source file
  *
+ * @param {string} importLine ts config resolved import string
  * @param {string} file build artifact path
  * @returns {boolean} top level source file flag
  */
