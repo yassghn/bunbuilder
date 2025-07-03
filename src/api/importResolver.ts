@@ -101,35 +101,6 @@ function _normalizePath(importLine: string, file: string): string {
     }
     return newImportLine.str
 }
-/*
-    const newImportLine = { str: importLine.valueOf() }
-    const arr = importLine.split('/')
-    const dir = arr[1] ?? ':'
-    const fileSplit = file.split(sep)
-    const pathHasDir = file.indexOf(dir) > 0 ? true : false
-    if (_isTopLevel(file)) {
-        newImportLine.str = arr.join('/')
-    } else {
-        if (pathHasDir) {
-            const numDirsFile = fileSplit.length - fileSplit.indexOf(dir)
-            const numDirsImport = arr.length - arr.indexOf(dir)
-            const pathHasMoreDirs = numDirsFile - numDirsImport > 0
-            const dirsDifferent = fileSplit[fileSplit.indexOf(dir)+1] !== arr[arr.indexOf(dir)+1]
-            if (pathHasMoreDirs || dirsDifferent) {
-                const newArr = arr.filter((val: string) => val != arr[1])
-                newArr[0] = '..'
-                newImportLine.str = newArr.join('/')
-            } else {
-                const newArr = arr.filter((val: string) => val != arr[1])
-                newImportLine.str = newArr.join('/')
-            }
-        } else {
-            arr[0] = '..'
-            newImportLine.str = arr.join('/')
-        }
-    }
-    return newImportLine.str
-} */
 
 /**
  * process import statements for a given build artifact
