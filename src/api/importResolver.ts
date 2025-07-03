@@ -91,9 +91,14 @@ function _normalizePath(importLine: string, file: string): string {
             const dir = importSplit[0]
             const fileHasMoreDirs = fileSplit.length > importSplit.length
             const moreSubDirs = fileSplit.length > 2 && importSplit.length > 2
+            const fileSubDirs = fileSplit.slice(1, fileSplit.length-1)
+            const importSubDirs = importSplit.slice(1, importSplit.length-1)
+            const sameSubDirs = fileSubDirs.every((item, index) => item == importSubDirs[index])
             const sameNumDirsDiffer = fileSplit.length == importSplit.length && fileSplit[1] !== importSplit[1]
             if (fileHasMoreDirs || (moreSubDirs && sameNumDirsDiffer)) {
                 newImportLine.str = '../' + importSplit.filter((item) => item !== dir).join('/')
+            } else if (moreSubDirs && sameSubDirs) {
+                newImportLine.str = './' + importSplit[importSplit.length-1]
             } else {
                 newImportLine.str = './' + importSplit.filter((item) => item !== dir).join('/')
             }
