@@ -747,43 +747,26 @@ function _resolveFromTsConfigPaths(importLine) {
   const val = obj_default.map.value.fromName(tsConfigPaths, importLine);
   return val;
 }
-function _isTopLevel(file) {
+function _normalizePath(importLine, file) {
+  const newImportLine = { str: importLine.valueOf() };
   const config2 = buildConfig_default.obj;
   const jsOutDir = data_default.buildTargets.browser.buildOptions.jsOutDir;
   const outDir = config2.options.outdir.slice(2, config2.options.outdir.length);
-  const path = outDir + sep3 + jsOutDir;
-  const arr = file.split(path);
-  if (arr[1]) {
-    const spliced = arr[1].slice(2, arr[1].length);
-    if (spliced && spliced.indexOf(sep3) < 0)
-      return true;
-  }
-  return false;
-}
-function _normalizePath(importLine, file) {
-  const newImportLine = { str: importLine.valueOf() };
-  const arr = importLine.split("/");
-  const dir = arr[1] ?? ":";
-  const fileSplit = file.split(sep3);
-  const pathHasDir = file.indexOf(dir) > 0 ? true : false;
-  if (_isTopLevel(file)) {
-    newImportLine.str = arr.join("/");
-  } else {
-    if (pathHasDir) {
-      const numDirsFile = fileSplit.length - fileSplit.indexOf(dir);
-      const numDirsImport = arr.length - arr.indexOf(dir);
-      const pathHasMoreDirs = numDirsFile - numDirsImport > 0;
-      if (pathHasMoreDirs) {
-        const newArr = arr.filter((val) => val != arr[1]);
-        newArr[0] = "..";
-        newImportLine.str = newArr.join("/");
+  const fileSplit = file.split(/\W/).filter((item) => item !== "" && item !== outDir && item !== jsOutDir);
+  const importSplit = importLine.split(/\W/).filter((item) => item !== "");
+  const isTopLevelFile = fileSplit.length == 1;
+  if (!isTopLevelFile) {
+    const isSameDir = fileSplit[0]?.valueOf() == importSplit[0]?.valueOf();
+    if (isSameDir) {
+      const dir = importSplit[0];
+      const fileHasMoreDirs = fileSplit.length > importSplit.length;
+      const moreSubDirs = fileSplit.length > 2 && importSplit.length > 2;
+      const sameNumDirsDiffer = fileSplit.length == importSplit.length && fileSplit[1] !== importSplit[1];
+      if (fileHasMoreDirs || moreSubDirs && sameNumDirsDiffer) {
+        newImportLine.str = "../" + importSplit.filter((item) => item !== dir).join("/");
       } else {
-        const newArr = arr.filter((val) => val != arr[1]);
-        newImportLine.str = newArr.join("/");
+        newImportLine.str = "./" + importSplit.filter((item) => item !== dir).join("/");
       }
-    } else {
-      arr[0] = "..";
-      newImportLine.str = arr.join("/");
     }
   }
   return newImportLine.str;

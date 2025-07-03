@@ -69,33 +69,39 @@ function _resolveFromTsConfigPaths(importLine: string): string {
 }
 
 /**
- * infer if build artifact is top level directory source file
- *
- * @param {string} importLine ts config resolved import string
- * @param {string} file build artifact path
- * @returns {boolean} top level source file flag
- */
-function _isTopLevel(file: string): boolean {
-    const config = buildConfig.obj
-    const jsOutDir = data.buildTargets.browser.buildOptions.jsOutDir
-    const outDir = config.options.outdir.slice(2, config.options.outdir.length)
-    const path = outDir + sep + jsOutDir
-    const arr = file.split(path) as string[]
-    if (arr[1]) {
-        const spliced = arr[1].slice(2, arr[1].length)
-        if (spliced && spliced.indexOf(sep) < 0) return true
-    }
-    return false
-}
-
-/**
  * normalize relative path import string
  *
- * @param {string } importLine build artifact import string
+ * @param {string} importLine ts config resolved import string
  * @param {string} file build artifact path
  * @returns {string} normalized relative path import string
  */
 function _normalizePath(importLine: string, file: string): string {
+    const newImportLine = { str: importLine.valueOf() }
+    const config = buildConfig.obj
+    const jsOutDir = data.buildTargets.browser.buildOptions.jsOutDir
+    const outDir = config.options.outdir.slice(2, config.options.outdir.length)
+    const fileSplit = file
+        .split(/\W/)
+        .filter((item: string) => item !== '' && item !== outDir && item !== jsOutDir)
+    const importSplit = importLine.split(/\W/).filter((item: string) => item !== '')
+    const isTopLevelFile = fileSplit.length == 1
+    if (!isTopLevelFile) {
+        const isSameDir = fileSplit[0]?.valueOf() == importSplit[0]?.valueOf()
+        if (isSameDir) {
+            const dir = importSplit[0]
+            const fileHasMoreDirs = fileSplit.length > importSplit.length
+            const moreSubDirs = fileSplit.length > 2 && importSplit.length > 2
+            const sameNumDirsDiffer = fileSplit.length == importSplit.length && fileSplit[1] !== importSplit[1]
+            if (fileHasMoreDirs || (moreSubDirs && sameNumDirsDiffer)) {
+                newImportLine.str = '../' + importSplit.filter((item) => item !== dir).join('/')
+            } else {
+                newImportLine.str = './' + importSplit.filter((item) => item !== dir).join('/')
+            }
+        }
+    }
+    return newImportLine.str
+}
+/*
     const newImportLine = { str: importLine.valueOf() }
     const arr = importLine.split('/')
     const dir = arr[1] ?? ':'
@@ -108,7 +114,8 @@ function _normalizePath(importLine: string, file: string): string {
             const numDirsFile = fileSplit.length - fileSplit.indexOf(dir)
             const numDirsImport = arr.length - arr.indexOf(dir)
             const pathHasMoreDirs = numDirsFile - numDirsImport > 0
-            if (pathHasMoreDirs) {
+            const dirsDifferent = fileSplit[fileSplit.indexOf(dir)+1] !== arr[arr.indexOf(dir)+1]
+            if (pathHasMoreDirs || dirsDifferent) {
                 const newArr = arr.filter((val: string) => val != arr[1])
                 newArr[0] = '..'
                 newImportLine.str = newArr.join('/')
@@ -122,7 +129,7 @@ function _normalizePath(importLine: string, file: string): string {
         }
     }
     return newImportLine.str
-}
+} */
 
 /**
  * process import statements for a given build artifact
